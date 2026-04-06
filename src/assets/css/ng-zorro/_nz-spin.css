@@ -1,0 +1,3 @@
+.ant-spin-dot-item {
+    @apply bg-primary w-[11px] h-[11px]
+}

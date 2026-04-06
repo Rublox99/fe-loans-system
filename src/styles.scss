@@ -3,25 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --primary: #003249;
-        --accent: #3870B5;
-        --neutral: #E4E4E4;
-        --help: #9A9A9A;
-        --low-contrast: #FDFDFD;
-        --high-contrast: #1C1C1C;
-        --success: #0A7040;
-        --error: #E31B54;
-        --warning: #FFA719;
-
-        --light-gray: #DDDDDD;
-        --standard-gray: #9F9F9F;
-        --dark-gray: #232323;
-
-        --static-white: #FDFDFD;
-        --static-black: #171616;
-    }
-
     * {
         @apply transition-all duration-150 ease-linear
     }

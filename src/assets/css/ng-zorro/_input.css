@@ -1,0 +1,35 @@
+.ant-input,
+textarea.ant-input {
+    background: transparent !important;
+    border: 1px solid var(--light-gray);
+    border-radius: 0;
+    resize: none;
+    min-height: 45px;
+}
+
+.ant-input:focus {
+    border-color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+}
+
+.ant-input-prefix {
+    margin-right: 10px !important;
+}
+
+.ant-input-affix-wrapper {
+    background-color: var(--theme-background);
+    padding: 0px 11px;
+}
+
+.ant-input-affix-wrapper>.ant-input {
+    color: var(--high-contrast);
+}
+
+.ant-input-affix-wrapper>.ant-input:focus {
+    border: none !important;
+}
+
+.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+    border-color: var(--accent) !important;
+}

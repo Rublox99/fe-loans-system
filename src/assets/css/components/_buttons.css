@@ -1,0 +1,54 @@
+.pseudo__button {
+    cursor: pointer !important;
+    transition: .3s ease all !important;
+}
+
+.button {
+    display: flex;
+    min-width: 100px;
+    min-height: 40px !important;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 20px;
+    border: 0 !important;
+    cursor: pointer;
+    color: var(--static-white) !important;
+
+    text-align: center;
+    font-weight: lighter;
+    font-size: .8rem !important;
+    transition: .3s ease all !important;
+}
+
+.button:hover,
+.pseudo__button:hover {
+    filter: brightness(.9);
+}
+
+.button:active,
+.pseudo__button:active {
+    filter: brightness(1.2);
+}
+
+.cancel__button {
+    background-color: var(--gray) !important;
+}
+
+.confirm__button {
+    background-color: var(--primary) !important;
+}
+
+.cto__button {
+    padding: 5px 10px !important;
+    background-color: transparent !important;
+    color: var(--static-white) !important;
+    border: 1px solid var(--static-white) !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important
+}
+
+.transparent__button {
+    color: var(--text) !important;
+    background-color: transparent !important;
+    border: 1px solid var(--border) !important;
+}

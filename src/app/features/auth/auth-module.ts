@@ -8,4 +8,4 @@ import { AuthComponent } from './auth.component';
   declarations: [],
   imports: [CommonModule, HomeRoutingModule, AuthComponent],
 })
-export class AuthModule {}
+export class AuthModule { }

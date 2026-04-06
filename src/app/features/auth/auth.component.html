@@ -1,3 +1,45 @@
-<p>
-  auth works!
-</p>
+<main class="font-roboto size-full flex bg-[url('assets/images/login-gradient.webp')] bg-no-repeat bg-cover">
+  <!-- Left -->
+  <section class="relative flex-1 font-sans text-staticWhite font-extralight">
+    <span class="absolute left-[10px] bottom-[10px]">Desarrollado por Robust - {{currentYear}}</span>
+  </section>
+
+  <!-- Right -->
+  <section class="w-1/3 relative px-10 bg-lowContrast flex flex-col items-center justify-center gap-[25px]"
+    [formGroup]="loginForm">
+    <!-- Absolutes -->
+    <app-logo class="absolute top-[25px] left-1/2 -translate-x-1/2 w-[50px]" />
+    <app-logo class="absolute opacity-50 bottom-[0px] left-1/2 -translate-x-1/2 inset-x-0" />
+
+    <!-- Form -->
+    <div class="space-y-1">
+      <p class="text-3xl font-bold text-primary">Acceso Institucional</p>
+      <p class="text-help">Ingrese sus credenciales para poder acceder al sistema de préstamos</p>
+    </div>
+
+    <!-- Fields -->
+    <div class="w-full space-y-2.5">
+      <span class="text-help ">Usuario</span>
+      <input id="user_field" nz-input placeholder="usuario@ejemplo.com" formControlName="email" />
+    </div>
+
+    <div class="w-full space-y-2.5">
+      <span class="text-help ">Contraseña</span>
+      <nz-input-password>
+        <input id="passworld_field" nz-input placeholder="********" formControlName="password" />
+      </nz-input-password>
+    </div>
+
+    <button class="w-full button confirm__button" nz-button nzType="primary" [nzLoading]="isLoadingResponse"
+      (click)="queryLogin()">
+      Iniciar sesión
+      <web-icon class="ml-1" name="RIGHT_ARROW" color="var(--static-white)" size="16" />
+    </button>
+
+    <div class="space-y-1">
+      <p class="text-xs text-help">Si presenta inconvenientes al iniciar sesión, por favor comunicarse con el
+        administrador del
+        sistema</p>
+    </div>
+  </section>
+</main>

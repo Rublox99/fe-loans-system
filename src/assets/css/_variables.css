@@ -1,0 +1,21 @@
+:root {
+    --sm-box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    --default-transition: .3s ease all;
+
+    --primary: #003249;
+    --accent: #3870B5;
+    --neutral: #E4E4E4;
+    --help: #9A9A9A;
+    --low-contrast: #FDFDFD;
+    --high-contrast: #1C1C1C;
+    --success: #0A7040;
+    --error: #E31B54;
+    --warning: #FFA719;
+
+    --light-gray: #DDDDDD;
+    --standard-gray: #9F9F9F;
+    --dark-gray: #232323;
+
+    --static-white: #FDFDFD;
+    --static-black: #171616;
+}

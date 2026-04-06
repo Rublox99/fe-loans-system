@@ -1,8 +1,8 @@
-# fe-angular-boilerplate
+# fe-loans-system
 
 ## ------------ ##
 Basic template to start an Angular project with Tailwind, NG-Zorro, routing, i18n and basic dependencies
-ng new angular-boilerplate --routing=true --style=scss --strict=true --standalone=false
+ng new loans-system --routing=true --style=scss --strict=true --standalone=false
 
 ## ----- Instalación e inicialización de TailwindCSS ----- ##
 npm install -D tailwindcss@3
@@ -35,4 +35,4 @@ ng generate component features/home/pages/home --module=features/home/home.modul
 
 ## ----- Clonación de boilerplate ----- ##
 git clone
-npx degit tu-usuario/angular-boilerplate nuevo-proyecto
+npx degit tu-usuario/loans-system nuevo-proyecto

@@ -1,0 +1,20 @@
+/* Variables */
+@import url(./_variables.css);
+
+/* Components */
+@import url(./components/_buttons.css);
+@import url(./components/_scrollbar.css);
+
+/* NG-ZORRO */
+@import url(./ng-zorro/_drawer.css);
+@import url(./ng-zorro/_input.css);
+@import url(./ng-zorro/_message.css);
+@import url(./ng-zorro/_modal.css);
+@import url(./ng-zorro/_nz-spin.css);
+@import url(./ng-zorro/_radio.css);
+
+/* Utilities */
+@import url(./utilities/_general.css);
+
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');

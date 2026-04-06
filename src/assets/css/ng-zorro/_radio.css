@@ -1,0 +1,30 @@
+.ant-radio-group {
+    display: flex !important;
+    gap: 10px;
+}
+
+.ant-radio-button-wrapper {
+    color: var(--gray);
+    border: 1px solid var(--gray) !important;
+    background-color: transparent;
+    border-radius: 2px !important;
+
+    &:hover {
+        color: var(--static-white);
+        background-color: var(--gray);
+    }
+
+    &::before {
+        display: none !important;
+    }
+}
+
+.ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    background-color: var(--primary) !important;
+    border: none !important;
+    transition: .3s ease all;
+
+    &:hover {
+        filter: brightness(.75);
+    }
+}
