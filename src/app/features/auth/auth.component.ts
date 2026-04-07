@@ -3,7 +3,7 @@ import { WebIconComponent } from '../../shared/components/web-icon.component';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgZorroModule } from '../../shared/modules/ng-zorro.module';
 import { Router } from '@angular/router';
-import { AppRoute } from '../../core/interfaces/app-route.interface';
+import { AppRoutesCollection } from '../../core/interfaces/app-route.interface';
 import { APP_ROUTES } from '../../shared/constants';
 import { AppLogoComponent } from '../../shared/components/app-logo.component';
 
@@ -14,7 +14,7 @@ import { AppLogoComponent } from '../../shared/components/app-logo.component';
 })
 export class AuthComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
-  appRoutes: AppRoute[] = APP_ROUTES
+  appRoutes: AppRoutesCollection = APP_ROUTES
 
   isLoadingResponse: boolean = false
 
@@ -34,7 +34,7 @@ export class AuthComponent implements OnInit {
 
     setTimeout(() => {
       this.isLoadingResponse = false
-      this.router.navigateByUrl(this.appRoutes[1].path);
+      this.router.navigateByUrl(this.appRoutes.customers.path);
     }, 1500);
   }
 }

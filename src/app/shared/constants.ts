@@ -1,15 +1,27 @@
-import { AppRoute } from "../core/interfaces/app-route.interface"
+import { AppRoute, AppRoutesCollection } from "../core/interfaces/app-route.interface"
 
 const bPointMobile: string = '(max-width: 764px)'
 const bPointTablet: string = '(max-width: 1024px)'
 const bPointDesktop: string = '(min-width: 1025px)'
 
-const APP_ROUTES: AppRoute[] = [
-    { path: '/v1/auth', label: 'Auth' },
-    { path: '/v1/main/customers', label: 'Clientes' },
-    { path: '/v1/main/loans', label: 'Préstamos' },
-    { path: '/v1/main/reports', label: 'Reportes' }
-]
+const APP_ROUTES: AppRoutesCollection = {
+    login: {
+        path: '/v1/auth',
+        label: 'Auth'
+    },
+    customers: {
+        path: '/v1/main/customers',
+        label: 'Clientes'
+    },
+    loans: {
+        path: '/v1/main/loans',
+        label: 'Préstamos'
+    },
+    reports: {
+        path: '/v1/main/reports',
+        label: 'Reportes'
+    }
+}
 
 const ICONS_DICTIONARY = {
     UNDEFINED: "", // This as an initializer only
