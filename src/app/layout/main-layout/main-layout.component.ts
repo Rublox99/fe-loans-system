@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { AppRoute, AppRoutesCollection } from '../../core/interfaces/app-route.interface';
+import { AppRoute } from '../../core/interfaces/app-route.interface';
 import { APP_ROUTES } from '../../shared/constants';
 import { WebIconComponent } from '../../shared/components/web-icon.component';
 

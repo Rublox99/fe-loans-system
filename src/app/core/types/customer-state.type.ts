@@ -1,0 +1,1 @@
+export type CustomerState = 'Active' | 'Inactive' | 'Blocked';

@@ -1,3 +1,9 @@
+/* Sub-routes */
+app-main, app-loans, app-reports {
+    display: block;
+    height: 100%;
+}
+
 .disabled {
     cursor: not-allowed;
     pointer-events: all;

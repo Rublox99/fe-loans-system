@@ -1,0 +1,12 @@
+<button class="button bg-accent" nz-button nzType="primary" (click)="openDrawer()">
+  <web-icon class="mr-2.5" name="USER" color="var(--static-white)" size="16" />
+  <span class="font-sans font-extralight text-lowContrast">Agregar entidad</span>
+</button>
+
+<nz-drawer [nzClosable]="true" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
+  <ng-container *nzDrawerContent="">
+    <section class="flex flex-col h-full p-[15px] bg-lowContrast">
+      A
+    </section>
+  </ng-container>
+</nz-drawer>

@@ -40,6 +40,7 @@ const ICONS_DICTIONARY = {
     CALENDAR: "solar:calendar-linear",
     BILL: "ri:bill-line",
     SEARCH: "ic:baseline-search",
+    DOT: "icon-park-outline:dot",
     HOME: "lucide:house",
     BLOCK: "material-symbols:block",
     EXPORT: "ph:export-fill",

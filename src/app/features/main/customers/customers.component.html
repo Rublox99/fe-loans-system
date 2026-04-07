@@ -1,3 +1,169 @@
-<p>
-  customers works!
-</p>
+<main class="px-[50px] py-[25px] flex flex-col w-full h-full gap-[20px]">
+  <!-- Header -->
+  <section class="flex items-end flex-none gap-5">
+    <!-- Left -->
+    <div class="flex-1 space-y-2">
+      <p class="title__header">Directorio de clientes</p>
+      <span class="label__header">Listado de clientes y entidades privadas gestionadas por el sistema.</span>
+    </div>
+
+    <!-- Right -->
+    <div class="flex-none">
+      <app-add-entity aria-label="Agregar entidad" />
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="flex flex-none gap-5 py-2 overflow-x-auto hide-scrollbar">
+    <!-- #1 -->
+    <div class="customers__data-card" style="--card-accent: #3870B5;">
+      <span class="title__data-card">Activos totales</span>
+      <span class="value__data-card">23</span>
+    </div>
+
+    <!-- #2 -->
+    <div class="customers__data-card" style="--card-accent: #0A7040;">
+      <span class="title__data-card">Clientes - Grado A</span>
+      <span class="value__data-card">10</span>
+    </div>
+
+    <!-- #3 -->
+    <div class="customers__data-card" style="--card-accent: #FFA719;">
+      <span class="title__data-card">Clientes - Grado B/C</span>
+      <span class="value__data-card">5</span>
+
+      <span class="label__data-card" style="--label-accent: #FFA719; background-color: #ffedd0;">
+        En observación
+      </span>
+    </div>
+
+    <!-- #4 -->
+    <div class="customers__data-card" style="--card-accent: #E31B54;">
+      <span class="title__data-card">Clientes - Grado D/E</span>
+      <span class="value__data-card">2</span>
+
+      <span class="label__data-card" style="--label-accent: #E31B54; background-color: #ffc1d2;">
+        En riesgo
+      </span>
+    </div>
+
+    <!-- #5 -->
+    <div class="customers__data-card" style="--card-accent: #9747FF;">
+      <span class="title__data-card">Nuevos este mes</span>
+      <span class="value__data-card">1</span>
+
+      <span class="label__data-card" style="--label-accent: #9747FF; background-color: #d6b7ff;">
+        Adquisiciones
+      </span>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="flex flex-col flex-1 min-h-0 gap-2.5">
+    <!-- Header -->
+    <div class="flex flex-none items-center gap-2.5">
+      <p class="flex-1 title__header" style="font-size: 20px !important;">
+        Lista de individuos en archivo
+      </p>
+
+      <input class="w-[250px] border-help" id="search_field" nz-input placeholder="Busque por nombre o DNI"
+        [(ngModel)]="searchText" (ngModelChange)="getCustomers()" />
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 min-h-0 overflow-auto border rounded-md">
+      <nz-spin [nzSpinning]="isLoading()">
+        @if (error()) {
+        <div class="p-4 text-red-500">{{ error() }}</div>
+        } @else if (customers().length === 0 && !isLoading()) {
+        <div class="p-4 text-center text-standardGray">No se encontraron clientes.</div>
+        } @else {
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b bg-[#E2E8F0]">
+              <th class="header__table">DNI</th>
+              <th class="header__table">Nombre Completo</th>
+              <th class="header__table">Tipo</th>
+              <th class="header__table">Grado de Riesgo</th>
+              <th class="header__table">Total en Préstamos</th>
+              <th class="header__table">Cónyuge</th>
+              <th class="header__table">Estado</th>
+              <th class="header__table">Último Pago</th>
+              <th class="header__table">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (customer of customers(); track customer.id) {
+            <tr class="border-b">
+              <td class="font-medium cell__table whitespace-nowrap">{{ customer.dni }}</td>
+              <td class="font-medium cell__table whitespace-nowrap">{{ getFullName(customer) }}</td>
+              <td class="font-medium cell__table">Cliente/Aval</td>
+              <td class="cell__table">
+                <span class="flex justify-center px-2 py-1 text-xs border rounded-sm border-primary text-primary">
+                  Grado {{ getGradeLabel(customer.payment_grade) }}
+                </span>
+              </td>
+              <td class="cell__table">L 50,000</td>
+              <td class="cell__table">#</td>
+              <td class="cell__table">
+                <web-icon name="DOT" size="16" [color]="getStateColor(customer.state)" />
+              </td>
+              <td class="cell__table">06/04/2026</td>
+              <td class="cell__table">
+                <div class="flex items-center gap-2.5">
+                  <app-view-customer aria-label="Ver cliente" [customerId]="customer.id" />
+                  <app-edit-customer aria-label="Editar cliente" [customerId]="customer.id" />
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        }
+      </nz-spin>
+    </div>
+
+    <!-- Paginator -->
+    <div class="flex flex-none items-center gap-2.5">
+      <!-- Left -->
+      <div class="flex-1 space-x-1 text-xs font-medium uppercase font-roboto">
+        <span class="text-help">Mostrando</span>
+        <span class="text-primary">{{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}</span>
+        <span class="text-help">entidades registradas</span>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center flex-none gap-1">
+        <!-- Previous -->
+        <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+          [class.border-lightGray]="currentPage() === 1" [class.cursor-not-allowed]="currentPage() === 1"
+          [class.border-standardGray]="currentPage() > 1" [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)" aria-label="Página anterior">
+          <web-icon [color]="currentPage() === 1 ? 'var(--light-gray)' : 'var(--standard-gray)'"
+            name="LEFT_ROUNDED_ARROW" size="20" />
+        </button>
+
+        <!-- Pages -->
+        @for (page of pageNumbers(); track page) {
+        <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+          [class.bg-highContrast]="page === currentPage()" [class.border-transparent]="page === currentPage()"
+          [class.border-standardGray]="page !== currentPage()" (click)="goToPage(page)"
+          [attr.aria-label]="'Página ' + page" [attr.aria-current]="page === currentPage() ? 'page' : null">
+          <span class="font-sans text-xs" [class.text-lowContrast]="page === currentPage()"
+            [class.text-standardGray]="page !== currentPage()">{{ page }}</span>
+        </button>
+        }
+
+        <!-- Next -->
+        <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+          [class.border-lightGray]="currentPage() === totalPages()"
+          [class.cursor-not-allowed]="currentPage() === totalPages()"
+          [class.border-standardGray]="currentPage() < totalPages()" [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)" aria-label="Página siguiente">
+          <web-icon [color]="currentPage() === totalPages() ? 'var(--light-gray)' : 'var(--standard-gray)'"
+            name="RIGHT_ROUNDED_ARROW" size="20" />
+        </button>
+      </div>
+    </div>
+  </section>
+</main>

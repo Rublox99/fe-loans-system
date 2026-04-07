@@ -1,0 +1,48 @@
+.customers__data-card {
+    width: 245px;
+    min-width: 245px;
+    height: 90px;
+    padding: 20px;
+    background-color: #F9F9F9;
+    border-radius: 3px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    @apply shadow-md font-sans
+}
+
+.customers__data-card::before {
+  content: "";
+  width: 4px;
+  height: 100%;
+  position: absolute;
+
+  background-color: var(--card-accent, red);
+
+  @apply top-0 left-0 rounded-l-[3px];
+}
+
+.customers__data-card>.title__data-card {
+    text-transform: uppercase;
+
+    @apply text-standardGray font-bold text-sm
+}
+
+.customers__data-card>.value__data-card {
+    @apply text-highContrast font-bold text-2xl
+}
+
+.customers__data-card>.label__data-card {
+    @apply absolute bottom-1.5 right-1.5 px-2 py-1 rounded-md font-medium text-xs text-[var(--label-accent)]
+}
+
+/* Table */
+.header__table {
+    @apply px-4 py-3 text-xs font-medium text-left uppercase text-standardGray whitespace-nowrap
+}
+
+.cell__table {
+    @apply px-4 py-3 font-roboto text-highContrast
+}

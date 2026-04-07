@@ -1,0 +1,7 @@
+.title__header {
+    @apply font-sans text-2xl font-medium text-primary
+}
+
+.label__header {
+    @apply font-light font-roboto text-standardGray
+}
