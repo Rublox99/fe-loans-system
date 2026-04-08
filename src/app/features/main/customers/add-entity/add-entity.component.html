@@ -3,10 +3,33 @@
   <span class="font-sans font-extralight text-lowContrast">Agregar entidad</span>
 </button>
 
-<nz-drawer [nzClosable]="true" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
+<nz-drawer [nzClosable]="true" nzWidth="600px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
   <ng-container *nzDrawerContent="">
-    <section class="flex flex-col h-full p-[15px] bg-lowContrast">
-      A
+    <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
+      <!-- Header -->
+      <p class="font-sans text-3xl font-bold text-primary">
+        Registro de Individuo
+      </p>
+      <!-- Description -->
+      <p class="font-sans text-sm text-standardGray">
+        Ingrese los campos requeridos para registrar una nueva entidad como cliente
+      </p>
+
+      <!-- Customer/Guarantee Radio -->
+      <nz-radio-group class="mb-5" [(ngModel)]="radioEntityType">
+        <label nz-radio-button nzValue="C">Cliente</label>
+        <label nz-radio-button nzValue="G">Aval</label>
+      </nz-radio-group>
+
+      @if (radioEntityType === 'C') {
+      <app-customer-form (submitForm)="handleCustomer($event)" (closeDrawer)="closeDrawer()">
+      </app-customer-form>
+      }
+
+      @if (radioEntityType === 'G') {
+      <app-guarantee-form (submitForm)="handleGuarantee($event)" (closeDrawer)="closeDrawer()">
+      </app-guarantee-form>
+      }
     </section>
   </ng-container>
 </nz-drawer>

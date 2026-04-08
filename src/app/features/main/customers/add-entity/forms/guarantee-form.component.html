@@ -1,0 +1,156 @@
+<form [formGroup]="form" class="flex flex-col gap-5">
+  <!-- Personal Identification -->
+  <section class="section__wrapper">
+    <p class="section__header">1. Identificación Personal</p>
+
+    <!-- Names -->
+    <div class="section__line">
+      <div class="w-full space-y-2.5">
+        <span class="text-help">Primer nombre</span>
+        <input nz-input placeholder="Primer nombre" formControlName="firstName" />
+      </div>
+      <div class="w-full space-y-2.5">
+        <span class="text-help">Segundo nombre</span>
+        <input nz-input placeholder="Segundo nombre" formControlName="secondName" />
+      </div>
+    </div>
+
+    <!-- Lastname -->
+    <div class="section__line">
+      <div class="w-full space-y-2.5">
+        <span class="text-help">Apellidos</span>
+        <input nz-input placeholder="Apellido materno y/o paterno" formControlName="lastName" />
+      </div>
+    </div>
+
+    <!-- DNI / Phone -->
+    <div class="section__line text-highContrast">
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">DNI</span>
+        <input id="dni" nz-input placeholder="AAAA-BBBB-CCCCC" formControlName="dni" />
+      </div>
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Teléfono</span>
+        <nz-input-wrapper class="h-[45px]">
+          <web-icon nzInputPrefix name="HONDURAS" size="20" />
+          <input id="phone" nz-input placeholder="XXXX-XXXX" formControlName="phone" />
+        </nz-input-wrapper>
+      </div>
+    </div>
+
+    <!-- Email / Guarantee -->
+    <div class="section__line text-highContrast">
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Correo electrónico</span>
+        <input id="email" nz-input placeholder="correo@proveedor.com" formControlName="email" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Demographic & Finantial -->
+  <section class="section__wrapper">
+    <!-- Label -->
+    <p class="section__header">
+      2. Datos Demográficos y Financieros
+    </p>
+
+    <!-- Location -->
+    <div class="section__line text-highContrast">
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Dirección</span>
+        <input id="location" nz-input placeholder="Ciudad, Departamento" formControlName="location" />
+      </div>
+    </div>
+
+    <!-- Proffesion & Company -->
+    <div class="section__line text-highContrast">
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Profesión</span>
+        <input id="profession" nz-input placeholder="Ocupación actual" formControlName="profession" />
+      </div>
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Empresa</span>
+        <input id="company" nz-input placeholder="Nombre de la empresa" formControlName="company" />
+      </div>
+    </div>
+
+    <!-- Income -->
+    <div class="section__line text-highContrast">
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Ingreso mensual (L)</span>
+        <input id="income" nz-input placeholder="L 35,000" formControlName="income" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Estimated Grade -->
+  <section class="section__wrapper">
+    <!-- Label -->
+    <p class="mb-5 section__header">
+      3. Clasificación Estimada
+    </p>
+
+    <!-- Grade Radio -->
+    <div class="section__line">
+      <nz-radio-group class="w-full gap-5" formControlName="radioEntityGrade">
+        <label nz-radio-button nzValue="A">A</label>
+        <label nz-radio-button nzValue="B">B</label>
+        <label nz-radio-button nzValue="C">C</label>
+        <label nz-radio-button nzValue="D">D</label>
+        <label nz-radio-button nzValue="E">E</label>
+      </nz-radio-group>
+    </div>
+  </section>
+
+  <!-- Multimedia -->
+  <section class="section__wrapper">
+    <!-- Label -->
+    <p class="mb-5 section__header">
+      4. Multimedia de verificación
+    </p>
+
+    <!-- Drag & Drop -->
+    <nz-upload nzType="drag" [nzMultiple]="true" [nzBeforeUpload]="beforeUpload" [nzShowUploadList]="false"
+      nzAccept="image/*">
+      <p class="flex justify-center">
+        <web-icon name="IMPORT" size="32" color="var(--light-gray)" />
+      </p>
+      <p class="ant-upload-text">Haga clic o arrastre imágenes aquí</p>
+      <p class="ant-upload-hint">Soporta JPG, PNG y WEBP</p>
+    </nz-upload>
+
+    <!-- Pictures Wall -->
+    @if (mediaFiles().length > 0) {
+    <nz-upload nzListType="picture-card" [nzFileList]="mediaFiles()" [nzShowButton]="false"
+      (nzChange)="handleMediaChange($event)"></nz-upload>
+    }
+  </section>
+
+  <!-- Extras -->
+  <section class="section__wrapper">
+    <!-- Label -->
+    <p class="section__header">
+      5. Información Adicional
+    </p>
+
+    <div class="section__line">
+      <div class="w-full space-y-2.5">
+        <span class="text-help ">Comentarios</span>
+        <textarea id="notes" nz-input placeholder="Escriba sus comentarios sobre el cliente aquí..." rows="6"
+          formControlName="notes"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="flex gap-3">
+    <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
+      <span class="font-sans font-extralight text-staticWhite">Crear entidad</span>
+    </button>
+
+    <button class="w-full button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
+      (click)="closeDrawerFn()">
+      <span class="font-sans font-extralight text-highContrast">Cerrar</span>
+    </button>
+  </section>
+</form>
