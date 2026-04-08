@@ -2,10 +2,104 @@
   <web-icon size="20" name="SEE" color="var(--standard-gray)" class="pseudo__button"></web-icon>
 </div>
 
-<nz-drawer [nzClosable]="true" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
+<nz-drawer [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
   <ng-container *nzDrawerContent="">
-    <section class="flex flex-col h-full p-[15px] bg-lowContrast">
-      A
+    <section class="flex flex-col gap-5 h-auto p-[15px] bg-lowContrast">
+      <!-- Header -->
+      <p class="mb-5 font-sans text-3xl font-bold text-primary">
+        Visualización de Individuo
+      </p>
+
+      <!-- Personal Identification -->
+      <section class="relative section__wrapper">
+        <!-- Absolute -->
+        <span class="absolute top-0 right-0 px-2 py-1 text-xs uppercase rounded-sm bg-slate-200 text-slate-800">
+          Grado A
+        </span>
+
+        <!-- Label -->
+        <p class="section__header">
+          1. Identificación Personal
+        </p>
+
+        <div class="section__line text-highContrast">
+          <span class="section__line-left">Alonso Banegas</span>
+          <span class="section__line-right">9990-1010</span>
+        </div>
+
+        <div class="section__line text-standardGray">
+          <span class="section__line-left">1501-2000-00111</span>
+          <span class="section__line-right">alonso@banegas.com</span>
+        </div>
+      </section>
+
+      <!-- Spouse Information -->
+      <section class="section__wrapper">
+        <!-- Label -->
+        <p class="section__header">
+          2. Información del Cónyuge
+        </p>
+
+        <div class="section__line text-standardGray">
+          <span class="section__line-left">N/A</span>
+        </div>
+      </section>
+
+      <!-- Guarantee Person -->
+      <section class="section__wrapper">
+        <!-- Label -->
+        <p class="section__header">
+          3. Información del Aval
+        </p>
+
+        <div class="section__line text-highContrast">
+          <span class="section__line-left">Erika Bustamante</span>
+          <span class="section__line-right">8821-3112</span>
+        </div>
+
+        <div class="section__line text-standardGray">
+          <span class="section__line-left">1501-1977-21111</span>
+          <span class="section__line-right">erika@bustamante.com</span>
+        </div>
+      </section>
+
+      <!-- Financial and Demographic -->
+      <section class="section__wrapper">
+        <!-- Label -->
+        <p class="section__header">
+          4. Datos Demográficos y financieros
+        </p>
+
+        <div class="section__line text-highContrast">
+          <span class="section__line-left">Ingeniero Industrial</span>
+          <span class="section__line-right">L 35,000.00</span>
+        </div>
+
+        <div class="section__line text-standardGray">
+          <span class="section__line-left">Ingenieros y Asociados S. de R.L.</span>
+          <span class="section__line-right">Juticalpa, Olancho</span>
+        </div>
+      </section>
+
+      <!-- Multimedia -->
+      <section class="section__wrapper">
+        <!-- Label -->
+        <p class="section__header">
+          5. Multimedia de verificación
+        </p>
+
+        <!-- Images -->
+        <div class="flex-wrap justify-between section__line">
+          @for (i of [1, 2, 3, 4, 5]; track $index) {
+          <div class="w-[225px] h-[200px] rounded-md bg-slate-400"></div>
+          }
+        </div>
+      </section>
+
+      <button class="button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
+        (click)="closeDrawer()">
+        <span class="font-sans font-extralight text-highContrast">Cerrar</span>
+      </button>
     </section>
   </ng-container>
 </nz-drawer>
