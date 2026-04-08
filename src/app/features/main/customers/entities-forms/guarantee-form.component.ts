@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NgZorroModule } from '../../../../../shared/modules/ng-zorro.module';
 import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload';
-import { WebIconComponent } from '../../../../../shared/components/web-icon.component';
+import { WebIconComponent } from '../../../../shared/components/web-icon.component';
+import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 
 @Component({
   selector: 'app-guarantee-form',
@@ -28,7 +28,9 @@ import { WebIconComponent } from '../../../../../shared/components/web-icon.comp
     }
   `
 })
-export class GuaranteeFormComponent {
+export class GuaranteeFormComponent implements OnInit {
+  @Input() entityId?: string;
+
   @Output() submitForm = new EventEmitter<any>();
   @Output() closeDrawer = new EventEmitter<any>();
 
@@ -48,6 +50,27 @@ export class GuaranteeFormComponent {
   });
 
   constructor() { }
+
+  ngOnInit(): void {
+    /* Loads data if this is an existing entity */
+    if (this.entityId) {
+      /* TODO: Load data from Supabase */
+      this.form.patchValue({
+        firstName: 'John',
+        secondName: 'Doe',
+        lastName: 'Smith',
+        dni: '12345678',
+        phone: '555-1234',
+        email: 'prueba@gmail.com',
+        radioEntityGrade: 'A',
+        location: 'Lima',
+        profession: 'Engineer',
+        company: 'Tech Co.',
+        income: 5000,
+        notes: 'This is a note about the guarantee.'
+      });
+    }
+  }
 
   mediaFiles = signal<NzUploadFile[]>([]);
 
@@ -70,6 +93,11 @@ export class GuaranteeFormComponent {
   }
 
   closeDrawerFn() {
+    this.closeDrawer.emit();
+  }
+
+  deactivate() {
+    /* TODO: Implement deactivation logic */
     this.closeDrawer.emit();
   }
 

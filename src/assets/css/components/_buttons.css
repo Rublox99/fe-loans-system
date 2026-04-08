@@ -34,6 +34,10 @@
     background-color: var(--gray) !important;
 }
 
+.alarm__button {
+    background-color: var(--error) !important;
+}
+
 .confirm__button {
     background-color: var(--primary) !important;
 }

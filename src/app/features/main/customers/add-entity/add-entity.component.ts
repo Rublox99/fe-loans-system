@@ -3,8 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
-import { CustomerFormComponent } from './forms/customer-form.component';
-import { GuaranteeFormComponent } from './forms/guarantee-form.component';
+import { CustomerFormComponent } from '../entities-forms/customer-form.component';
+import { GuaranteeFormComponent } from '../entities-forms/guarantee-form.component';
 
 @Component({
   selector: 'app-add-entity',
@@ -40,8 +40,6 @@ export class AddEntityDrawerComponent implements OnInit {
   isVisible: boolean = false
 
   radioEntityType: string = 'C'; // C: Customer, G: Guarantee
-  radioEntityGrade: string = 'A'; // A: 1, B: 2, C: 3, D: 4, E: 5
-  isWithGuarantee: boolean = false;
 
   constructor(
   ) { }

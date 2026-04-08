@@ -1,0 +1,24 @@
+<div class="flex items-center justify-center" (click)="openDrawer()">
+  <web-icon size="18" name="EDIT" color="var(--success)" class="pseudo__button"></web-icon>
+</div>
+
+<nz-drawer [nzClosable]="true" nzWidth="600px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
+  <ng-container *nzDrawerContent="">
+    <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
+      <!-- Header -->
+      <p class="font-sans text-3xl font-bold text-primary">
+        Modificación de Individuo
+      </p>
+
+      @if (entityType === 'C') {
+      <app-customer-form [entityId]="'#1'" (submitForm)="handleCustomer($event)" (closeDrawer)="closeDrawer()">
+      </app-customer-form>
+      }
+
+      @if (entityType === 'G') {
+      <app-guarantee-form [entityId]="'#1'" (submitForm)="handleGuarantee($event)" (closeDrawer)="closeDrawer()">
+      </app-guarantee-form>
+      }
+    </section>
+  </ng-container>
+</nz-drawer>

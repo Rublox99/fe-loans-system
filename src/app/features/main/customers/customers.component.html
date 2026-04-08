@@ -111,8 +111,8 @@
               <td class="cell__table">06/04/2026</td>
               <td class="cell__table">
                 <div class="flex items-center gap-2.5">
-                  <app-view-customer aria-label="Ver cliente" [customerId]="customer.id" />
-                  <app-edit-customer aria-label="Editar cliente" [customerId]="customer.id" />
+                  <app-view-entity aria-label="Ver cliente" [customerId]="customer.id" />
+                  <app-edit-entity aria-label="Editar cliente" [customerId]="customer.id" [entityType]="'C'" />
                 </div>
               </td>
             </tr>

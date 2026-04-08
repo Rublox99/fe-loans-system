@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NgZorroModule } from '../../../../../shared/modules/ng-zorro.module';
-import { WebIconComponent } from '../../../../../shared/components/web-icon.component';
 import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload';
+import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
+import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 
 @Component({
   selector: 'app-customer-form',
@@ -28,7 +28,9 @@ import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload';
     }
   `
 })
-export class CustomerFormComponent {
+export class CustomerFormComponent implements OnInit {
+  @Input() entityId?: string;
+
   @Output() submitForm = new EventEmitter<any>();
   @Output() closeDrawer = new EventEmitter<any>();
 
@@ -78,6 +80,38 @@ export class CustomerFormComponent {
     });
   }
 
+  ngOnInit(): void {
+    /* Loads data if this is an existing entity */
+    if (this.entityId) {
+      /* TODO: Load data from Supabase */
+      this.form.patchValue({
+        firstName: 'Jane',
+        secondName: 'Doe',
+        lastName: 'Smith',
+        dni: '87654321',
+        phone: '555-4321',
+        email: 'prueba@gmail.com',
+        guarantee: 'Guarantee #1',
+        isWithSpouse: true,
+        radioEntityGrade: 'B',
+        location: 'Lima',
+        profession: 'Designer',
+        company: 'Design Co.',
+        income: 4000,
+        spouse: {
+          firstName: 'John',
+          lastName: 'Doe',
+          dni: '12345678',
+          phone: '555-1234',
+          profession: 'Engineer',
+          income: 5000,
+          location: 'Lima'
+        },
+        notes: 'This is a note about the customer.'
+      })
+    }
+  }
+
   mediaFiles = signal<NzUploadFile[]>([]);
 
   beforeUpload = (file: NzUploadFile): boolean => {
@@ -98,8 +132,12 @@ export class CustomerFormComponent {
     this.mediaFiles.set(info.fileList);
   }
 
-
   closeDrawerFn() {
+    this.closeDrawer.emit();
+  }
+
+  deactivate() {
+    /* TODO: Implement deactivation logic */
     this.closeDrawer.emit();
   }
 

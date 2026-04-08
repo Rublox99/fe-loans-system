@@ -143,6 +143,24 @@
   </section>
 
   <!-- Buttons -->
+  @if (entityId) {
+  <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
+    <span class="font-sans font-extralight text-staticWhite">Actualizar entidad</span>
+  </button>
+
+  <section class="flex gap-3">
+    <button class="w-full button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
+      (click)="closeDrawerFn()">
+      <span class="font-sans font-extralight text-highContrast">Cancelar</span>
+    </button>
+
+    <button class="w-full button alarm__button" nz-button nzType="text" (click)="submit()">
+      <span class="font-sans font-extralight text-staticWhite">Desactivar</span>
+    </button>
+  </section>
+  }
+
+  @else if (!entityId) {
   <section class="flex gap-3">
     <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
       <span class="font-sans font-extralight text-staticWhite">Crear entidad</span>
@@ -153,4 +171,5 @@
       <span class="font-sans font-extralight text-highContrast">Cerrar</span>
     </button>
   </section>
+  }
 </form>

@@ -5,17 +5,38 @@ import { WebIconComponent } from '../../../../shared/components/web-icon.compone
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 
 @Component({
-  selector: 'app-edit-customer',
+  selector: 'app-view-entity',
   standalone: true,
-  templateUrl: './edit-customer.component.html',
+  templateUrl: './view-entity.component.html',
   imports: [
     CommonModule,
     WebIconComponent,
     FormsModule,
     NgZorroModule
-  ]
+  ],
+  styles: `
+    .section__wrapper {
+      @apply space-y-2.5
+    }
+
+    .section__header {
+      @apply font-sans text-xs font-bold uppercase text-highContrast
+    }
+
+    .section__line {
+      @apply font-sans flex gap-2.5 text-base
+    }
+
+    .section__line-left {
+      @apply flex-1
+    }
+
+    .section__line-right {
+      @apply flex-none
+    }
+  `
 })
-export class EditCustomerDrawerComponent implements OnInit {
+export class ViewCustomerDrawerComponent implements OnInit {
   @Input() customerId!: string;
 
   isVisible: boolean = false
