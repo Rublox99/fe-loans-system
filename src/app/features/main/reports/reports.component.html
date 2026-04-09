@@ -1,3 +1,225 @@
-<main class="px-[50px] py-[25px] flex w-full h-full bg-green-400 gap-[20px]">
+<main class="px-[50px] py-[25px] flex flex-col w-full h-full gap-[20px]">
+    <!-- Header -->
+    <section class="items-end flex-none gap-5 space-y-2">
+        <p class="title__header">Generación de Reportes</p>
+        <span class="label__header">Seleccione los parámetros deseados para generar reportes de forma dinámica</span>
+    </section>
 
+    <!-- Filters & Controls -->
+    <section class="flex flex-none gap-5">
+        <!-- Fields -->
+        <div [formGroup]="filtersForm" class="border-lightGray bg-[#f4f9ff] container__filters-card w-2/3">
+            <!-- Title -->
+            <div class="flex gap-5">
+                <web-icon name="TABLE" color="var(--primary)" />
+                <p class="title__filters-card text-primary">Parámetros de reporte</p>
+            </div>
+
+            <!-- Customer & Grade -->
+            <div class="line__filters-card">
+                <div class="line__filters-card">
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help">Cliente</span>
+                        <nz-select class="w-full" formControlName="customerId"
+                            nzPlaceHolder="Busque un cliente por su nombre">
+                            <nz-option nzValue="jack" nzLabel="Jack" />
+                            <nz-option nzValue="lucy" nzLabel="Lucy" />
+                            <nz-option nzValue="disabled" nzLabel="Disabled" nzDisabled />
+                        </nz-select>
+                    </div>
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help ">Grado de cliente</span>
+                        <nz-radio-group class="w-full gap-5 h-[35px]" formControlName="customersGrade">
+                            <label class="h-full" nz-radio-button nzValue="A">A</label>
+                            <label class="h-full" nz-radio-button nzValue="B">B</label>
+                            <label class="h-full" nz-radio-button nzValue="C">C</label>
+                            <label class="h-full" nz-radio-button nzValue="D">D</label>
+                            <label class="h-full" nz-radio-button nzValue="E">E</label>
+                        </nz-radio-group>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User & Capital -->
+            <div class="line_filters-card">
+                <div class="line__filters-card">
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help ">Colaborador</span>
+                        <nz-select class="w-full" formControlName="userId"
+                            nzPlaceHolder="Busque un colaborador por su nombre">
+                            <nz-option nzValue="jack" nzLabel="Jack" />
+                            <nz-option nzValue="lucy" nzLabel="Lucy" />
+                            <nz-option nzValue="disabled" nzLabel="Disabled" nzDisabled />
+                        </nz-select>
+                    </div>
+
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help ">Rango de capital</span>
+                        <nz-select class="w-full" formControlName="capital"
+                            nzPlaceHolder="Seleccione un rango de capital">
+                            <nz-option nzValue="A" nzLabel="< 100,000.00" />
+                            <nz-option nzValue="B" nzLabel="> 100,000.00 - <500,000.00" />
+                            <nz-option nzValue="C" nzLabel="> 500,000.00" />
+                        </nz-select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan State, Fee State & Daterange -->
+            <div class="line_filters-card">
+                <div class="line__filters-card">
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help ">Estado de préstamo</span>
+                        <nz-select class="w-full" formControlName="loanState" nzPlaceHolder="Seleccione un estado">
+                            <nz-option nzValue="jack" nzLabel="Jack" />
+                            <nz-option nzValue="lucy" nzLabel="Lucy" />
+                            <nz-option nzValue="disabled" nzLabel="Disabled" nzDisabled />
+                        </nz-select>
+                    </div>
+
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help ">Estado de cuota (actual)</span>
+                        <nz-select class="w-full" formControlName="feeState" nzPlaceHolder="Seleccione un estado">
+                            <nz-option nzValue="A" nzLabel="< 100,000.00" />
+                            <nz-option nzValue="B" nzLabel="> 100,000.00 - <500,000.00" />
+                            <nz-option nzValue="C" nzLabel="> 500,000.00" />
+                        </nz-select>
+                    </div>
+
+                    <div class="w-full space-y-2.5">
+                        <span class="text-help ">Período de consulta</span>
+                        <nz-select class="w-full" formControlName="dateRange">
+                            <nz-option nzValue="A" nzLabel="10/04/2025 - 31/12/2025" />
+                        </nz-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output card -->
+        <div class="w-1/3 bg-primary text-staticWhite container__filters-card">
+            <!-- Title -->
+            <div class="flex flex-none gap-5">
+                <web-icon name="VERIFIED" color="var(--static-white)" />
+                <p class="title__filters-card text-staticWhite">Salida parametrizada</p>
+            </div>
+
+            <!-- Summary text -->
+            <p class="flex-none text-xs font-light text-lightGray font-roboto">
+                Se han encontrado <span class="font-medium text-staticWhite">23 elementos</span> dentro del período
+                seleccionado.
+            </p>
+
+            <!-- Divisor -->
+            <div class="w-full h-[1px] bg-help"></div>
+
+            <!-- Summary details & Button -->
+            <div class="flex flex-1 flex-col gap-2.5">
+                <div class="flex-1 space-y-2.5">
+                    <p class="text-xs font-light font-roboto text-staticWhite">
+                        Capital calculado: <span class="font-medium">L 22350.00</span>
+                    </p>
+                    <p class="text-xs font-light font-roboto text-staticWhite">
+                        Período: <span class="font-medium">01 de octubre del 2025 - 31 de diciembre del 2025</span>
+                    </p>
+                </div>
+            </div>
+
+            <button class="w-full button confirm__button" style="background-color: var(--static-white) !important;"
+                nz-button nzType="text" (click)="generateReport()">
+                <span class="font-sans font-extralight text-staticBlack">Generar reporte</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Output Table -->
+    <section class="flex flex-col flex-1 min-h-0 gap-1 space-y-2">
+        <!-- Header -->
+        <p class="flex-none title__header" style="font-size: 20px !important;">
+            Lista de individuos en archivo
+        </p>
+
+        <!-- Content -->
+        <div class="flex-1 min-h-0 overflow-auto border rounded-md">
+            <nz-spin [nzSpinning]="isLoading()">
+                @if (error()) {
+                <div class="p-4 text-red-500">{{ error() }}</div>
+                }@else if (reportCustomers().length === 0 && !isLoading()) {
+                <div class="p-4 text-center text-standardGray">No se encontraron clientes.</div>
+                } @else {
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="header__table">DNI</th>
+                            <th class="header__table">Nombre</th>
+                            <th class="header__table">Grado de Riesgo</th>
+                            <th class="header__table">Capital</th>
+                            <th class="header__table">Saldo Abonado</th>
+                            <th class="header__table">Estado de Préstamo</th>
+                            <th class="header__table">Fecha de Préstamo</th>
+                            <th class="header__table">Próxima Cuota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (customer of reportCustomers(); track customer.id) {
+                        <tr class="border-b">
+                            <td class="font-medium cell__table whitespace-nowrap">{{ customer.dni }}</td>
+                            <td class="font-medium cell__table whitespace-nowrap">{{ getFullName(customer) }}</td>
+                            <td class="cell__table">
+                                <span
+                                    class="flex justify-center px-2 py-1 text-xs border rounded-sm border-primary text-primary">
+                                    Grado {{ getGradeLabel(customer.payment_grade) }}
+                                </span>
+                            </td>
+                            <td class="cell__table">L {{customer.capital}}</td>
+                            <td class="cell__table">L {{customer.paid_amount}}</td>
+                            <td class="cell__table">
+                                <span class="flex justify-center px-2 py-1 text-xs border rounded-sm"
+                                    [ngClass]="getLoanStateClasses(customer.loan_state)">
+                                    {{ getLoanStateLabel(customer.loan_state) }}
+                                </span>
+                            </td>
+                            <td class="cell__table">{{customer.date_of_approval}}</td>
+                            <td class="cell__table">{{customer.next_fee_due_date}}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                }
+            </nz-spin>
+        </div>
+
+        <!-- Paginator -->
+        <div class="flex flex-none items-center gap-2.5">
+            <!-- Left -->
+            <div class="flex-1 space-x-1 text-xs font-medium uppercase font-roboto">
+                <span class="text-help">Mostrando</span>
+                <span class="text-primary">{{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}</span>
+                <span class="text-help">entidades registradas</span>
+            </div>
+
+            <!-- Right -->
+            <div class="flex items-center flex-none gap-1">
+                <!-- Previous -->
+                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+                    [class.border-lightGray]="currentPage() === 1" [class.cursor-not-allowed]="currentPage() === 1"
+                    [class.border-standardGray]="currentPage() > 1" [disabled]="currentPage() === 1"
+                    (click)="goToPage(currentPage() - 1)" aria-label="Página anterior">
+                    <web-icon [color]="currentPage() === 1 ? 'var(--light-gray)' : 'var(--standard-gray)'"
+                        name="LEFT_ROUNDED_ARROW" size="20" />
+                </button>
+
+                <!-- Next -->
+                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+                    [class.border-lightGray]="currentPage() === totalPages()"
+                    [class.cursor-not-allowed]="currentPage() === totalPages()"
+                    [class.border-standardGray]="currentPage() < totalPages()"
+                    [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)"
+                    aria-label="Página siguiente">
+                    <web-icon [color]="currentPage() === totalPages() ? 'var(--light-gray)' : 'var(--standard-gray)'"
+                        name="RIGHT_ROUNDED_ARROW" size="20" />
+                </button>
+            </div>
+        </div>
+    </section>
 </main>

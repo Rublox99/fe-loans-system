@@ -1,0 +1,20 @@
+.container__filters-card {
+    @apply rounded-md p-5 flex flex-col gap-2.5
+}
+
+.title__filters-card {
+    @apply flex gap-5 uppercase font-sans font-medium
+}
+
+.line__filters-card {
+    @apply flex gap-2.5 w-full
+}
+
+/* Table */
+.header__table {
+    @apply px-4 py-3 text-xs font-medium text-left uppercase text-standardGray whitespace-nowrap
+}
+
+.cell__table {
+    @apply px-4 py-3 font-roboto text-highContrast
+}

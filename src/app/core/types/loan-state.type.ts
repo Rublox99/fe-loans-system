@@ -1,0 +1,1 @@
+export type LoanState = 'A' | 'IP' | 'R' | 'C'; // A: Approved, IR: In Progress, R: Rejected, C: Closed
