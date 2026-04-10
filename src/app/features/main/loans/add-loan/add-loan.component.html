@@ -1,0 +1,22 @@
+<button class="button bg-primary" nz-button nzType="primary" (click)="openDrawer()">
+  <web-icon class="mr-2.5" name="BILL" color="var(--static-white)" size="16" />
+  <span class="font-sans font-extralight text-lowContrast">Nueva solicitud de préstamo</span>
+</button>
+
+<nz-drawer [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
+  <ng-container *nzDrawerContent="">
+    <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
+      <!-- Header -->
+      <p class="font-sans text-3xl font-bold text-primary">
+        Creación de Préstamo
+      </p>
+      <!-- Description -->
+      <p class="font-sans text-sm text-standardGray">
+        Ingrese los campos requeridos para gestionar una nueva solicitud de préstamo
+      </p>
+
+      <app-loan-form (submitForm)="closeDrawer()" (closeDrawer)="closeDrawer()">
+      </app-loan-form>
+    </section>
+  </ng-container>
+</nz-drawer>

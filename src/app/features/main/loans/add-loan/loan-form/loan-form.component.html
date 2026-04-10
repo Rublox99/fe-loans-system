@@ -1,0 +1,115 @@
+<form [formGroup]="form" class="flex flex-col gap-5 font-sans">
+  <!-- Customer -->
+  <section class="section__line text-highContrast">
+    <div class="w-full space-y-2.5">
+      <p class="text-help ">Cliente</p>
+
+      <nz-input-wrapper class="h-[45px]">
+        <input id="customer_id" nz-input placeholder="Seleccione un cliente" formControlName="customerId" />
+        <web-icon nzInputSuffix name="SEARCH" size="20" color="var(--light-gray)" />
+      </nz-input-wrapper>
+    </div>
+  </section>
+
+  <!-- Capital Balance & Fees -->
+  <section class="section__line text-highContrast">
+    <!-- Balance -->
+    <div class="w-full space-y-2.5">
+      <p class="text-help ">Capital a prestar (capital total)</p>
+
+      <input nz-input placeholder="Ingrese un monto" formControlName="lendingCapital" />
+    </div>
+
+    <!-- Fees amount -->
+    <div class="w-full space-y-2.5">
+      <p class="text-help ">N° de cuotas</p>
+
+      <input nz-input placeholder="Cantidad" formControlName="feesAmount" />
+    </div>
+  </section>
+
+  <!-- Interest -->
+  <section class="section__line text-highContrast">
+    <div class="w-full space-y-2.5">
+      <p class="text-help ">Margen de interés (%)</p>
+
+      <input nz-input placeholder="Cantidad" formControlName="interest" />
+    </div>
+  </section>
+
+  <!-- Modality -->
+  <section class="section__line">
+    <div class="w-full space-y-2.5">
+      <p class="text-help ">Fecha de vencimiento (solo lectura)</p>
+      <nz-radio-group class="w-full gap-2.5" formControlName="modality">
+        <label nz-radio-button nzValue="S">Semanal (S)</label>
+        <label nz-radio-button nzValue="Q">Quincenal (Q)</label>
+        <label nz-radio-button nzValue="M">Mensual (M)</label>
+      </nz-radio-group>
+    </div>
+  </section>
+
+  <!-- Summary -->
+  <section class="w-full rounded-md bg-[#F4F3F5] p-5 flex flex-col gap-5 uppercase font-medium">
+
+    <!-- Header -->
+    <div class="flex gap-2.5">
+      <web-icon name="TABLE" color="var(--primary)" />
+      <span class="font-medium text-primary">Resumen</span>
+    </div>
+
+    <!-- Summary Items -->
+    <div class="mb-10 space-y-5">
+
+      <!-- Capital -->
+      <div class="flex gap-2.5">
+        <span class="flex-1 text-standardGray">Capital a prestar</span>
+        <span class="flex-none text-highContrast">
+          {{ capital() | currency:'L ':'symbol':'1.2-2' }}
+        </span>
+      </div>
+
+      <!-- Calculated Interest -->
+      <div class="flex gap-2.5">
+        <span class="flex-1 text-standardGray">Interés calculado</span>
+        <span class="flex-none text-highContrast">
+          {{ interestAmount() | currency:'L ':'symbol':'1.2-2' }}
+        </span>
+      </div>
+
+      <!-- Divisor -->
+      <div class="w-full h-[1px] bg-lightGray"></div>
+
+      <!-- Total -->
+      <div class="flex gap-2.5">
+        <span class="flex-1 text-standardGray">Total</span>
+        <span class="flex-none text-highContrast">
+          {{ total() | currency:'L ':'symbol':'1.2-2' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Fee Details -->
+    <div class="flex gap-2.5 text-accent">
+      <span class="flex-1">
+        Valor de la cuota ({{ fees() }} cuotas)
+      </span>
+      <span class="flex-none">
+        {{ feeValue() | currency:'L ':'symbol':'1.2-2' }}
+      </span>
+    </div>
+
+  </section>
+
+  <!-- Buttons -->
+  <div class="space-y-2.5">
+    <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
+      <span class="font-sans font-extralight text-staticWhite">Registrar préstamo</span>
+    </button>
+
+    <button class="w-full button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
+      (click)="closeDrawerFn()">
+      <span class="font-sans font-extralight text-highContrast">Cancelar</span>
+    </button>
+  </div>
+</form>
