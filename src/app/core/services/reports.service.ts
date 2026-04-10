@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Customer } from '../interfaces/customers.interface';
-import { REPORT_CUSTOMERS_MOCK } from '../../shared/mocks/report-customers';
+import { REPORT_CUSTOMERS_MOCK } from '../../shared/mocks/report-customers.mock';
 import { ReportCustomer } from '../interfaces/report-customers.interface';
 
 export interface PaginatedCustomers {

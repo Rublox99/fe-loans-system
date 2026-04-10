@@ -6,6 +6,7 @@ import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { GeneralService } from '../../../core/services/general.service';
 import { ReportCustomersService } from '../../../core/services/reports.service';
 import { ReportCustomer } from '../../../core/interfaces/report-customers.interface';
+import { LoanStateAcronym } from '../../../core/types/loan-state.type';
 
 @Component({
   selector: 'app-reports',
@@ -86,7 +87,7 @@ export class ReportsComponent implements OnInit {
     }
   }
 
-  getLoanStateClasses(state: string): string {
+  getLoanStateClasses(state: LoanStateAcronym): string {
     switch (state) {
       case 'A': // Approved
         return 'border-green-500 text-green-700 bg-green-100';

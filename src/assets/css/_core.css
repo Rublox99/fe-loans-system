@@ -13,6 +13,7 @@
 @import url(./ng-zorro/_nz-spin.css);
 @import url(./ng-zorro/_radio.css);
 @import url(./ng-zorro/_navbar.css);
+@import url(./ng-zorro/_button.css);
 
 /* Utilities */
 @import url(./utilities/_general.css);

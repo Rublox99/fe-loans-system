@@ -1,0 +1,33 @@
+.highlight__data-card {
+    width: 245px;
+    min-width: 245px;
+    height: 120px;
+    padding: 20px;
+    border-radius: 3px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+
+    @apply shadow-md font-sans
+}
+
+.highlight__data-card>.title__data-card {
+    text-transform: uppercase;
+
+    @apply font-thin text-sm
+}
+
+.highlight__data-card>.value__data-card {
+    @apply font-bold text-2xl
+}
+
+/* Table */
+.header__table {
+    @apply px-4 py-3 text-xs font-medium text-left uppercase text-standardGray whitespace-nowrap
+}
+
+.cell__table {
+    @apply px-4 py-3 font-roboto
+}

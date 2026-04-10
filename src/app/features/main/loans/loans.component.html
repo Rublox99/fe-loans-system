@@ -1,3 +1,168 @@
-<main class="px-[50px] py-[25px] flex w-full h-full bg-blue-400 gap-[20px]">
+<main class="px-[50px] py-[25px] flex flex-col w-full h-full gap-[20px]">
+    <!-- Header -->
+    <section class="flex items-end flex-none gap-5">
+        <!-- Left -->
+        <div class="flex-1 space-y-2">
+            <p class="title__header">Portafolio de préstamos</p>
+            <span class="label__header">Catálogo de préstamos registrados y administrados en sus distintas
+                etapas.</span>
+        </div>
 
+        <!-- Right -->
+        <div class="flex-none">
+            <app-add-loan aria-label="Agregar préstamo" />
+        </div>
+    </section>
+
+    <!-- Cards -->
+    <section class="flex flex-none gap-5 py-2 overflow-x-auto hide-scrollbar">
+        <!-- #1 -->
+        <div class="relative flex-1 highlight__data-card bg-staticBlack text-staticWhite">
+            <!-- Texture layer -->
+            <div class="absolute inset-0 
+                bg-[url(/assets/images/terrain-texture.webp)] 
+                bg-cover opacity-10 pointer-events-none">
+            </div>
+
+            <span class="title__data-card">Capital en fluctuación</span>
+            <span class="value__data-card">L 3,125,000.00</span>
+        </div>
+
+        <!-- #2 -->
+        <div class="flex-1 highlight__data-card bg-primary text-staticWhite">
+            <span class="title__data-card">Líquidez del portafolio</span>
+            <span class="value__data-card">80% retornado</span>
+
+            <div class="w-[90%] absolute left-5 bottom-5 bg-[#0B5070] rounded-full overflow-hidden">
+                <div class="h-[2px] bg-staticWhite" style="width: 80%;"></div>
+            </div>
+        </div>
+
+        <!-- #3 -->
+        <div class="highlight__data-card bg-[#E8F2FF] flex-none text-staticBlack">
+            <span class="title__data-card">Préstamos activos</span>
+            <span class="value__data-card">10</span>
+        </div>
+    </section>
+
+    <!-- Table -->
+    <section class="flex flex-col flex-1 min-h-0 gap-2.5">
+        <!-- Header -->
+        <div class="flex flex-none items-center gap-2.5">
+            <p class="flex-1 title__header" style="font-size: 20px !important;">
+                Préstamos en archivo
+            </p>
+
+            <!-- Buttons -->
+            <div class="flex flex-none gap-2.5">
+                <button class="button bg-accent" nz-button nzType="primary" [disabled]="!selectedLoanId()"
+                    (click)="goToLoanDetails()">
+                    <web-icon class="mr-2.5" name="RIGHT_ARROW" color="var(--static-white)" size="16" />
+                    <span class="font-sans font-extralight text-lowContrast">Ver detalles del préstamo</span>
+                </button>
+
+                <input class="w-[250px] border-help" id="search_field" nz-input placeholder="Busque por nombre o DNI"
+                    [(ngModel)]="searchText" (ngModelChange)="getLoans()" />
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-h-0 overflow-auto border rounded-md">
+            <nz-spin [nzSpinning]="isLoading()">
+                @if (error()) {
+                <div class="p-4 text-red-500">{{ error() }}</div>
+                } @else if (loans().length === 0 && !isLoading()) {
+                <div class="p-4 text-center text-standardGray">No se encontraron préstamos.</div>
+                } @else {
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b bg-[#E2E8F0]">
+                            <th class="header__table">Código</th>
+                            <th class="header__table">Cliente</th>
+                            <th class="header__table">Estado</th>
+                            <th class="header__table">Capital</th>
+                            <th class="header__table">Balance</th>
+                            <th class="header__table">Interés</th>
+                            <th class="header__table">Modalidad</th>
+                            <th class="header__table">Siguiente pago</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (loan of loans(); track loan.id) {
+                        <tr class="transition-colors duration-150 border-b cursor-pointer"
+                            [class.bg-accent]="selectedLoanId() === loan.id"
+                            [class.text-staticWhite]="selectedLoanId() === loan.id"
+                            [class.text-highContrast]="selectedLoanId() !== loan.id"
+                            [class.border-l-2]="selectedLoanId() === loan.id"
+                            [class.border-l-primary]="selectedLoanId() === loan.id" (click)="selectLoan(loan.id)">
+
+                            <td class="font-medium cell__table whitespace-nowrap">{{ loan.id }}</td>
+                            <td class="font-medium cell__table whitespace-nowrap">{{ loan.customer_id }}</td>
+                            <td class="cell__table">
+                                <span
+                                    class="flex justify-center w-[100px] px-2 py-1 text-xs border rounded-sm font-roboto"
+                                    [ngClass]="getLoanStateClasses(loan.state)">
+                                    {{ getLoanStateLabel(loan.state) }}
+                                </span>
+                            </td>
+                            <td class="cell__table">{{ loan.capital | currency:'L':'symbol' }}</td>
+                            <td class="cell__table">{{ loan.capital_balance | currency:'L':'symbol' }}</td>
+                            <td class="cell__table">{{ loan.interest }}%</td>
+                            <td class="cell__table">{{ loan.modality }}</td>
+                            <td class="cell__table">
+                                {{ loan.next_expected_payment === null ? 'N/A' :
+                                (loan.next_expected_payment | date:'dd/MM/yyyy') }}
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                }
+            </nz-spin>
+        </div>
+
+        <!-- Paginator -->
+        <div class="flex flex-none items-center gap-2.5">
+            <!-- Left -->
+            <div class="flex-1 space-x-1 text-xs font-medium uppercase font-roboto">
+                <span class="text-help">Mostrando</span>
+                <span class="text-primary">{{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}</span>
+                <span class="text-help">entidades registradas</span>
+            </div>
+
+            <!-- Right -->
+            <div class="flex items-center flex-none gap-1">
+                <!-- Previous -->
+                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+                    [class.border-lightGray]="currentPage() === 1" [class.cursor-not-allowed]="currentPage() === 1"
+                    [class.border-standardGray]="currentPage() > 1" [disabled]="currentPage() === 1"
+                    (click)="goToPage(currentPage() - 1)" aria-label="Página anterior">
+                    <web-icon [color]="currentPage() === 1 ? 'var(--light-gray)' : 'var(--standard-gray)'"
+                        name="LEFT_ROUNDED_ARROW" size="20" />
+                </button>
+
+                <!-- Pages -->
+                @for (page of pageNumbers(); track page) {
+                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+                    [class.bg-highContrast]="page === currentPage()" [class.border-transparent]="page === currentPage()"
+                    [class.border-standardGray]="page !== currentPage()" (click)="goToPage(page)"
+                    [attr.aria-label]="'Página ' + page" [attr.aria-current]="page === currentPage() ? 'page' : null">
+                    <span class="font-sans text-xs" [class.text-lowContrast]="page === currentPage()"
+                        [class.text-standardGray]="page !== currentPage()">{{ page }}</span>
+                </button>
+                }
+
+                <!-- Next -->
+                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+                    [class.border-lightGray]="currentPage() === totalPages()"
+                    [class.cursor-not-allowed]="currentPage() === totalPages()"
+                    [class.border-standardGray]="currentPage() < totalPages()"
+                    [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)"
+                    aria-label="Página siguiente">
+                    <web-icon [color]="currentPage() === totalPages() ? 'var(--light-gray)' : 'var(--standard-gray)'"
+                        name="RIGHT_ROUNDED_ARROW" size="20" />
+                </button>
+            </div>
+        </div>
+    </section>
 </main>

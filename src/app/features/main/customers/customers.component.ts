@@ -99,6 +99,4 @@ export class CustomersComponent implements OnInit {
         }
       });
   }
-
-  openAddEntityForm() { }
 }

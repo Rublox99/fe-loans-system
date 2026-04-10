@@ -1,4 +1,4 @@
-import { LoanState } from "../types/loan-state.type";
+import { LoanStateAcronym } from "../types/loan-state.type";
 import { PaymentGrade } from "../types/payment-grade.type";
 
 export interface ReportCustomer {
@@ -10,7 +10,7 @@ export interface ReportCustomer {
     payment_grade: PaymentGrade;
     capital: number;
     paid_amount: number; // Fees total currency paid by the customer
-    loan_state: LoanState;
+    loan_state: LoanStateAcronym;
     date_of_approval?: string; // ISO date, only for approved loans
     next_fee_due_date?: string; // ISO date, only for approved loans
 }

@@ -1,0 +1,6 @@
+.ant-btn-primary[disabled],
+.ant-btn-primary[disabled]:active,
+.ant-btn-primary[disabled]:focus,
+.ant-btn-primary[disabled]:hover {
+    background-color: var(--standard-gray);
+}
