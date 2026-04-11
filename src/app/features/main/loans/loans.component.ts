@@ -124,7 +124,8 @@ export class LoansComponent implements OnInit {
   }
 
   goToLoanDetails() {
-    if (this.selectedLoanId())
-      this.router.navigate(['/loans', this.selectedLoanId()]);
+    if (this.selectedLoanId()) {
+      this.router.navigate(['/v1/main/loans', this.selectedLoanId(), 'details']);
+    }
   }
 }

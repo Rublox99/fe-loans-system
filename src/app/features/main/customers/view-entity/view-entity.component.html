@@ -1,6 +1,13 @@
+@if(!isViewableFromLoanDetails) {
 <div class="flex items-center justify-center" (click)="openDrawer()">
   <web-icon size="20" name="SEE" color="var(--standard-gray)" class="pseudo__button"></web-icon>
 </div>
+} @else if (isViewableFromLoanDetails){
+<button class="button bg-lightGray" nz-button nzType="primary" (click)="openDrawer()">
+  <web-icon class="mr-2.5" name="SEE" color="var(--primary)" size="16" />
+  <span class="font-sans font-extralight text-primary">Información del cliente</span>
+</button>
+}
 
 <nz-drawer [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
   <ng-container *nzDrawerContent="">

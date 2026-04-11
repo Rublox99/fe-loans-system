@@ -1,0 +1,116 @@
+<button class="button bg-warning" [ngClass]="!fee ? 'disabled' : ''" nz-button nzType="primary" (click)="openDrawer()">
+  <web-icon class="mr-2.5" name="TABLE" color="var(--static-white)" size="16" />
+  <span class="font-sans font-extralight text-lowContrast">Gestionar cuota</span>
+</button>
+
+<nz-drawer class="font-sans" [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right"
+  (nzOnClose)="closeDrawer()">
+  <ng-container *nzDrawerContent>
+    <section [formGroup]="form" class="flex flex-col gap-[25px] h-full p-[15px] bg-lowContrast">
+      <!-- Header -->
+      <div class="flex flex-col gap-2.5 text-primary">
+        <p class="font-sans text-3xl font-bold">
+          Gestión de Cuota
+        </p>
+
+        <span class="text-lg font-light font-roboto">Entrada de la transacción: {{ fee!.created_at | date:'dd-MM-yyyy'
+          }}</span>
+      </div>
+
+      <!-- Header Card -->
+      <section class="rounded-md bg-[#F4F3F5] flex gap-2.5 p-2.5">
+        <!-- Left -->
+        <div class="space-y-2.5">
+          <span class="text-xs uppercase text-standardGray">
+            Identificador de cuota
+          </span>
+
+          <p class="font-medium uppercase text-highContrast">
+            {{ fee!.id }}
+          </p>
+        </div>
+
+        <!-- Right -->
+        <div class="space-y-2.5 text-right">
+          <span class="text-xs uppercase text-standardGray">
+            Préstamo asociado
+          </span>
+
+          <p class="font-medium uppercase text-highContrast">
+            {{ loan!.id }}
+          </p>
+        </div>
+      </section>
+
+      <!-- Summary -->
+      <section class="section__wrapper">
+        <!-- Label -->
+        <p class="section__header">
+          Resumen
+        </p>
+
+        <!-- Content -->
+        <div class="section__line text-standardGray">
+          <!-- Left -->
+          <div class="flex-1 space-y-0">
+            <span class="text-xs uppercase text-standardGray">
+              Cantidad a pagar
+            </span>
+
+            <p class="text-2xl font-bold text-accent">L {{loan!.fee_value}}</p>
+          </div>
+
+          <!-- Right -->
+          <div class="flex-1 space-y-0">
+            <span class="text-xs uppercase text-standardGray">
+              Días de mora
+            </span>
+
+            <p class="text-2xl font-bold text-success">{{fee?.delay_days}} Día(s)</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Administration -->
+      <section class="flex-1 section__wrapper">
+        <!-- Label -->
+        <p class="section__header">
+          Administración de cuota
+        </p>
+
+        <!-- State -->
+        <div class="w-full space-y-2.5">
+          <span class="text-help ">Estado de pago</span>
+          <nz-select class="w-full" formControlName="paymentState" nzPlaceHolder="Seleccione un estado">
+            <nz-option nzValue="1" nzLabel="1 - Pendiente" />
+            <nz-option nzValue="2" nzLabel="2 - Pagado" />
+            <nz-option nzValue="3" nzLabel="3 - Mora" nzDisabled />
+          </nz-select>
+        </div>
+
+        <!-- Payment Date -->
+        <div class="w-full space-y-2.5">
+          <span class="text-help ">Fecha de pago</span>
+          <input class="w-full border-help" id="expiration_date" nz-input formControlName="paymentDate" />
+        </div>
+
+        <!-- Expiration Date -->
+        <div class="w-full space-y-2.5">
+          <span class="text-help ">Fecha de vencimiento (Solo lectura)</span>
+          <input class="w-full border-help" id="expiration_date" nz-input formControlName="expirationDate" />
+        </div>
+      </section>
+
+      <div class="space-y-2.5">
+        <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
+          <span class="font-sans font-extralight text-staticWhite">Actualizar cuota</span>
+        </button>
+
+        <button class="w-full button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
+          (click)="closeDrawer()">
+          <span class="font-sans font-extralight text-highContrast">Cerrar</span>
+        </button>
+      </div>
+    </section>
+  </ng-container>
+</nz-drawer>

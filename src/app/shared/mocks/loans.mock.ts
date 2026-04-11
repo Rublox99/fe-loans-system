@@ -54,7 +54,7 @@ export const LOANS_MOCK: Loan[] = [
         modality: 'M',                    // Monthly
         first_expiration_date: '2024-09-01T00:00:00.000Z',
         last_expected_expiration_date: '2025-02-01T00:00:00.000Z',
-        next_expected_payment: '2024-11-01T00:00:00.000Z',
+        next_expected_payment: '2024-12-01T00:00:00.000Z',
         created_at: '2024-08-01T10:00:00.000Z',
         updated_at: '2024-10-01T10:00:00.000Z'
     },

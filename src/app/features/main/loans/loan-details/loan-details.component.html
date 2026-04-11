@@ -1,0 +1,180 @@
+<main class="px-[50px] py-[25px] flex flex-col w-full h-full gap-[20px]">
+  <!-- Header -->
+  <section class="flex items-end flex-none gap-5">
+    <!-- Left -->
+    <div class="flex-1 space-y-2">
+      <span class="label__header">Información del préstamo</span>
+
+      <div class="flex gap-2.5 items-center">
+        <!-- Loan Id -->
+        <p class="title__header h-ellipsed-text" style="font-weight: bold !important;">{{loanId}}</p>
+
+        <!-- Loan State Selector -->
+        <nz-select class="loan-state-select" [ngModel]="selectedLoanState()" [nzLoading]="isUpdatingState()"
+          [nzDisabled]="isLoadingLoan() || isUpdatingState()" [class]="selectedStateColorClass()"
+          (ngModelChange)="onLoanStateChange($event)" nzBorderless aria-label="Estado del préstamo">
+
+          @for (option of loanStateOptions; track option.value) {
+          <nz-option [nzValue]="option.value" [nzLabel]="option.label" [nzCustomContent]="true">
+            <span [class]="option.colorClass + ' option-pill'">
+              {{ option.label }}
+            </span>
+          </nz-option>
+          }
+        </nz-select>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="flex-none flex items-center gap-2.5">
+      <app-view-entity aria-label="Ver entidad" [isViewableFromLoanDetails]="true" [customerId]="loan!.customer_id" />
+      <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee" [loan]="loan" />
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="flex flex-none gap-5 py-2 overflow-x-auto hide-scrollbar">
+    <!-- #1 -->
+    <div class="flex-1 relative highlight__data-card bg-[#E4FFF3] text-highContrast" style="--card-accent: #0A7040;">
+      <span class="title__data-card">Total pagado</span>
+      <span class="value__data-card">L {{isLoadingLoan() ? 0 : loan!.fee_value * loan!.paid_fees }}</span>
+
+      <!-- Absolute -->
+      <span class="absolute text-xs uppercase text-standardGray bottom-1.5 left-5">
+        45% retornado
+      </span>
+
+      <web-icon class="absolute top-5 right-5" name="BILL" color="#0A7040" size="20" />
+    </div>
+
+    <!-- #2 -->
+    <div class="flex-1 relative highlight__data-card bg-[#FFF6E7] text-highContrast" style="--card-accent: #FFA719;">
+      <span class="title__data-card">Saldo restante</span>
+      <span class="value__data-card">L {{isLoadingLoan() ?
+        0
+        :
+        loan!.capital_balance + loan!.capital_balance*loan!.interest}}</span>
+
+      <!-- Absolute -->
+      <web-icon class="absolute top-5 right-5" name="BANK" color="#FFA719" size="20" />
+    </div>
+
+    <!-- #3 -->
+    <div class="relative flex-1 highlight__data-card bg-primary text-staticWhite">
+      <!-- Texture layer -->
+      <div class="absolute inset-0 
+                bg-[url(/assets/images/geometric-texture.webp)] 
+                bg-cover opacity-10 pointer-events-none">
+      </div>
+
+      <span class="title__data-card">Siguiente fecha de pago</span>
+      <span class="value__data-card">
+        {{ loan!.next_expected_payment | date:"d 'de' MMMM 'de' yyyy" : '' : 'es' }}
+      </span>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="flex flex-col flex-1 min-h-0 gap-2.5">
+    <!-- Header -->
+    <div class="flex flex-none items-center gap-2.5">
+      <p class="flex-1 title__header" style="font-size: 20px !important;">
+        Préstamos en archivo
+      </p>
+
+      <!-- Buttons -->
+      <div class="flex flex-none gap-2.5">
+        <input class="w-[250px] border-help" id="search_field" nz-input placeholder="Busque por código de cuota"
+          [(ngModel)]="searchText" (ngModelChange)="getFeeDetails()" />
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 min-h-0 overflow-auto border rounded-md">
+      <nz-spin [nzSpinning]="isLoadingTable()">
+        @if (errorFeeDetails()) {
+        <div class="p-4 text-red-500">{{ errorFeeDetails() }}</div>
+        } @else if (fees().length === 0 && !isLoadingTable()) {
+        <div class="p-4 text-center text-standardGray">No se encontraron cuotas.</div>
+        } @else {
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b bg-[#E2E8F0]">
+              <th class="header__table">Código</th>
+              <th class="header__table">Fecha de expiración</th>
+              <th class="header__table">Fecha de pago</th>
+              <th class="header__table">Cantidad pagada</th>
+              <th class="header__table">Estado de cuota</th>
+              <th class="header__table">Días de mora</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fee of fees(); track fee.id) {
+            <tr class="transition-colors duration-150 border-b">
+              <td class="font-medium cell__table whitespace-nowrap">{{ fee.id }}</td>
+              <td class="cell__table whitespace-nowrap">
+                {{ fee.expiration_date | date:"d-MM-yyyy" }}
+              </td>
+              <td class="cell__table whitespace-nowrap">
+                {{ fee.payment_date | date:"d-MM-yyyy" }}
+              </td>
+              <td class="cell__table whitespace-nowrap">{{ fee.paid_amount }}</td>
+              <td class="cell__table">
+                <span class="flex justify-center w-[100px] px-2 py-1 text-xs border rounded-sm font-roboto"
+                  [ngClass]="getFeeStateClasses(fee.fee_state)">
+                  {{ getFeeStateLabel(fee.fee_state) }}
+                </span>
+              </td>
+              <td class="cell__table whitespace-nowrap">{{ fee.delay_days }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        }
+      </nz-spin>
+    </div>
+
+    <!-- Paginator -->
+    <div class="flex flex-none items-center gap-2.5">
+      <!-- Left -->
+      <div class="flex-1 space-x-1 text-xs font-medium uppercase font-roboto">
+        <span class="text-help">Mostrando</span>
+        <span class="text-primary">{{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}</span>
+        <span class="text-help">entidades registradas</span>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center flex-none gap-1">
+        <!-- Previous -->
+        <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+          [class.border-lightGray]="currentPage() === 1" [class.cursor-not-allowed]="currentPage() === 1"
+          [class.border-standardGray]="currentPage() > 1" [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)" aria-label="Página anterior">
+          <web-icon [color]="currentPage() === 1 ? 'var(--light-gray)' : 'var(--standard-gray)'"
+            name="LEFT_ROUNDED_ARROW" size="20" />
+        </button>
+
+        <!-- Pages -->
+        @for (page of pageNumbers(); track page) {
+        <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+          [class.bg-highContrast]="page === currentPage()" [class.border-transparent]="page === currentPage()"
+          [class.border-standardGray]="page !== currentPage()" (click)="goToPage(page)"
+          [attr.aria-label]="'Página ' + page" [attr.aria-current]="page === currentPage() ? 'page' : null">
+          <span class="font-sans text-xs" [class.text-lowContrast]="page === currentPage()"
+            [class.text-standardGray]="page !== currentPage()">{{ page }}</span>
+        </button>
+        }
+
+        <!-- Next -->
+        <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
+          [class.border-lightGray]="currentPage() === totalPages()"
+          [class.cursor-not-allowed]="currentPage() === totalPages()"
+          [class.border-standardGray]="currentPage() < totalPages()" [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)" aria-label="Página siguiente">
+          <web-icon [color]="currentPage() === totalPages() ? 'var(--light-gray)' : 'var(--standard-gray)'"
+            name="RIGHT_ROUNDED_ARROW" size="20" />
+        </button>
+      </div>
+    </div>
+  </section>
+</main>

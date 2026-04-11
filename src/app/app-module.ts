@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
@@ -22,8 +22,9 @@ registerLocaleData(es);
     NgZorroModule
   ],
   providers: [
-    { provide: NZ_I18N, useValue: es_ES }
+    { provide: NZ_I18N, useValue: es_ES },
+    { provide: LOCALE_ID, useValue: 'es' }
   ],
   bootstrap: [App]
 })
-export class AppModule {}
+export class AppModule { }

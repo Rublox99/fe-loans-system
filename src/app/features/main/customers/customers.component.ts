@@ -5,7 +5,7 @@ import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { Customer } from '../../../core/interfaces/customers.interface';
 import { CustomersService } from '../../../core/services/customers.service';
 import { GeneralService } from '../../../core/services/general.service';
-import { ViewCustomerDrawerComponent } from './view-entity/view-entity.component';
+import { ViewEntityDrawerComponent } from './view-entity/view-entity.component';
 import { AddEntityDrawerComponent } from './add-entity/add-entity.component';
 import { EditEntityDrawerComponent } from './edit-entity/edit-entity.component';
 
@@ -19,7 +19,7 @@ import { EditEntityDrawerComponent } from './edit-entity/edit-entity.component';
     WebIconComponent,
     AddEntityDrawerComponent,
     EditEntityDrawerComponent,
-    ViewCustomerDrawerComponent,
+    ViewEntityDrawerComponent,
     FormsModule,
     NgZorroModule
   ]

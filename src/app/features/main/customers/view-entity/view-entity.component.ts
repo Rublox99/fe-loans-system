@@ -36,8 +36,9 @@ import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
     }
   `
 })
-export class ViewCustomerDrawerComponent implements OnInit {
+export class ViewEntityDrawerComponent implements OnInit {
   @Input() customerId!: string;
+  @Input() isViewableFromLoanDetails: boolean = false;
 
   isVisible: boolean = false
 

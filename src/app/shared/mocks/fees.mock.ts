@@ -34,8 +34,8 @@ export const FEES_MOCK: Fee[] = [
         loan_id: 'loan-0003-e003-4a2b-9c1a-333333333333',
         user_id: 'user-uuid-002',
         expiration_date: '2024-11-01T00:00:00.000Z',
-        payment_date: null,                             // Not yet paid (overdue)
-        paid_amount: null,
+        payment_date: '2024-10-05T09:00:00.000Z',       // Paid (overdue)
+        paid_amount: 5500.00,
         fee_state: '3',                                 // Overdue
         delay_days: 5,
         last_modified: '2024-11-06T00:00:00.000Z',
@@ -46,30 +46,6 @@ export const FEES_MOCK: Fee[] = [
         loan_id: 'loan-0003-e003-4a2b-9c1a-333333333333',
         user_id: 'user-uuid-002',
         expiration_date: '2024-12-01T00:00:00.000Z',
-        payment_date: null,
-        paid_amount: null,
-        fee_state: '1',                                 // Pending
-        delay_days: 0,
-        last_modified: '2024-08-01T10:00:00.000Z',
-        created_at: '2024-08-01T10:00:00.000Z'
-    },
-    {
-        id: 'fee-00005-e003-4a2b-9c1a-333333333333',
-        loan_id: 'loan-0003-e003-4a2b-9c1a-333333333333',
-        user_id: 'user-uuid-002',
-        expiration_date: '2025-01-01T00:00:00.000Z',
-        payment_date: null,
-        paid_amount: null,
-        fee_state: '1',                                 // Pending
-        delay_days: 0,
-        last_modified: '2024-08-01T10:00:00.000Z',
-        created_at: '2024-08-01T10:00:00.000Z'
-    },
-    {
-        id: 'fee-00006-e003-4a2b-9c1a-333333333333',
-        loan_id: 'loan-0003-e003-4a2b-9c1a-333333333333',
-        user_id: 'user-uuid-002',
-        expiration_date: '2025-02-01T00:00:00.000Z',
         payment_date: null,
         paid_amount: null,
         fee_state: '1',                                 // Pending

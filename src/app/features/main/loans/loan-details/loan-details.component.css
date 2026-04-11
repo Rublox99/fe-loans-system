@@ -1,0 +1,100 @@
+.highlight__data-card {
+    width: 245px;
+    min-width: 245px;
+    height: 120px;
+    padding: 20px;
+    border-radius: 3px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+
+    @apply shadow-md font-sans
+}
+
+.highlight__data-card::before {
+    content: "";
+    width: 4px;
+    height: 100%;
+    position: absolute;
+
+    background-color: var(--card-accent, transparent);
+
+    @apply top-0 left-0 rounded-l-[3px];
+}
+
+
+.highlight__data-card>.title__data-card {
+    text-transform: uppercase;
+
+    @apply font-thin text-sm
+}
+
+.highlight__data-card>.value__data-card {
+    @apply font-bold text-2xl
+}
+
+/* Table */
+.header__table {
+    @apply px-4 py-3 text-xs font-medium text-left uppercase text-standardGray whitespace-nowrap
+}
+
+.cell__table {
+    @apply px-4 py-3 font-roboto
+}
+
+/* State Select */
+/* Pill base */
+.option-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border-width: 1px;
+    border-style: solid;
+}
+
+/* State colours */
+.loan-state--accepted {
+    background-color: #dcfce7;
+    color: #15803d;
+    border-color: #4ade80;
+}
+
+.loan-state--under-review {
+    background-color: #fefce8;
+    color: #a16207;
+    border-color: #facc15;
+}
+
+.loan-state--denied {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border-color: #f87171;
+}
+
+.loan-state--paid {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    border-color: #c084fc;
+}
+
+/* Apply the selected colour to the nz-select trigger as well */
+.loan-state-select.loan-state--accepted .ant-select-selector {
+    @apply text-green-700 bg-green-100 border-green-400;
+}
+
+.loan-state-select.loan-state--under-review .ant-select-selector {
+    @apply text-yellow-700 border-yellow-400 bg-yellow-50;
+}
+
+.loan-state-select.loan-state--denied .ant-select-selector {
+    @apply text-red-700 bg-red-100 border-red-400;
+}
+
+.loan-state-select.loan-state--paid .ant-select-selector {
+    @apply text-purple-700 bg-purple-100 border-purple-400;
+}

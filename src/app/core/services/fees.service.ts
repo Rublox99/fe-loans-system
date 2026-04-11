@@ -39,15 +39,26 @@ export class FeesService {
 
     getFeesByLoanId(
         loanId: string,
+        text: string,
+        page: number = 1,
+        pageSize: number = 10,
         state?: FeeState
-    ): Observable<Fee[]> {
+    ): Observable<PaginatedFees> {
         let filtered = FEES_MOCK.filter(f => f.loan_id === loanId);
 
         if (state) {
             filtered = filtered.filter(f => f.fee_state === state);
         }
 
-        return of(filtered);
+        if (text) {
+            filtered = filtered.filter(f => f.id.includes(text));
+        }
+
+        const total = filtered.length;
+        const start = (page - 1) * pageSize;
+        const data = filtered.slice(start, start + pageSize);
+
+        return of({ data, total });
     }
 
     getFeesByState(state: FeeState): Observable<Fee[]> {

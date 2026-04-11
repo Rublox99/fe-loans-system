@@ -4,6 +4,7 @@ import { MainLayoutComponent } from '../../layout/main-layout/main-layout.compon
 import { CustomersComponent } from './customers/customers.component';
 import { LoansComponent } from './loans/loans.component';
 import { ReportsComponent } from './reports/reports.component';
+import { LoanDetailsComponent } from './loans/loan-details/loan-details.component';
 
 const routes: Routes = [
   {
@@ -12,7 +13,12 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'customers', pathMatch: 'full' },
       { path: 'customers', component: CustomersComponent },
-      { path: 'loans', component: LoansComponent },
+      {
+        path: 'loans', children: [                                                   // 👈 new
+          { path: '', component: LoansComponent },
+          { path: ':id/details', component: LoanDetailsComponent },
+        ]
+      },
       { path: 'reports', component: ReportsComponent },
       { path: '**', redirectTo: 'customers' },
     ],
