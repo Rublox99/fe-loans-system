@@ -142,7 +142,8 @@ import { NzQRCodeModule } from 'ng-zorro-antd/qr-code';
     NzPipesModule,
     NzCodeEditorModule,
     NzGraphModule,
-    NzQRCodeModule
+    NzQRCodeModule,
+    NzCheckboxModule
   ],
   declarations: []
 })

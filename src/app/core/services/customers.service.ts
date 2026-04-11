@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { CUSTOMERS_MOCK } from '../../shared/mocks/customers.mock';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Customer } from '../interfaces/customers.interface';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { environment } from '../../../environments/environment';
 
 export interface PaginatedCustomers {
     data: Customer[];
@@ -12,26 +14,53 @@ export interface PaginatedCustomers {
     providedIn: 'root'
 })
 export class CustomersService {
+    private supabase: SupabaseClient;
+
+    constructor() {
+        this.supabase = createClient(
+            environment.supabase.url,
+            environment.supabase.key
+        );
+    }
 
     getCustomers(search?: string, page: number = 1, pageSize: number = 10): Observable<PaginatedCustomers> {
-        let filtered = CUSTOMERS_MOCK;
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize - 1;
+
+        let query = this.supabase
+            .from('customers')
+            .select('*', { count: 'exact' })
+            .range(start, end);
 
         if (search) {
-            filtered = CUSTOMERS_MOCK.filter(c =>
-                `${c.first_name} ${c.last_names}`
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
-            );
+            query = query.ilike('first_name', `%${search}%`);
         }
 
-        const total = filtered.length;
-        const start = (page - 1) * pageSize;
-        const data = filtered.slice(start, start + pageSize);
+        return from(query).pipe(
+            map(({ data, count, error }) => {
+                if (error) throw error;
 
-        return of({ data, total });
+                return {
+                    data: data as Customer[],
+                    total: count ?? 0
+                };
+            })
+        );
     }
 
     getCustomerById(id: string): Observable<Customer | undefined> {
-        return of(CUSTOMERS_MOCK.find(c => c.id === id));
+        return from(
+            this.supabase
+                .from('customers')
+                .select('*')
+                .eq('id', id)
+                .single()
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+
+                return data as Customer;
+            })
+        );
     }
 }
