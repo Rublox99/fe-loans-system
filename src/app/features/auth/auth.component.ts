@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { AppRoutesCollection } from '../../core/interfaces/app-route.interface';
 import { APP_ROUTES } from '../../shared/constants';
 import { AppLogoComponent } from '../../shared/components/app-logo.component';
+import { AuthService } from '../../core/services/auth.service';
+import { GeneralService } from '../../core/services/general.service';
 
 @Component({
   selector: 'app-auth',
@@ -14,27 +16,50 @@ import { AppLogoComponent } from '../../shared/components/app-logo.component';
 })
 export class AuthComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
-  appRoutes: AppRoutesCollection = APP_ROUTES
+  appRoutes: AppRoutesCollection = APP_ROUTES;
 
-  isLoadingResponse: boolean = false
+  isLoadingResponse: boolean = false;
+  passwordVisible: boolean = false
+  formSubmitted: boolean = false;
 
   loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required]),
-  })
+  });
 
   constructor(
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private generalService: GeneralService
   ) { }
 
   ngOnInit() { }
 
-  queryLogin() {
-    this.isLoadingResponse = true
+  // Helper for cleaner template access
+  get f() {
+    return this.loginForm.controls;
+  }
 
-    setTimeout(() => {
-      this.isLoadingResponse = false
+  async queryLogin() {
+    this.formSubmitted = true;
+
+    if (this.loginForm.invalid) return;
+
+    this.isLoadingResponse = true;
+
+    try {
+      const { email, password } = this.loginForm.value;
+      await this.authService.signIn(email!, password!);
       this.router.navigateByUrl(this.appRoutes.customers.path);
-    }, 1500);
+    } catch (error: any) {
+      this.generalService.createMessage(
+        'error',
+        'Error al iniciar sesión. Intente nuevamente.'
+      );
+    } finally {
+      this.isLoadingResponse = false;
+
+      console.log(this.authService.currentUser);
+    }
   }
 }

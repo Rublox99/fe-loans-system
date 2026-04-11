@@ -53,8 +53,7 @@ export class LoanDetailsComponent implements OnInit {
   readonly loanStateOptions: LoanStateOption[] = [
     { value: 'Accepted', label: 'Aceptado', colorClass: 'loan-state--accepted' },
     { value: 'Under Review', label: 'En proceso', colorClass: 'loan-state--under-review' },
-    { value: 'Denied', label: 'Rechazado', colorClass: 'loan-state--denied' },
-    { value: 'Paid', label: 'Pagado', colorClass: 'loan-state--paid' },
+    { value: 'Denied', label: 'Rechazado', colorClass: 'loan-state--denied' }
   ];
 
   selectedLoanState = signal<LoanState | null>(null);

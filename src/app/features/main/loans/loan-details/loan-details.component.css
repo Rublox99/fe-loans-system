@@ -94,7 +94,3 @@
 .loan-state-select.loan-state--denied .ant-select-selector {
     @apply text-red-700 bg-red-100 border-red-400;
 }
-
-.loan-state-select.loan-state--paid .ant-select-selector {
-    @apply text-purple-700 bg-purple-100 border-purple-400;
-}

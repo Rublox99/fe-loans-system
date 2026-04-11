@@ -7,39 +7,58 @@
   <!-- Right -->
   <section class="w-1/3 relative px-10 bg-lowContrast flex flex-col items-center justify-center gap-[25px]"
     [formGroup]="loginForm">
+
     <!-- Absolutes -->
     <app-logo class="absolute top-[25px] left-1/2 -translate-x-1/2 w-[50px]" />
     <app-logo class="absolute opacity-50 bottom-[0px] left-1/2 -translate-x-1/2 inset-x-0" />
 
-    <!-- Form -->
+    <!-- Header -->
     <div class="space-y-1">
       <p class="text-3xl font-bold text-primary">Acceso Institucional</p>
       <p class="text-help">Ingrese sus credenciales para poder acceder al sistema de préstamos</p>
     </div>
 
-    <!-- Fields -->
+    <!-- Email -->
     <div class="w-full space-y-2.5">
-      <span class="text-help ">Usuario</span>
-      <input id="user_field" nz-input placeholder="usuario@ejemplo.com" formControlName="email" />
+      <span class="text-help">Usuario</span>
+      <input nz-input placeholder="usuario@ejemplo.com" formControlName="email" />
+      <!-- Validation messages only show after first submit attempt -->
+      @if (formSubmitted && f['email'].hasError('required')) {
+        <p class="text-xs text-red-500">El correo es requerido</p>
+      }
+      @if (formSubmitted && f['email'].hasError('email')) {
+        <p class="text-xs text-red-500">Ingrese un correo válido</p>
+      }
     </div>
 
+    <!-- Password -->
     <div class="w-full space-y-2.5">
-      <span class="text-help ">Contraseña</span>
-      <nz-input-password>
-        <input id="passworld_field" nz-input placeholder="********" formControlName="password" />
-      </nz-input-password>
+      <span class="text-help">Contraseña</span>
+      <nz-input-group [nzSuffix]="suffixTemplate">
+        <input nz-input [type]="passwordVisible ? 'text' : 'password'"
+          placeholder="********" formControlName="password" />
+      </nz-input-group>
+      <ng-template #suffixTemplate>
+        <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+          (click)="passwordVisible = !passwordVisible"
+          class="cursor-pointer text-help">
+        </span>
+      </ng-template>
+      @if (formSubmitted && f['password'].hasError('required')) {
+        <p class="text-xs text-red-500">La contraseña es requerida</p>
+      }
     </div>
 
-    <button class="w-full button confirm__button" nz-button nzType="primary" [nzLoading]="isLoadingResponse"
-      (click)="queryLogin()">
+    <!-- Submit -->
+    <button class="w-full button confirm__button" nz-button nzType="primary"
+      [nzLoading]="isLoadingResponse" (click)="queryLogin()">
       Iniciar sesión
       <web-icon class="ml-1" name="RIGHT_ARROW" color="var(--static-white)" size="16" />
     </button>
 
     <div class="space-y-1">
-      <p class="text-xs text-help">Si presenta inconvenientes al iniciar sesión, por favor comunicarse con el
-        administrador del
-        sistema</p>
+      <p class="text-xs text-help">Si presenta inconvenientes al iniciar sesión, por favor comunicarse
+        con el administrador del sistema</p>
     </div>
   </section>
 </main>

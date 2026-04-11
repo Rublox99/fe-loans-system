@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { Session, User } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
+import { APP_ROUTES } from '../../shared/constants';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AuthService {
     private supabaseService: SupabaseService,
     private router: Router
   ) {
-    // Escuchar cambios de sesión
+    // Listens to session changes
     this.supabaseService.client.auth.onAuthStateChange((_, session) => {
       this._session.next(session);
     });
@@ -40,6 +41,7 @@ export class AuthService {
   async signOut() {
     await this.supabaseService.client.auth.signOut();
     this.router.navigate(['/auth/login']);
+    this.router.navigateByUrl(APP_ROUTES.login.path)
   }
 
   async isAuthenticated(): Promise<boolean> {

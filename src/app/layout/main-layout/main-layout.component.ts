@@ -6,6 +6,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AppRoute } from '../../core/interfaces/app-route.interface';
 import { APP_ROUTES } from '../../shared/constants';
 import { WebIconComponent } from '../../shared/components/web-icon.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -19,10 +20,10 @@ export class MainLayoutComponent {
     .filter(route => route.label !== 'Auth')
 
   constructor(
-    private router: Router
+    private authService: AuthService
   ) { }
 
   signOut() {
-    this.router.navigateByUrl(APP_ROUTES.login.path)
+    this.authService.signOut();
   }
 }
