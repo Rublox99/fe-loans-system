@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 import { Customer } from '../../../../core/interfaces/customers.interface';
-import { CustomersService } from '../../../../core/services/pages/customers.service';
+import { EntitiesService } from '../../../../core/services/pages/entities.service';
 import { StorageService } from '../../../../core/services/storage.service';
 import { GuaranteePerson } from '../../../../core/interfaces/guarantee-person.interface';
 import { Spouse } from '../../../../core/interfaces/spouse.interface';
@@ -68,7 +68,7 @@ export class ViewEntityDrawerComponent {
   galleryUrls = signal<string[]>([]);
 
   constructor(
-    private customersService: CustomersService,
+    private entitiesService: EntitiesService,
     private storageService: StorageService
   ) { }
 
@@ -124,14 +124,12 @@ export class ViewEntityDrawerComponent {
     const urls = await Promise.all(
       customer.gallery.map(async filename => {
         const path = `${customer.id}/${filename}`;
-        console.log('Attempting signed URL for path:', path);
 
         const url = await this.storageService.getSignedUrl(
           SUPABASE_BUCKETS.ENTITIES_GALLERIES,
           `${customer.id}/${filename}`
         );
-
-        console.log({ path, url });
+        
         return url;
       })
     );
@@ -145,7 +143,7 @@ export class ViewEntityDrawerComponent {
     this.isLoadingCustomer.set(true);
     this.errorCustomer.set(null);
 
-    this.customersService.getCustomerById(id).subscribe({
+    this.entitiesService.getCustomerById(id).subscribe({
       next: (data) => {
         this.customer = data!;
         this.isLoadingCustomer.set(false);
@@ -174,7 +172,7 @@ export class ViewEntityDrawerComponent {
     this.isLoadingGuaranteePerson.set(true);
     this.errorGuaranteePerson.set(null);
 
-    this.customersService.getGuaranteePersonById(id).subscribe({
+    this.entitiesService.getGuaranteePersonById(id).subscribe({
       next: (data) => {
         this.guaranteePerson.set(data);
         this.isLoadingGuaranteePerson.set(false);
@@ -191,7 +189,7 @@ export class ViewEntityDrawerComponent {
     this.isLoadingSpouse.set(true);
     this.errorSpouse.set(null);
 
-    this.customersService.getSpouseById(id).subscribe({
+    this.entitiesService.getSpouseById(id).subscribe({
       next: (data) => {
         this.spouse.set(data);
         this.isLoadingSpouse.set(false);

@@ -1,4 +1,5 @@
 import { AppRoutesCollection } from "../core/interfaces/app-route.interface"
+import { ProfessionOption } from "../core/interfaces/profession-option.interface"
 
 const bPointMobile: string = '(max-width: 764px)'
 const bPointTablet: string = '(max-width: 1024px)'
@@ -40,6 +41,7 @@ const ICONS_DICTIONARY = {
     CALENDAR: "solar:calendar-linear",
     BILL: "ri:bill-line",
     SEARCH: "ic:baseline-search",
+    UNDO: "material-symbols:undo",
     DOT: "icon-park-outline:dot",
     HOME: "lucide:house",
     BLOCK: "material-symbols:block",
@@ -56,6 +58,29 @@ const ICONS_DICTIONARY = {
     COLLAPSE: "mingcute:down-line",
     HONDURAS: "emojione:flag-for-honduras"
 } as const
+
+export const PROFESSION_LIST: ProfessionOption[] = [
+    { label: 'Abogado/a', value: 'abogado' },
+    { label: 'Administrador/a', value: 'administrador' },
+    { label: 'Agricultor/a', value: 'agricultor' },
+    { label: 'Arquitecto/a', value: 'arquitecto' },
+    { label: 'Comerciante', value: 'comerciante' },
+    { label: 'Contador/a', value: 'contador' },
+    { label: 'Docente / Maestro/a', value: 'docente' },
+    { label: 'Economista', value: 'economista' },
+    { label: 'Enfermero/a', value: 'enfermero' },
+    { label: 'Ingeniero/a', value: 'ingeniero' },
+    { label: 'Licenciado/a', value: 'licenciado' },
+    { label: 'Médico/a', value: 'medico' },
+    { label: 'Mecánico/a', value: 'mecanico' },
+    { label: 'Periodista', value: 'periodista' },
+    { label: 'Programador/a', value: 'programador' },
+    { label: 'Psicólogo/a', value: 'psicologo' },
+    { label: 'Servidor/a Público/a', value: 'servidor_publico' },
+    { label: 'Técnico/a', value: 'tecnico' },
+    { label: 'Vendedor/a', value: 'vendedor' },
+    { label: 'Otro', value: 'otro' },
+];
 
 export type IconKeys = keyof typeof ICONS_DICTIONARY;
 export type ScreenSize = 'mobile' | 'tablet' | 'desktop'

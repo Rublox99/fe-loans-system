@@ -1,96 +1,184 @@
 <form [formGroup]="form" class="flex flex-col gap-5">
-  <!-- Personal Identification -->
+
+  <!-- 1. Personal Identification -->
   <section class="section__wrapper">
     <p class="section__header">1. Identificación Personal</p>
 
     <!-- Names -->
     <div class="section__line">
+      <!-- First name -->
       <div class="w-full space-y-2.5">
-        <span class="text-help">Primer nombre</span>
-        <input nz-input placeholder="Primer nombre" formControlName="firstName" />
+        <span class="text-help">Primer nombre <span class="text-red-500">*</span></span>
+        <input nz-input placeholder="Primer nombre" formControlName="firstName"
+          [nzStatus]="isInvalid('firstName') ? 'error' : ''" />
+        @if (isInvalid('firstName')) {
+        <p class="field__error">
+          @if (form.get('firstName')?.errors?.['required']) { Requerido. }
+          @if (form.get('firstName')?.errors?.['maxlength']) { Máximo 25 caracteres. }
+        </p>
+        }
       </div>
+
+      <!-- Second name -->
       <div class="w-full space-y-2.5">
         <span class="text-help">Segundo nombre</span>
-        <input nz-input placeholder="Segundo nombre" formControlName="secondName" />
+        <input nz-input placeholder="Segundo nombre" formControlName="secondName"
+          [nzStatus]="isInvalid('secondName') ? 'error' : ''" />
+        @if (isInvalid('secondName')) {
+        <p class="field__error">
+          @if (form.get('secondName')?.errors?.['maxlength']) { Máximo 25 caracteres. }
+        </p>
+        }
       </div>
     </div>
 
-    <!-- Lastname -->
+    <!-- Last name -->
     <div class="section__line">
       <div class="w-full space-y-2.5">
-        <span class="text-help">Apellidos</span>
-        <input nz-input placeholder="Apellido materno y/o paterno" formControlName="lastName" />
+        <span class="text-help">Apellidos <span class="text-red-500">*</span></span>
+        <input nz-input placeholder="Apellido materno y/o paterno" formControlName="lastName"
+          [nzStatus]="isInvalid('lastName') ? 'error' : ''" />
+        @if (isInvalid('lastName')) {
+        <p class="field__error">
+          @if (form.get('lastName')?.errors?.['required']) { Requerido. }
+          @if (form.get('lastName')?.errors?.['maxlength']) { Máximo 25 caracteres. }
+        </p>
+        }
       </div>
     </div>
 
     <!-- DNI / Phone -->
-    <div class="section__line text-highContrast">
+    <div class="section__line">
+      <!-- DNI -->
       <div class="w-full space-y-2.5">
-        <span class="text-help ">DNI</span>
-        <input id="dni" nz-input placeholder="AAAA-BBBB-CCCCC" formControlName="dni" />
+        <span class="text-help">DNI <span class="text-red-500">*</span></span>
+        <input nz-input placeholder="0000-0000-00000" formControlName="dni" [nzStatus]="isInvalid('dni') ? 'error' : ''"
+          (input)="onDniInput($event)" (keydown)="onDniKeydown($event)" />
+        @if (isInvalid('dni')) {
+        <p class="field__error">
+          @if (form.get('dni')?.errors?.['required']) { Requerido. }
+          @if (form.get('dni')?.errors?.['dniInvalid']) { Formato inválido. Debe contener 13 dígitos. }
+        </p>
+        }
       </div>
+
+      <!-- Phone -->
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Teléfono</span>
+        <span class="text-help">Teléfono <span class="text-red-500">*</span></span>
         <nz-input-wrapper class="h-[45px]">
           <web-icon nzInputPrefix name="HONDURAS" size="20" />
-          <input id="phone" nz-input placeholder="XXXX-XXXX" formControlName="phone" />
+          <input nz-input placeholder="0000-0000" formControlName="phone" [nzStatus]="isInvalid('phone') ? 'error' : ''"
+            (input)="onPhoneInput($event)" (keydown)="onPhoneKeydown($event)" />
         </nz-input-wrapper>
+        @if (isInvalid('phone')) {
+        <p class="field__error">
+          @if (form.get('phone')?.errors?.['required']) { Requerido. }
+          @if (form.get('phone')?.errors?.['phoneInvalid']) { Formato inválido. Ej: 9999-8888. }
+        </p>
+        }
       </div>
     </div>
 
-    <!-- Email / Guarantee -->
-    <div class="section__line text-highContrast">
+    <!-- Email -->
+    <div class="section__line">
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Correo electrónico</span>
-        <input id="email" nz-input placeholder="correo@proveedor.com" formControlName="email" />
+        <span class="text-help">Correo electrónico <span class="text-red-500">*</span></span>
+        <input nz-input placeholder="correo@proveedor.com" formControlName="email"
+          [nzStatus]="isInvalid('email') ? 'error' : ''" />
+        @if (isInvalid('email')) {
+        <p class="field__error">
+          @if (form.get('email')?.errors?.['required']) { Requerido. }
+          @if (form.get('email')?.errors?.['email']) { Correo electrónico inválido. }
+        </p>
+        }
       </div>
     </div>
   </section>
 
-  <!-- Demographic & Finantial -->
+  <!-- 2. Demographic & Financial -->
   <section class="section__wrapper">
-    <!-- Label -->
-    <p class="section__header">
-      2. Datos Demográficos y Financieros
-    </p>
+    <p class="section__header">2. Datos Demográficos y Financieros</p>
 
     <!-- Location -->
-    <div class="section__line text-highContrast">
+    <div class="section__line">
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Dirección</span>
-        <input id="location" nz-input placeholder="Ciudad, Departamento" formControlName="location" />
+        <span class="text-help">Dirección <span class="text-red-500">*</span></span>
+        <input nz-input placeholder="Ciudad, Departamento" formControlName="location"
+          [nzStatus]="isInvalid('location') ? 'error' : ''" />
+        @if (isInvalid('location')) {
+        <p class="field__error">
+          @if (form.get('location')?.errors?.['required']) { Requerido. }
+          @if (form.get('location')?.errors?.['maxlength']) { Máximo 100 caracteres. }
+        </p>
+        }
       </div>
     </div>
 
-    <!-- Proffesion & Company -->
-    <div class="section__line text-highContrast">
+    <!-- Profession & Company -->
+    <div class="section__line">
+      <!-- Profession select -->
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Profesión</span>
-        <input id="profession" nz-input placeholder="Ocupación actual" formControlName="profession" />
+        <span class="text-help">Profesión <span class="text-red-500">*</span></span>
+        <nz-select class="w-full" style="height: 45px !important;" nzPlaceHolder="Seleccione una profesión"
+          formControlName="professionSelect" [nzStatus]="isInvalid('professionSelect') ? 'error' : ''">
+          @for (profession of professions; track profession.value) {
+          <nz-option [nzValue]="profession.value" [nzLabel]="profession.label" />
+          }
+        </nz-select>
+        @if (isInvalid('professionSelect')) {
+        <p class="field__error">
+          @if (form.get('professionSelect')?.errors?.['required']) { Requerido. }
+        </p>
+        }
       </div>
+
+      <!-- Company -->
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Empresa</span>
-        <input id="company" nz-input placeholder="Nombre de la empresa" formControlName="company" />
+        <span class="text-help">Empresa</span>
+        <input nz-input placeholder="Nombre de la empresa" formControlName="company" />
       </div>
     </div>
+
+    <!-- Custom profession — shown only when 'Otro' is selected -->
+    @if (isCustomProfession()) {
+    <div class="section__line">
+      <div class="w-full space-y-2.5">
+        <span class="text-help">Especifique la profesión <span class="text-red-500">*</span></span>
+        <input nz-input placeholder="Escriba la profesión" formControlName="professionCustom"
+          [nzStatus]="isInvalid('professionCustom') ? 'error' : ''" />
+        @if (isInvalid('professionCustom')) {
+        <p class="field__error">
+          @if (form.get('professionCustom')?.errors?.['required']) { Requerido. }
+          @if (form.get('professionCustom')?.errors?.['maxlength']) { Máximo 25 caracteres. }
+        </p>
+        }
+      </div>
+    </div>
+    }
 
     <!-- Income -->
-    <div class="section__line text-highContrast">
+    <div class="section__line">
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Ingreso mensual (L)</span>
-        <input id="income" nz-input placeholder="L 35,000" formControlName="income" />
+        <span class="text-help">Ingreso mensual (L) <span class="text-red-500">*</span></span>
+        <nz-input-number class="w-full" formControlName="income" [nzMin]="0.01" [nzMax]="999999" [nzStep]="0.01"
+          nzPlaceHolder="L 35,000" [nzStatus]="isInvalid('income') ? 'error' : ''" />
+        @if (isInvalid('income')) {
+        <p class="field__error">
+          @if (form.get('income')?.errors?.['required']) { Requerido. }
+          @if (form.get('income')?.errors?.['incomeInvalid']) { Ingrese un valor numérico válido. }
+          @if (form.get('income')?.errors?.['incomeMin']) { Debe ser mayor a 0. }
+          @if (form.get('income')?.errors?.['incomeMax']) { Máximo L 999,999.00. }
+        </p>
+        }
       </div>
     </div>
   </section>
 
-  <!-- Estimated Grade -->
+  <!-- ── 3. Grade ──────────────────────────────────────────────── -->
   <section class="section__wrapper">
-    <!-- Label -->
     <p class="mb-5 section__header">
-      3. Clasificación Estimada
+      3. Clasificación Estimada <span class="text-red-500">*</span>
     </p>
-
-    <!-- Grade Radio -->
     <div class="section__line">
       <nz-radio-group class="w-full gap-5" formControlName="radioEntityGrade">
         <label nz-radio-button nzValue="A">A</label>
@@ -100,16 +188,15 @@
         <label nz-radio-button nzValue="E">E</label>
       </nz-radio-group>
     </div>
+    @if (isInvalid('radioEntityGrade')) {
+    <p class="field__error">Seleccione una clasificación.</p>
+    }
   </section>
 
-  <!-- Multimedia -->
+  <!-- 4. Multimedia -->
   <section class="section__wrapper">
-    <!-- Label -->
-    <p class="mb-5 section__header">
-      4. Multimedia de verificación
-    </p>
-
-    <!-- Drag & Drop -->
+    <!-- TODO: Fix icons error and view image popup -->
+    <p class="mb-5 section__header">4. Multimedia de verificación</p>
     <nz-upload nzType="drag" [nzMultiple]="true" [nzBeforeUpload]="beforeUpload" [nzShowUploadList]="false"
       nzAccept="image/*">
       <p class="flex justify-center">
@@ -119,42 +206,48 @@
       <p class="ant-upload-hint">Soporta JPG, PNG y WEBP</p>
     </nz-upload>
 
-    <!-- Pictures Wall -->
     @if (mediaFiles().length > 0) {
     <nz-upload nzListType="picture-card" [nzFileList]="mediaFiles()" [nzShowButton]="false"
-      (nzChange)="handleMediaChange($event)"></nz-upload>
+      (nzChange)="handleMediaChange($event)" />
     }
   </section>
 
-  <!-- Extras -->
+  <!-- 5. Notes -->
   <section class="section__wrapper">
-    <!-- Label -->
-    <p class="section__header">
-      5. Información Adicional
-    </p>
-
+    <p class="section__header">5. Información Adicional</p>
     <div class="section__line">
       <div class="w-full space-y-2.5">
-        <span class="text-help ">Comentarios</span>
-        <textarea id="notes" nz-input placeholder="Escriba sus comentarios sobre el cliente aquí..." rows="6"
-          formControlName="notes"></textarea>
+        <div class="flex justify-between">
+          <span class="text-help">Comentarios</span>
+          <!-- Character counter -->
+          <span class="text-help">
+            {{ form.get('notes')?.value?.length ?? 0 }} / 500
+          </span>
+        </div>
+        <textarea nz-input rows="6" placeholder="Escriba sus comentarios sobre el aval aquí..." formControlName="notes"
+          [nzStatus]="isInvalid('notes') ? 'error' : ''">
+        </textarea>
+        @if (isInvalid('notes')) {
+        <p class="field__error">
+          @if (form.get('notes')?.errors?.['maxlength']) { Máximo 500 caracteres. }
+        </p>
+        }
       </div>
     </div>
   </section>
 
   <!-- Buttons -->
   @if (entityId) {
-  <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
+  <button class="w-full button confirm__button" nz-button nzType="text" [nzLoading]="isLoading" (click)="submit()">
     <span class="font-sans font-extralight text-staticWhite">Actualizar entidad</span>
   </button>
 
   <section class="flex gap-3">
-    <button class="w-full button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
-      (click)="closeDrawerFn()">
+    <button class="w-full button" nz-button nzType="text" style="border: 1px solid var(--high-contrast) !important"
+      [disabled]="isLoading" (click)="closeDrawerFn()">
       <span class="font-sans font-extralight text-highContrast">Cancelar</span>
     </button>
-
-    <button class="w-full button alarm__button" nz-button nzType="text" (click)="submit()">
+    <button class="w-full button alarm__button" nz-button nzType="text" [disabled]="isLoading" (click)="submit()">
       <span class="font-sans font-extralight text-staticWhite">Desactivar</span>
     </button>
   </section>
@@ -162,12 +255,11 @@
 
   @else if (!entityId) {
   <section class="flex gap-3">
-    <button class="w-full button confirm__button" nz-button nzType="text" (click)="submit()">
+    <button class="w-full button confirm__button" nz-button nzType="text" [nzLoading]="isLoading" (click)="submit()">
       <span class="font-sans font-extralight text-staticWhite">Crear entidad</span>
     </button>
-
-    <button class="w-full button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
-      (click)="closeDrawerFn()">
+    <button class="w-full button" nz-button nzType="text" style="border: 1px solid var(--high-contrast) !important"
+      [disabled]="isLoading" (click)="closeDrawerFn()">
       <span class="font-sans font-extralight text-highContrast">Cerrar</span>
     </button>
   </section>

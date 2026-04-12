@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { WebIconComponent } from '../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { Customer } from '../../../core/interfaces/customers.interface';
-import { CustomersService, CustomerStats } from '../../../core/services/pages/customers.service';
+import { CustomerStats, EntitiesService } from '../../../core/services/pages/entities.service';
 import { GeneralService } from '../../../core/services/general.service';
 import { ViewEntityDrawerComponent } from './view-entity/view-entity.component';
 import { AddEntityDrawerComponent } from './add-entity/add-entity.component';
@@ -40,7 +40,7 @@ export interface CardDef {
 })
 export class CustomersComponent implements OnInit {
   private generalService = inject(GeneralService);
-  private customersService = inject(CustomersService);
+  private entitiesService = inject(EntitiesService);
 
   searchText = '';
   isLoading = signal(false);
@@ -111,6 +111,11 @@ export class CustomersComponent implements OnInit {
     this.fetchStats();
   }
 
+  onEntityChanged(): void {
+    this.fetchCustomers();
+    this.fetchStats();
+  }
+
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages()) return;
     this.currentPage.set(page);
@@ -149,11 +154,11 @@ export class CustomersComponent implements OnInit {
     return `${name} (${customer.spouse.dni})`;
   }
 
-  private fetchCustomers() {
+  fetchCustomers() {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.customersService.getCustomers(this.searchText, this.currentPage(), this.pageSize)
+    this.entitiesService.getCustomers(this.searchText, this.currentPage(), this.pageSize)
       .subscribe({
         next: ({ data, total }) => {
           this.customers.set(data);
@@ -171,10 +176,10 @@ export class CustomersComponent implements OnInit {
       });
   }
 
-  private fetchStats() {
+  fetchStats() {
     this.isStatsLoading.set(true);
 
-    this.customersService.getCustomerStats()
+    this.entitiesService.getCustomerStats()
       .subscribe({
         next: (stats) => {
           this.stats.set(stats);

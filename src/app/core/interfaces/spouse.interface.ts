@@ -11,3 +11,14 @@ export interface Spouse {
     last_modified: string;
     created_at: string;
 }
+
+export interface InsertSpousePayload {
+  firstName:   string;
+  secondName:  string;
+  lastName:    string;
+  dni:         string;   
+  phone:       string;   
+  location:    string;
+  profession:  string;
+  income:      number;
+}

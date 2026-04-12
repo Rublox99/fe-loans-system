@@ -9,7 +9,7 @@
 
     <!-- Right -->
     <div class="flex-none">
-      <app-add-entity aria-label="Agregar entidad" />
+      <app-add-entity aria-label="Agregar entidad" (entityInserted)="onEntityChanged()" />
     </div>
   </section>
 
@@ -36,6 +36,7 @@
   </section>
 
   <!-- Table -->
+  <!-- TODO: Fix dynamic missing values -->
   <section class="flex flex-col flex-1 min-h-0 gap-2.5">
     <!-- Header -->
     <div class="flex flex-none items-center gap-2.5">
@@ -91,7 +92,8 @@
               <td class="cell__table">
                 <div class="flex items-center gap-2.5">
                   <app-view-entity aria-label="Ver cliente" [customer]="customer" />
-                  <app-edit-entity aria-label="Editar cliente" [customerId]="customer.id" [entityType]="'C'" />
+                  <app-edit-entity aria-label="Editar cliente" [customerId]="customer.id" [entityType]="'C'"
+                    (entityUpdated)="onEntityChanged()" />
                 </div>
               </td>
             </tr>

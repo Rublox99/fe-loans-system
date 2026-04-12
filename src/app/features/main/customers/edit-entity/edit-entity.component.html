@@ -1,24 +1,40 @@
+<!-- Trigger button -->
 <div class="flex items-center justify-center" (click)="openDrawer()">
-  <web-icon size="18" name="EDIT" color="var(--success)" class="pseudo__button"></web-icon>
+  <web-icon size="18" name="EDIT" color="var(--success)" class="pseudo__button" />
 </div>
 
 <nz-drawer [nzClosable]="true" nzWidth="600px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
-  <ng-container *nzDrawerContent="">
+  <ng-container *nzDrawerContent>
     <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
+
       <!-- Header -->
       <p class="font-sans text-3xl font-bold text-primary">
         Modificación de Individuo
       </p>
 
-      @if (entityType === 'C') {
-      <app-customer-form [entityId]="'#1'" (submitForm)="handleCustomer($event)" (closeDrawer)="closeDrawer()">
-      </app-customer-form>
+      <!-- Loading spinner while fetching entity data -->
+      @if (isFetching()) {
+      <div class="flex flex-col items-center justify-center flex-1 gap-4">
+        <nz-spin nzSimple [nzSize]="'large'" />
+        <p class="font-sans text-sm text-standardGray">Cargando datos de la entidad...</p>
+      </div>
       }
 
-      @if (entityType === 'G') {
-      <app-guarantee-form [entityId]="'#1'" (submitForm)="handleGuarantee($event)" (closeDrawer)="closeDrawer()">
-      </app-guarantee-form>
-      }
+      <!-- Customer form — hidden while fetching so ViewChild is always in DOM -->
+      <div [class.hidden]="isFetching()">
+        @if (entityType === 'C') {
+        <app-customer-form [entityId]="customerId" [isLoading]="isLoading" (submitForm)="handleCustomer($event)"
+          (closeDrawer)="closeDrawer()">
+        </app-customer-form>
+        }
+
+        @if (entityType === 'G') {
+        <app-guarantee-form [entityId]="customerId" [isLoading]="isLoading" (submitForm)="handleGuarantee()"
+          (closeDrawer)="closeDrawer()">
+        </app-guarantee-form>
+        }
+      </div>
+
     </section>
   </ng-container>
 </nz-drawer>

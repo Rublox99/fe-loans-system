@@ -27,7 +27,7 @@
       }
 
       @if (radioEntityType === 'G') {
-      <app-guarantee-form (submitForm)="handleGuarantee($event)" (closeDrawer)="closeDrawer()">
+      <app-guarantee-form [isLoading]="isLoading" (submitForm)="handleGuarantee($event)" (closeDrawer)="closeDrawer()">
       </app-guarantee-form>
       }
     </section>

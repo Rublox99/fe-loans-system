@@ -1,6 +1,8 @@
 import { CustomerState } from "../types/customer-state.type";
 import { PaymentGrade } from "../types/payment-grade.type";
+import { GuaranteePerson } from "./guarantee-person.interface";
 import { SpouseSummary } from "./spouse-summary.interface";
+import { Spouse } from "./spouse.interface";
 
 export interface Customer {
     id: string;
@@ -24,4 +26,58 @@ export interface Customer {
     state: CustomerState;
     company?: string | null;
     comment?: string | null;
+}
+
+export interface CustomerForEdit {
+    customer: Customer;
+    guaranteePerson: GuaranteePerson | null;
+    spouse: Spouse | null;
+}
+
+export interface InsertCustomerPayload {
+    userId: string;
+    firstName: string;
+    secondName: string;
+    lastName: string;
+    dni: string;
+    phone: string;
+    email?: string;
+    location: string;
+    profession: string;
+    company?: string;
+    income: number;
+    paymentGrade: PaymentGrade;
+    gallery: string[];
+    notes?: string;
+    spouseId?: string;
+    guaranteePersonId?: string;
+}
+
+export interface UpdateCustomerPayload {
+    firstName: string;
+    secondName: string;
+    lastName: string;
+    dni: string;
+    phone: string;
+    email?: string;
+    location: string;
+    profession: string;
+    company?: string;
+    income: number;
+    paymentGrade: PaymentGrade;
+    gallery: string[];
+    notes?: string;
+    spouseId?: string | null;
+    guaranteePersonId?: string;
+}
+
+export interface UpdateSpousePayload {
+    firstName: string;
+    secondName: string;
+    lastName: string;
+    dni: string;
+    phone: string;
+    location: string;
+    profession: string;
+    income: number;
 }

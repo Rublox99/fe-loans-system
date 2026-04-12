@@ -6,12 +6,12 @@ import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { GeneralService } from '../../../core/services/general.service';
 import { ReportCustomer } from '../../../core/interfaces/report-customers.interface';
 import { LoanStateAcronym } from '../../../core/types/loan-state.type';
-import { CustomersService } from '../../../core/services/pages/customers.service';
 import { Customer } from '../../../core/interfaces/customers.interface';
 import { LocalUser } from '../../../core/interfaces/users.interface';
 import { ReportsService } from '../../../core/services/pages/reports.service';
 import { PaymentGrade } from '../../../core/types/payment-grade.type';
 import { ExcelService } from '../../../core/services/pages/excel.service';
+import { EntitiesService } from '../../../core/services/pages/entities.service';
 
 export interface ReportFilters {
   search?: string;
@@ -40,7 +40,7 @@ export interface ReportFilters {
 })
 export class ReportsComponent implements OnInit {
   private generalService = inject(GeneralService);
-  private customersService = inject(CustomersService);
+  private entitiesService = inject(EntitiesService);
   private reportsService = inject(ReportsService);
   private excelService = inject(ExcelService);
 
@@ -147,7 +147,7 @@ export class ReportsComponent implements OnInit {
   private fetchCustomerOptions(search: string = ''): void {
     this.isCustomerSearchLoading.set(true);
 
-    this.customersService.getCustomers(search, 1, 20).subscribe({
+    this.entitiesService.getCustomers(search, 1, 20).subscribe({
       next: ({ data }) => {
         this.customerSearchResults.set(data);
         this.isCustomerSearchLoading.set(false);
