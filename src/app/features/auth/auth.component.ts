@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { AppRoutesCollection } from '../../core/interfaces/app-route.interface';
 import { APP_ROUTES } from '../../shared/constants';
 import { AppLogoComponent } from '../../shared/components/app-logo.component';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/pages/auth.service';
 import { GeneralService } from '../../core/services/general.service';
 
 @Component({

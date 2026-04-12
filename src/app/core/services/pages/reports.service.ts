@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
-import { ReportCustomer } from '../interfaces/report-customers.interface';
-import { ReportFilters } from '../interfaces/report-filters.interface';
-import { PaymentGrade } from '../types/payment-grade.type';
-import { LoanStateAcronym } from '../types/loan-state.type';
-import { LocalUser } from '../interfaces/users.interface';
+import { environment } from '../../../../environments/environment';
+import { ReportCustomer } from '../../interfaces/report-customers.interface';
+import { ReportFilters } from '../../interfaces/report-filters.interface';
+import { PaymentGrade } from '../../types/payment-grade.type';
+import { LoanStateAcronym } from '../../types/loan-state.type';
+import { LocalUser } from '../../interfaces/users.interface';
 
 export interface PaginatedCustomers {
     data: ReportCustomer[];

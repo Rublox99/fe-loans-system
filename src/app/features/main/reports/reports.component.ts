@@ -6,12 +6,12 @@ import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { GeneralService } from '../../../core/services/general.service';
 import { ReportCustomer } from '../../../core/interfaces/report-customers.interface';
 import { LoanStateAcronym } from '../../../core/types/loan-state.type';
-import { CustomersService } from '../../../core/services/customers.service';
+import { CustomersService } from '../../../core/services/pages/customers.service';
 import { Customer } from '../../../core/interfaces/customers.interface';
 import { LocalUser } from '../../../core/interfaces/users.interface';
-import { ReportsService } from '../../../core/services/reports.service';
+import { ReportsService } from '../../../core/services/pages/reports.service';
 import { PaymentGrade } from '../../../core/types/payment-grade.type';
-import { ExcelService } from '../../../core/services/excel.service';
+import { ExcelService } from '../../../core/services/pages/excel.service';
 
 export interface ReportFilters {
   search?: string;

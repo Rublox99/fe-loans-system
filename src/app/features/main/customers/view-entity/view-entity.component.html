@@ -2,7 +2,7 @@
 <div class="flex items-center justify-center" (click)="openDrawer()">
   <web-icon size="20" name="SEE" color="var(--standard-gray)" class="pseudo__button"></web-icon>
 </div>
-} @else if (isViewableFromLoanDetails){
+} @else if (isViewableFromLoanDetails) {
 <button class="button bg-lightGray" nz-button nzType="primary" (click)="openDrawer()">
   <web-icon class="mr-2.5" name="SEE" color="var(--primary)" size="16" />
   <span class="font-sans font-extralight text-primary">Información del cliente</span>
@@ -11,102 +11,142 @@
 
 <nz-drawer [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
   <ng-container *nzDrawerContent="">
-    <section class="flex flex-col gap-5 h-auto p-[15px] bg-lowContrast">
+    <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
+
+      @if (isLoadingCustomer()) {
+      <!-- Simple spinner while resolving customer from customerId -->
+      <div class="flex items-center justify-center w-full h-full">
+        <nz-spin nzSimple />
+      </div>
+      } @else if (errorCustomer()) {
+      <div class="flex items-center justify-center w-full h-full">
+        <span class="font-sans text-sm text-standardGray">{{ errorCustomer() }}</span>
+      </div>
+      } @else {
       <!-- Header -->
       <p class="mb-5 font-sans text-3xl font-bold text-primary">
         Visualización de Individuo
       </p>
 
-      <!-- Personal Identification -->
-      <section class="relative section__wrapper">
-        <!-- Absolute -->
-        <span class="absolute top-0 right-0 px-2 py-1 text-xs uppercase rounded-sm bg-slate-200 text-slate-800">
-          Grado A
-        </span>
+      <div class="flex-1 space-y-5">
+        <!-- 1. Personal Identification -->
+        <section class="relative section__wrapper">
+          <span class="absolute top-0 right-0 px-2 py-1 text-xs uppercase rounded-sm bg-slate-200 text-slate-800">
+            Grado {{ getPaymentGradeLabel(customer.payment_grade) }}
+          </span>
 
-        <!-- Label -->
-        <p class="section__header">
-          1. Identificación Personal
-        </p>
+          <p class="section__header">1. Identificación Personal</p>
 
-        <div class="section__line text-highContrast">
-          <span class="section__line-left">Alonso Banegas</span>
-          <span class="section__line-right">9990-1010</span>
-        </div>
+          <div class="section__line text-highContrast">
+            <span class="section__line-left">{{ getFullName(customer) }}</span>
+            <span class="section__line-right">{{ customer.phone_numbers[0] }}</span>
+          </div>
 
-        <div class="section__line text-standardGray">
-          <span class="section__line-left">1501-2000-00111</span>
-          <span class="section__line-right">alonso@banegas.com</span>
-        </div>
-      </section>
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">{{ customer.dni }}</span>
+            <span class="section__line-right">{{ customer.email }}</span>
+          </div>
+        </section>
 
-      <!-- Spouse Information -->
-      <section class="section__wrapper">
-        <!-- Label -->
-        <p class="section__header">
-          2. Información del Cónyuge
-        </p>
+        <!-- 2. Spouse Information -->
+        <section class="section__wrapper">
+          <p class="section__header">2. Información del Cónyuge</p>
 
-        <div class="section__line text-standardGray">
-          <span class="section__line-left">N/A</span>
-        </div>
-      </section>
-
-      <!-- Guarantee Person -->
-      <section class="section__wrapper">
-        <!-- Label -->
-        <p class="section__header">
-          3. Información del Aval
-        </p>
-
-        <div class="section__line text-highContrast">
-          <span class="section__line-left">Erika Bustamante</span>
-          <span class="section__line-right">8821-3112</span>
-        </div>
-
-        <div class="section__line text-standardGray">
-          <span class="section__line-left">1501-1977-21111</span>
-          <span class="section__line-right">erika@bustamante.com</span>
-        </div>
-      </section>
-
-      <!-- Financial and Demographic -->
-      <section class="section__wrapper">
-        <!-- Label -->
-        <p class="section__header">
-          4. Datos Demográficos y financieros
-        </p>
-
-        <div class="section__line text-highContrast">
-          <span class="section__line-left">Ingeniero Industrial</span>
-          <span class="section__line-right">L 35,000.00</span>
-        </div>
-
-        <div class="section__line text-standardGray">
-          <span class="section__line-left">Ingenieros y Asociados S. de R.L.</span>
-          <span class="section__line-right">Juticalpa, Olancho</span>
-        </div>
-      </section>
-
-      <!-- Multimedia -->
-      <section class="section__wrapper">
-        <!-- Label -->
-        <p class="section__header">
-          5. Multimedia de verificación
-        </p>
-
-        <!-- Images -->
-        <div class="flex-wrap justify-between section__line">
-          @for (i of [1, 2, 3, 4, 5]; track $index) {
-          <div class="w-[225px] h-[200px] rounded-md bg-slate-400"></div>
+          @if (isLoadingSpouse()) {
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">Cargando...</span>
+          </div>
+          } @else if (errorSpouse()) {
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">{{ errorSpouse() }}</span>
+          </div>
+          } @else if (spouse()) {
+          <div class="section__line text-highContrast">
+            <span class="section__line-left">{{ getFullName(spouse()!) }}</span>
+            <span class="section__line-right">{{ spouse()!.phone_numbers[0] }}</span>
+          </div>
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">{{ spouse()!.dni }}</span>
+          </div>
+          } @else {
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">N/A</span>
+          </div>
           }
-        </div>
-      </section>
+        </section>
+
+        <!-- 3. Guarantee Person -->
+        <section class="section__wrapper">
+          <p class="section__header">3. Información del Aval</p>
+
+          @if (isLoadingGuaranteePerson()) {
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">Cargando...</span>
+          </div>
+          } @else if (errorGuaranteePerson()) {
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">{{ errorGuaranteePerson() }}</span>
+          </div>
+          } @else if (guaranteePerson()) {
+          <div class="section__line text-highContrast">
+            <span class="section__line-left">{{ getGuaranteeFullName(guaranteePerson()!) }}</span>
+            <span class="section__line-right">{{ guaranteePerson()!.phone_number }}</span>
+          </div>
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">{{ guaranteePerson()!.dni }}</span>
+            <span class="section__line-right">{{ guaranteePerson()!.email }}</span>
+          </div>
+          } @else {
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">N/A</span>
+          </div>
+          }
+        </section>
+
+        <!-- 4. Financial and Demographic -->
+        <section class="section__wrapper">
+          <p class="section__header">4. Datos Demográficos y Financieros</p>
+
+          <div class="section__line text-highContrast">
+            <span class="section__line-left">{{ customer.profession }}</span>
+            <span class="section__line-right">{{ formatIncome(customer.income) }}</span>
+          </div>
+
+          <div class="section__line text-standardGray">
+            <span class="section__line-left">{{ customer.company ?? 'N/A' }}</span>
+            <span class="section__line-right">{{ customer.location }}</span>
+          </div>
+        </section>
+
+        <!-- 5. Multimedia -->
+        <section class="section__wrapper">
+          <p class="section__header">5. Multimedia de verificación</p>
+
+          @if (isLoadingGallery()) {
+          <div class="flex items-center justify-center w-full py-4">
+            <nz-spin nzSimple />
+          </div>
+          } @else {
+          <div class="flex flex-wrap gap-3" nz-image-group>
+            @for (url of galleryUrls(); track url) {
+            <img nz-image [nzSrc]="url" class="w-[220px] h-[200px] rounded-md object-cover bg-slate-400 cursor-pointer"
+              [alt]="'Imagen ' + ($index + 1)" />
+            } @empty {
+            <span class="font-sans text-sm text-standardGray">
+              Sin imágenes de verificación
+            </span>
+            }
+          </div>
+          }
+        </section>
+      </div>
 
       <button class="button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"
         (click)="closeDrawer()">
         <span class="font-sans font-extralight text-highContrast">Cerrar</span>
       </button>
+
+      }
     </section>
   </ng-container>
 </nz-drawer>

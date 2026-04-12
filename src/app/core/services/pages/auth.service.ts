@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { Session, User } from '@supabase/supabase-js';
-import { SupabaseService } from './supabase.service';
-import { APP_ROUTES } from '../../shared/constants';
+import { SupabaseService } from '../supabase.service';
+import { APP_ROUTES } from '../../../shared/constants';
 
 @Injectable({
   providedIn: 'root'

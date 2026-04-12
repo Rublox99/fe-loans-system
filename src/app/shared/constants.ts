@@ -1,4 +1,4 @@
-import { AppRoute, AppRoutesCollection } from "../core/interfaces/app-route.interface"
+import { AppRoutesCollection } from "../core/interfaces/app-route.interface"
 
 const bPointMobile: string = '(max-width: 764px)'
 const bPointTablet: string = '(max-width: 1024px)'
@@ -61,6 +61,10 @@ export type IconKeys = keyof typeof ICONS_DICTIONARY;
 export type ScreenSize = 'mobile' | 'tablet' | 'desktop'
 export type Themes = 'light' | 'dark'
 export type Languages = 'en' | 'es'
+
+export enum SUPABASE_BUCKETS {
+    ENTITIES_GALLERIES = 'entities-galleries'
+}
 
 export {
     APP_ROUTES,

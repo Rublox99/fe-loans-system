@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { LOANS_MOCK } from '../../shared/mocks/loans.mock';
-import { LoanState } from '../types/loan-state.type';
-import { Loan } from '../interfaces/loans.interface';
+import { LOANS_MOCK } from '../../../shared/mocks/loans.mock';
+import { LoanState } from '../../types/loan-state.type';
+import { Loan } from '../../interfaces/loans.interface';
 
 export interface PaginatedLoans {
     data: Loan[];

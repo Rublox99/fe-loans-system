@@ -6,7 +6,7 @@ import { AddLoanDrawerComponent } from './add-loan/add-loan.component';
 import { WebIconComponent } from '../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { FormsModule } from '@angular/forms';
-import { LoansService } from '../../../core/services/loans.service';
+import { LoansService } from '../../../core/services/pages/loans.service';
 import { Loan } from '../../../core/interfaces/loans.interface';
 import { LoanState } from '../../../core/types/loan-state.type';
 import { Router } from '@angular/router';

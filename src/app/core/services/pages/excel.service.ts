@@ -2,9 +2,9 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { ReportCustomer } from '../interfaces/report-customers.interface';
-import { LoanStateAcronym } from '../types/loan-state.type';
-import { PaymentGrade } from '../types/payment-grade.type';
+import { ReportCustomer } from '../../interfaces/report-customers.interface';
+import { LoanStateAcronym } from '../../types/loan-state.type';
+import { PaymentGrade } from '../../types/payment-grade.type';
 
 const GRADE_LABEL: Record<PaymentGrade, string> = {
     '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E'

@@ -6,7 +6,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AppRoute } from '../../core/interfaces/app-route.interface';
 import { APP_ROUTES } from '../../shared/constants';
 import { WebIconComponent } from '../../shared/components/web-icon.component';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/pages/auth.service';
 
 @Component({
   selector: 'app-main-layout',

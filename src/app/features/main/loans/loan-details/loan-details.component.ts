@@ -6,10 +6,10 @@ import { CommonModule } from '@angular/common';
 import { ViewEntityDrawerComponent } from '../../customers/view-entity/view-entity.component';
 import { HandleFeeDrawerComponent } from '../handle-fee/handle-fee.component';
 import { Fee } from '../../../../core/interfaces/fees.interface';
-import { FeesService } from '../../../../core/services/fees.service';
+import { FeesService } from '../../../../core/services/pages/fees.service';
 import { FormsModule } from '@angular/forms';
 import { Loan } from '../../../../core/interfaces/loans.interface';
-import { LoansService } from '../../../../core/services/loans.service';
+import { LoansService } from '../../../../core/services/pages/loans.service';
 import { FeeState } from '../../../../core/types/fee-state';
 import { LoanState } from '../../../../core/types/loan-state.type';
 

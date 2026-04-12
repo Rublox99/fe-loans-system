@@ -14,48 +14,25 @@
   </section>
 
   <!-- Cards -->
-  <section class="flex flex-none gap-5 py-2 overflow-x-auto hide-scrollbar">
-    <!-- #1 -->
-    <div class="customers__data-card" style="--card-accent: #3870B5;">
-      <span class="title__data-card">Activos totales</span>
-      <span class="value__data-card">23</span>
-    </div>
+  <section class="flex flex-none gap-5 py-2 overflow-x-auto">
+    @for (card of cardDefs(); track card.title) {
+    <div class="customers__data-card" [style.--card-accent]="card.accent">
+      <span class="title__data-card">{{ card.title }}</span>
 
-    <!-- #2 -->
-    <div class="customers__data-card" style="--card-accent: #0A7040;">
-      <span class="title__data-card">Clientes - Grado A</span>
-      <span class="value__data-card">10</span>
-    </div>
+      @if (isStatsLoading()) {
+      <!-- TODO: Swap for a skeleton/spinner -->
+      <span class="value__data-card">—</span>
+      } @else {
+      <span class="value__data-card">{{ card.value }}</span>
+      }
 
-    <!-- #3 -->
-    <div class="customers__data-card" style="--card-accent: #FFA719;">
-      <span class="title__data-card">Clientes - Grado B/C</span>
-      <span class="value__data-card">5</span>
-
-      <span class="label__data-card" style="--label-accent: #FFA719; background-color: #ffedd0;">
-        En observación
+      @if (card.label) {
+      <span class="label__data-card" [style.--label-accent]="card.accent" [style.background-color]="card.label.bg">
+        {{ card.label.text }}
       </span>
+      }
     </div>
-
-    <!-- #4 -->
-    <div class="customers__data-card" style="--card-accent: #E31B54;">
-      <span class="title__data-card">Clientes - Grado D/E</span>
-      <span class="value__data-card">2</span>
-
-      <span class="label__data-card" style="--label-accent: #E31B54; background-color: #ffc1d2;">
-        En riesgo
-      </span>
-    </div>
-
-    <!-- #5 -->
-    <div class="customers__data-card" style="--card-accent: #9747FF;">
-      <span class="title__data-card">Nuevos este mes</span>
-      <span class="value__data-card">1</span>
-
-      <span class="label__data-card" style="--label-accent: #9747FF; background-color: #d6b7ff;">
-        Adquisiciones
-      </span>
-    </div>
+    }
   </section>
 
   <!-- Table -->
@@ -97,21 +74,23 @@
             <tr class="border-b">
               <td class="font-medium cell__table whitespace-nowrap">{{ customer.dni }}</td>
               <td class="font-medium cell__table whitespace-nowrap">{{ getFullName(customer) }}</td>
-              <td class="font-medium cell__table">Cliente/Aval</td>
+              <td class="font-medium cell__table">Cliente</td>
               <td class="cell__table">
                 <span class="flex justify-center px-2 py-1 text-xs border rounded-sm border-primary text-primary">
                   Grado {{ getGradeLabel(customer.payment_grade) }}
                 </span>
               </td>
               <td class="cell__table">L 50,000</td>
-              <td class="cell__table">#</td>
+              <td class="cell__table whitespace-nowrap">
+                {{ getSpouseLabel(customer) }}
+              </td>
               <td class="cell__table">
                 <web-icon name="DOT" size="16" [color]="getStateColor(customer.state)" />
               </td>
               <td class="cell__table">06/04/2026</td>
               <td class="cell__table">
                 <div class="flex items-center gap-2.5">
-                  <app-view-entity aria-label="Ver cliente" [customerId]="customer.id" />
+                  <app-view-entity aria-label="Ver cliente" [customer]="customer" />
                   <app-edit-entity aria-label="Editar cliente" [customerId]="customer.id" [entityType]="'C'" />
                 </div>
               </td>

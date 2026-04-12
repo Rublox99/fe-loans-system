@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { FEES_MOCK } from '../../shared/mocks/fees.mock';
-import { Fee } from '../interfaces/fees.interface';
-import { FeeState } from '../types/fee-state';
+import { FEES_MOCK } from '../../../shared/mocks/fees.mock';
+import { Fee } from '../../interfaces/fees.interface';
+import { FeeState } from '../../types/fee-state';
 
 export interface PaginatedFees {
     data: Fee[];
