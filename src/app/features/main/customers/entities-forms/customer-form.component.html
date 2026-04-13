@@ -389,13 +389,14 @@
             <span class="text-help">Imágenes actuales</span>
             <div class="flex flex-wrap gap-2.5">
                 @for (image of existingImages(); track image.fileName) {
-                <div class="relative w-24 h-24 rounded-md overflow-hidden border"
+                <div class="relative w-24 h-24 overflow-hidden border rounded-md"
                     [class.opacity-40]="image.markedForDeletion" [class.border-red-400]="image.markedForDeletion"
                     [class.border-gray-200]="!image.markedForDeletion">
 
-                    <img [src]="image.signedUrl" [alt]="image.fileName" class="w-full h-full object-cover" />
+                    <!-- TODO: Check why it doesn't render the image in full screen -->
+                    <img nz-image [src]="image.signedUrl" [alt]="image.fileName" class="object-cover w-full h-full" />
                     <!-- Delete overlay button -->
-                    <button class="absolute top-1 right-1 bg-red-500 rounded-full p-0.5
+                    <button class="absolute top-1 right-1 bg-red-500 rounded-full size-[20px] p-0.5 hover:bg-red-900
                            flex items-center justify-center" nz-button nzType="text" nzSize="small"
                         [nzTooltipTitle]="image.markedForDeletion ? 'Restaurar' : 'Eliminar'" nz-tooltip
                         (click)="toggleImageDeletion(image.fileName)">
@@ -413,9 +414,12 @@
         </div>
         }
 
+        <!-- Spacer -->
+        <div></div>
+
         <!-- New images drag & drop -->
         <nz-upload nzType="drag" [nzMultiple]="true" [nzBeforeUpload]="beforeUpload" [nzShowUploadList]="false"
-            nzAccept="image/*">
+            nzAccept="image/*" class="mt">
             <p class="flex justify-center">
                 <web-icon name="IMPORT" size="32" color="var(--light-gray)" />
             </p>

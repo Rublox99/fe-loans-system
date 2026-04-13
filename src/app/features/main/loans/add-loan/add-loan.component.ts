@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
@@ -35,12 +35,19 @@ import { LoanFormComponent } from './loan-form/loan-form.component';
   `
 })
 export class AddLoanDrawerComponent implements OnInit {
+  @Output() loanCreated = new EventEmitter<void>();
+
   isVisible: boolean = false
 
   constructor(
   ) { }
 
   ngOnInit() {
+  }
+
+  onFormSubmitted(): void {
+    this.closeDrawer();
+    this.loanCreated.emit();
   }
 
   openDrawer() {

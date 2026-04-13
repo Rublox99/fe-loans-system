@@ -15,7 +15,7 @@
         Ingrese los campos requeridos para gestionar una nueva solicitud de préstamo
       </p>
 
-      <app-loan-form (submitForm)="closeDrawer()" (closeDrawer)="closeDrawer()">
+      <app-loan-form (submitForm)="onFormSubmitted()" (closeDrawer)="closeDrawer()">
       </app-loan-form>
     </section>
   </ng-container>

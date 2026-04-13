@@ -10,38 +10,56 @@
 
         <!-- Right -->
         <div class="flex-none">
-            <app-add-loan aria-label="Agregar préstamo" />
+            <app-add-loan aria-label="Agregar préstamo" (loanCreated)="onLoanCreated()" />
         </div>
     </section>
 
     <!-- Cards -->
     <section class="flex flex-none gap-5 py-2 overflow-x-auto hide-scrollbar">
-        <!-- #1 -->
+        <!-- #1 Capital en fluctuación -->
         <div class="relative flex-1 highlight__data-card bg-staticBlack text-staticWhite">
-            <!-- Texture layer -->
             <div class="absolute inset-0 
-                bg-[url(/assets/images/terrain-texture.webp)] 
-                bg-cover opacity-10 pointer-events-none">
+            bg-[url(/assets/images/terrain-texture.webp)] 
+            bg-cover opacity-10 pointer-events-none">
             </div>
-
             <span class="title__data-card">Capital en fluctuación</span>
-            <span class="value__data-card">L 3,125,000.00</span>
+            <span class="value__data-card">
+                @if (areStatsLoading()) {
+                <nz-spin nzSimple nzSize="small" />
+                } @else {
+                {{ stats().fluctuatingCapital | currency:'L':'symbol':'1.2-2' }}
+                }
+            </span>
         </div>
 
-        <!-- #2 -->
+        <!-- #2 Liquidez del portafolio -->
         <div class="flex-1 highlight__data-card bg-primary text-staticWhite">
             <span class="title__data-card">Líquidez del portafolio</span>
-            <span class="value__data-card">80% retornado</span>
+            <span class="value__data-card">
+                @if (areStatsLoading()) {
+                <nz-spin nzSimple nzSize="small" />
+                } @else {
+                {{ stats().portfolioLiquidity | number:'1.0-1' }}% retornado
+                }
+            </span>
 
             <div class="w-[90%] absolute left-5 bottom-5 bg-[#0B5070] rounded-full overflow-hidden">
-                <div class="h-[2px] bg-staticWhite" style="width: 80%;"></div>
+                <div class="h-[2px] bg-staticWhite transition-all duration-500"
+                    [style.width.%]="stats().portfolioLiquidity">
+                </div>
             </div>
         </div>
 
-        <!-- #3 -->
+        <!-- #3 Préstamos activos -->
         <div class="highlight__data-card bg-[#E8F2FF] flex-none text-staticBlack">
             <span class="title__data-card">Préstamos activos</span>
-            <span class="value__data-card">10</span>
+            <span class="value__data-card">
+                @if (areStatsLoading()) {
+                <nz-spin nzSimple nzSize="small" />
+                } @else {
+                {{ stats().activeLoans }}
+                }
+            </span>
         </div>
     </section>
 
@@ -97,7 +115,9 @@
                             [class.border-l-primary]="selectedLoanId() === loan.id" (click)="selectLoan(loan.id)">
 
                             <td class="font-medium cell__table whitespace-nowrap">{{ loan.id }}</td>
-                            <td class="font-medium cell__table whitespace-nowrap">{{ loan.customer_id }}</td>
+                            <td class="font-medium cell__table whitespace-nowrap">
+                                {{ customerNames().get(loan.customer_id) ?? loan.customer_id }}
+                            </td>
                             <td class="cell__table">
                                 <span
                                     class="flex justify-center w-[100px] px-2 py-1 text-xs border rounded-sm font-roboto"

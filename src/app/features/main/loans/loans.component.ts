@@ -5,11 +5,23 @@ import { CommonModule } from '@angular/common';
 import { AddLoanDrawerComponent } from './add-loan/add-loan.component';
 import { WebIconComponent } from '../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
-import { FormsModule } from '@angular/forms';
+import { AbstractControl, FormsModule, ValidatorFn } from '@angular/forms';
 import { LoansService } from '../../../core/services/pages/loans.service';
-import { Loan } from '../../../core/interfaces/loans.interface';
+import { Loan, LoansStats } from '../../../core/interfaces/loans.interface';
 import { LoanState } from '../../../core/types/loan-state.type';
 import { Router } from '@angular/router';
+
+// Validator: must be a positive finite number
+export const positiveNumberValidator: ValidatorFn = (control: AbstractControl) => {
+  const val = Number(control.value);
+  return isFinite(val) && val > 0 ? null : { notPositive: true };
+};
+
+// Validator: interest between 1 and 50
+export const interestRangeValidator: ValidatorFn = (control: AbstractControl) => {
+  const val = Number(control.value);
+  return isFinite(val) && val >= 1 && val <= 50 ? null : { outOfRange: true };
+};
 
 @Component({
   selector: 'app-loans',
@@ -36,6 +48,13 @@ export class LoansComponent implements OnInit {
   currentPage = signal(1);
   readonly pageSize = 10;
   totalItems = signal(0);
+  customerNames = signal<Map<string, string>>(new Map());
+  areStatsLoading = signal(false);
+  stats = signal<LoansStats>({
+    fluctuatingCapital: 0,
+    portfolioLiquidity: 0,
+    activeLoans: 0
+  });
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.totalItems() / this.pageSize)));
   pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
@@ -55,6 +74,8 @@ export class LoansComponent implements OnInit {
       this.currentPage.set(1);
       this.fetchLoans();
     });
+
+    this.fetchStats();
     this.fetchLoans();
   }
 
@@ -73,7 +94,7 @@ export class LoansComponent implements OnInit {
   getLoanStateLabel(state: LoanState): string {
     switch (state) {
       case 'Accepted': return 'Aprobado';
-      case 'Under Review': return 'En Proceso';
+      case 'Under Review': return 'En revisión';
       case 'Denied': return 'Rechazado';
       case 'Paid': return 'Cerrado';
       default: return state;
@@ -104,20 +125,40 @@ export class LoansComponent implements OnInit {
     this.selectedLoanId.set(this.selectedLoanId() === id ? null : id);
   }
 
+  onLoanCreated(): void {
+    this.fetchLoans();
+    this.fetchStats();
+  }
+
+  private fetchStats() {
+    this.areStatsLoading.set(true);
+    this.loansService.getLoansStats().subscribe({
+      next: (stats) => {
+        this.stats.set(stats);
+        this.areStatsLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading stats', err);
+        this.areStatsLoading.set(false);
+      }
+    });
+  }
+
   private fetchLoans() {
     this.isLoading.set(true);
     this.error.set(null);
 
     this.loansService.getLoans(this.searchText, this.currentPage(), this.pageSize)
       .subscribe({
-        next: ({ data, total }) => {
+        next: ({ data, total, customerNames }) => {
           this.loans.set(data);
           this.totalItems.set(total);
+          this.customerNames.set(customerNames);
           this.isLoading.set(false);
         },
         error: (err) => {
           console.error(err);
-          this.error.set('Error cargando clientes');
+          this.error.set('Error cargando préstamos');
           this.isLoading.set(false);
         }
       });

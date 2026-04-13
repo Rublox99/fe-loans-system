@@ -1,3 +1,4 @@
+// loans.interface.ts
 import { LoanModality } from "../types/loan-modality";
 import { LoanState } from "../types/loan-state.type";
 
@@ -18,4 +19,28 @@ export interface Loan {
   next_expected_payment: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface LoanWithCustomer extends Loan {
+  customer: {
+    first_name: string;
+    second_name: string;
+    last_names: string;
+    dni: string;
+  };
+}
+
+export interface LoansStats {
+  fluctuatingCapital: number;
+  portfolioLiquidity: number;
+  activeLoans: number;
+}
+
+export interface CreateLoanPayload {
+  customerId: string;
+  capital: number;
+  interest: number;
+  fees: number;
+  feeValue: number;
+  modality: 'S' | 'Q' | 'M';
 }
