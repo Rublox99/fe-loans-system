@@ -148,15 +148,17 @@ export class LoansService {
         const user = this.authService.currentUser;
         if (!user) throw new Error('No authenticated user');
 
+        const calculatedCapital = payload.capital * (1 + payload.interest / 100) // Full amount owed from day one
+
         const insert = {
             customer_id: payload.customerId,
-            capital: payload.capital,
-            capital_balance: payload.capital,   // full amount owed from day one
+            capital: calculatedCapital,
+            capital_balance: calculatedCapital,
             interest: payload.interest,
             fees: payload.fees,
             fee_value: payload.feeValue,
             modality: payload.modality,
-            state: 'Under Review',              // always starts here
+            state: 'Under Review',
         };
 
         return from(
