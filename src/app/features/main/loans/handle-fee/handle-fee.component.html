@@ -10,11 +10,20 @@
   <ng-container *nzDrawerContent>
     <section [formGroup]="form" class="flex flex-col gap-[25px] h-full p-[15px] bg-lowContrast">
 
+      @if (!fee || !loan) {
+      <!-- Guard: nothing to manage -->
+      <div class="flex items-center justify-center w-full h-full">
+        <span class="font-sans text-sm text-standardGray">
+          No hay cuotas pendientes para gestionar.
+        </span>
+      </div>
+      } @else {
+
       <!-- Header -->
       <div class="flex flex-col gap-2.5 text-primary">
         <p class="font-sans text-3xl font-bold">Gestión de Cuota</p>
         <span class="text-lg font-light font-roboto">
-          Entrada de la transacción: {{ fee?.created_at | date:'dd/MM/yyyy' }}
+          Entrada de la transacción: {{ fee.created_at | date:'dd/MM/yyyy' }}
         </span>
       </div>
 
@@ -46,21 +55,17 @@
       <!-- Summary -->
       <section class="section__wrapper">
         <p class="section__header">Resumen</p>
-
         <div class="section__line text-standardGray">
-          <!-- Amount -->
           <div class="flex-1 space-y-1">
             <span class="text-xs uppercase text-standardGray">Cantidad a pagar</span>
             <p class="text-2xl font-bold text-accent">
-              {{ loan?.fee_value | currency:'L ':'symbol':'1.2-2' }}
+              {{ loan.fee_value | currency:'L ':'symbol':'1.2-2' }}
             </p>
           </div>
-
-          <!-- Delay days -->
           <div class="flex-1 space-y-1">
             <span class="text-xs uppercase text-standardGray">Días de mora</span>
             <p class="text-2xl font-bold text-success">
-              {{ fee?.delay_days ?? 0 }} Día(s)
+              {{ fee.delay_days ? fee.delay_days : 0 }} Día(s)
             </p>
           </div>
         </div>
@@ -75,14 +80,13 @@
           <span class="text-help">Estado de pago</span>
           <nz-select class="w-full" formControlName="paymentState" nzPlaceHolder="Seleccione un estado">
             <nz-option nzValue="1" nzLabel="1 - Pendiente" />
-            <nz-option nzValue="2" nzLabel="2 - Mora" nzDisabled />
             <nz-option nzValue="3" nzLabel="3 - Pagado" />
+            <nz-option nzValue="2" nzLabel="2 - Mora" nzDisabled />
           </nz-select>
         </div>
 
         <!-- Payment Date -->
         <div class="w-full space-y-2.5">
-          <!-- Label row with toggle -->
           <div class="flex items-center justify-between">
             <span class="text-help">Fecha de pago</span>
             <div class="flex items-center gap-2">
@@ -93,13 +97,11 @@
           </div>
 
           @if (useCustomDate()) {
-          <!-- Custom date picker -->
           <input class="w-full border-help" type="date" nz-input formControlName="paymentDate" />
           <p class="text-xs text-standardGray">
             Seleccionado: {{ formatDateForDisplay(form.getRawValue().paymentDate) }}
           </p>
           } @else {
-          <!-- Read-only showing today -->
           <input class="w-full border-help" nz-input [value]="formatDateForDisplay(form.getRawValue().paymentDate)"
             disabled />
           }
@@ -108,7 +110,7 @@
         <!-- Expiration Date (read-only) -->
         <div class="w-full space-y-2.5">
           <span class="text-help">Fecha de vencimiento (Solo lectura)</span>
-          <input class="w-full border-help" nz-input [value]="formatDateForDisplay(fee?.expiration_date)" disabled />
+          <input class="w-full border-help" nz-input [value]="formatDateForDisplay(fee.expiration_date)" disabled />
         </div>
       </section>
 
@@ -124,6 +126,8 @@
           <span class="font-sans font-extralight text-highContrast">Cerrar</span>
         </button>
       </div>
+
+      } <!-- end @if (fee && loan) -->
 
     </section>
   </ng-container>

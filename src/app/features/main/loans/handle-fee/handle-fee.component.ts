@@ -129,6 +129,7 @@ export class HandleFeeDrawerComponent implements OnChanges {
       paid_amount: selectedState === '3' ? (this.loan?.fee_value ?? 0) : null
     }).subscribe({
       next: () => {
+
         this.isSubmitting.set(false);
         this.closeDrawer();
         this.feeUpdated.emit();

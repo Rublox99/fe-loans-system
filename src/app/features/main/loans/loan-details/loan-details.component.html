@@ -137,7 +137,7 @@
                 {{ fee.expiration_date | date:"d-MM-yyyy" }}
               </td>
               <td class="cell__table whitespace-nowrap">
-                {{ fee.payment_date ? (fee.payment_date | date:"d-MM-yyyy") : 'N/A' }}
+                {{ fee.payment_date ? (fee.payment_date | date:"d-MM-yyyy":"UTC") : 'N/A' }}
               </td>
               <td class="cell__table whitespace-nowrap">{{ fee.paid_amount ? fee.paid_amount : 'N/A'}}</td>
               <td class="cell__table">

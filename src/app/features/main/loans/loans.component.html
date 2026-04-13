@@ -54,7 +54,7 @@
         <div class="highlight__data-card bg-[#E8F2FF] flex-none text-staticBlack">
             <span class="title__data-card">Préstamos activos</span>
             <span class="value__data-card">
-                @if (areStatsLoading()) 
+                @if (areStatsLoading())
                 { - }
                 @else {
                 {{ stats().activeLoans }}
@@ -125,7 +125,10 @@
                                     {{ getLoanStateLabel(loan.state) }}
                                 </span>
                             </td>
-                            <td class="cell__table">{{ loan.capital | currency:'L':'symbol' }}</td>
+                            <td class="cell__table">
+                                {{ loan.capital | currency:'L':'symbol' }}
+                                ({{ loan.capital / (1 + loan.interest / 100) | currency:'L':'symbol' }})
+                            </td>
                             <td class="cell__table">{{ loan.capital_balance | currency:'L':'symbol' }}</td>
                             <td class="cell__table">{{ loan.interest }}%</td>
                             <td class="cell__table">{{ loan.modality }}</td>
