@@ -10,8 +10,8 @@ const APP_ROUTES: AppRoutesCollection = {
         path: '/v1/auth',
         label: 'Auth'
     },
-    customers: {
-        path: '/v1/main/customers',
+    entities: {
+        path: '/v1/main/entities',
         label: 'Clientes'
     },
     loans: {

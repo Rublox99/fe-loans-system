@@ -4,11 +4,12 @@ import { map, switchMap } from 'rxjs/operators';
 import { Customer, CustomerForEdit, InsertCustomerPayload, UpdateCustomerPayload, UpdateSpousePayload } from '../../interfaces/customers.interface';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../../../environments/environment';
-import { GuaranteePerson, InsertGuaranteePersonPayload } from '../../interfaces/guarantee-person.interface';
+import { GuaranteePerson, InsertGuaranteePersonPayload, UpdateGuaranteePersonPayload } from '../../interfaces/guarantee-person.interface';
 import { InsertSpousePayload, Spouse } from '../../interfaces/spouse.interface';
+import { Entity } from '../../types/entity.type';
 
-export interface PaginatedCustomers {
-    data: Customer[];
+export interface PaginatedEntities {
+    data: Entity[];
     total: number;
 }
 
@@ -35,37 +36,187 @@ export class EntitiesService {
 
     // ─── SELECT ────────────────────────────────────────────────────────────────
 
-    getCustomers(search?: string, page: number = 1, pageSize: number = 10): Observable<PaginatedCustomers> {
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize - 1;
+    getEntities(
+        search?: string,
+        page: number = 1,
+        pageSize: number = 10,
+        returnAllEntities: boolean = false
+    ): Observable<PaginatedEntities> {
 
-        let query = this.supabase
-            .from('customers')
-            .select(`
-            *,
-            spouse:spouses!spouse_id (
-                first_name,
-                second_name,
-                last_names,
-                dni
-            )
-        `, { count: 'exact' })
-            .range(start, end);
+        const buildCustomerQuery = () => {
+            let q = this.supabase
+                .from('customers')
+                .select(`
+        *,
+        spouse:spouses!spouse_id (
+          first_name,
+          second_name,
+          last_names,
+          dni
+        )
+      `, { count: 'exact' });
 
-        if (search) {
-            query = query.or(
-                `first_name.ilike.%${search}%,second_name.ilike.%${search}%,last_names.ilike.%${search}%,dni.ilike.%${search}%`
+            if (search) {
+                q = q.or(
+                    `first_name.ilike.%${search}%,` +
+                    `second_name.ilike.%${search}%,` +
+                    `last_names.ilike.%${search}%,` +
+                    `dni.ilike.%${search}%`
+                );
+            }
+            return from(q);
+        };
+
+        const buildGuaranteeQuery = () => {
+            let q = this.supabase
+                .from('guarantee_persons')
+                .select('*', { count: 'exact' });
+
+            if (search) {
+                q = q.or(
+                    `first_name.ilike.%${search}%,` +
+                    `second_name.ilike.%${search}%,` +
+                    `last_names.ilike.%${search}%,` +
+                    `dni.ilike.%${search}%`
+                );
+            }
+            return from(q);
+        };
+
+        if (!returnAllEntities) {
+            // Customers only — paginated at DB level
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize - 1;
+
+            let q = this.supabase
+                .from('customers')
+                .select(`
+        *,
+        spouse:spouses!spouse_id (
+          first_name,
+          second_name,
+          last_names,
+          dni
+        )
+      `, { count: 'exact' })
+                .range(start, end);
+
+            if (search) {
+                q = q.or(
+                    `first_name.ilike.%${search}%,` +
+                    `second_name.ilike.%${search}%,` +
+                    `last_names.ilike.%${search}%,` +
+                    `dni.ilike.%${search}%`
+                );
+            }
+
+            return from(q).pipe(
+                map(({ data, count, error }) => {
+                    if (error) throw error;
+                    return {
+                        data: (data as Customer[]).map(c => ({ ...c, _kind: 'C' as const })),
+                        total: count ?? 0
+                    };
+                })
             );
         }
 
-        return from(query).pipe(
-            map(({ data, count, error }) => {
-                if (error) throw error;
+        // Both customers + guarantee persons — fetch counts in parallel,
+        // then fetch only the page window we need.
+        return forkJoin([buildCustomerQuery(), buildGuaranteeQuery()]).pipe(
+            switchMap(([customers, guarantees]) => {
+                if (customers.error) throw customers.error;
+                if (guarantees.error) throw guarantees.error;
 
-                return {
-                    data: data as Customer[],
-                    total: count ?? 0
-                };
+                const totalCustomers = customers.count ?? 0;
+                const totalGuarantees = guarantees.count ?? 0;
+                const total = totalCustomers + totalGuarantees;
+
+                // Global offset window
+                const globalStart = (page - 1) * pageSize;
+                const globalEnd = globalStart + pageSize; // exclusive
+
+                // Slice customers
+                const custStart = Math.min(globalStart, totalCustomers);
+                const custEnd = Math.min(globalEnd, totalCustomers);
+                const custNeeded = custEnd - custStart;
+
+                // Slice guarantee persons (starts after all customers)
+                const guarStart = Math.max(0, globalStart - totalCustomers);
+                const guarEnd = Math.max(0, globalEnd - totalCustomers);
+                const guarNeeded = guarEnd - guarStart;
+
+                // Build only the queries we actually need for this page
+                const obs: Observable<Entity[]>[] = [];
+
+                if (custNeeded > 0) {
+                    let q = this.supabase
+                        .from('customers')
+                        .select(`
+            *,
+            spouse:spouses!spouse_id (
+              first_name,
+              second_name,
+              last_names,
+              dni
+            )
+          `)
+                        .range(custStart, custEnd - 1); // supabase range is inclusive
+
+                    if (search) {
+                        q = q.or(
+                            `first_name.ilike.%${search}%,` +
+                            `second_name.ilike.%${search}%,` +
+                            `last_names.ilike.%${search}%,` +
+                            `dni.ilike.%${search}%`
+                        );
+                    }
+
+                    obs.push(
+                        from(q).pipe(
+                            map(({ data, error }) => {
+                                if (error) throw error;
+                                return (data as Customer[]).map(c => ({ ...c, _kind: 'C' as const }));
+                            })
+                        )
+                    );
+                }
+
+                if (guarNeeded > 0) {
+                    let q = this.supabase
+                        .from('guarantee_persons')
+                        .select('*')
+                        .range(guarStart, guarEnd - 1);
+
+                    if (search) {
+                        q = q.or(
+                            `first_name.ilike.%${search}%,` +
+                            `second_name.ilike.%${search}%,` +
+                            `last_names.ilike.%${search}%,` +
+                            `dni.ilike.%${search}%`
+                        );
+                    }
+
+                    obs.push(
+                        from(q).pipe(
+                            map(({ data, error }) => {
+                                if (error) throw error;
+                                return (data as GuaranteePerson[]).map(g => ({ ...g, _kind: 'A' as const }));
+                            })
+                        )
+                    );
+                }
+
+                if (obs.length === 0) {
+                    return of({ data: [] as Entity[], total });
+                }
+
+                return forkJoin(obs).pipe(
+                    map(results => ({
+                        data: results.flat(),
+                        total
+                    }))
+                );
             })
         );
     }
@@ -121,6 +272,21 @@ export class EntitiesService {
                     guaranteePerson: guaranteePerson$,
                     spouse: spouse$
                 });
+            })
+        );
+    }
+
+    getGuaranteePersonForEdit(id: string): Observable<GuaranteePerson> {
+        return from(
+            this.supabase
+                .from('guarantee_persons')
+                .select('*')
+                .eq('id', id)
+                .single()
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+                return data as GuaranteePerson;
             })
         );
     }
@@ -303,6 +469,38 @@ export class EntitiesService {
 
         if (error) {
             console.error('updateCustomer error:', error.message);
+            return { error: error.message };
+        }
+
+        return { error: null };
+    }
+
+    async updateGuaranteePerson(
+        id: string,
+        payload: UpdateGuaranteePersonPayload
+    ): Promise<{ error: string | null }> {
+        const { error } = await this.supabase
+            .from('guarantee_persons')
+            .update({
+                first_name: payload.firstName,
+                second_name: payload.secondName,
+                last_names: payload.lastName,
+                dni: payload.dni,
+                phone_number: payload.phone,       // singular — not an array
+                email: payload.email,
+                location: payload.location,
+                profession: payload.profession,
+                company: payload.company ?? null,
+                income: payload.income,
+                payment_grade: payload.paymentGrade,
+                gallery: payload.gallery,
+                comment: payload.notes ?? null,
+                last_modified: new Date().toISOString(),
+            })
+            .eq('id', id);
+
+        if (error) {
+            console.error('updateGuaranteePerson error:', error.message);
             return { error: error.message };
         }
 

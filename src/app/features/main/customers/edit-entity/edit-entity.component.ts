@@ -9,13 +9,14 @@ import { Subject, takeUntil } from 'rxjs';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 import { CustomerFormComponent, CustomerFormOutput } from '../entities-forms/customer-form.component';
-import { GuaranteeFormComponent } from '../entities-forms/guarantee-form.component';
+import { GuaranteeFormComponent, GuaranteeFormOutput } from '../entities-forms/guarantee-form.component';
 import { CustomerForEdit } from '../../../../core/interfaces/customers.interface';
 import { EntitiesService } from '../../../../core/services/pages/entities.service';
 import { StorageService } from '../../../../core/services/storage.service';
 import { GeneralService } from '../../../../core/services/general.service';
 import { AuthService } from '../../../../core/services/pages/auth.service';
 import { PROFESSION_LIST, SUPABASE_BUCKETS } from '../../../../shared/constants';
+import { GuaranteePersonForEdit } from '../../../../core/interfaces/guarantee-person.interface';
 
 @Component({
   selector: 'app-edit-entity',
@@ -31,28 +32,30 @@ import { PROFESSION_LIST, SUPABASE_BUCKETS } from '../../../../shared/constants'
   ]
 })
 export class EditEntityDrawerComponent implements OnDestroy {
-  @Input() customerId!: string;
-  @Input() entityType!: 'C' | 'G';
+  @Input() entityId!: string;
+  @Input() entityType!: 'C' | 'A';
 
   @Output() entityUpdated = new EventEmitter<void>();
 
   @ViewChild(CustomerFormComponent)
   private customerForm!: CustomerFormComponent;
 
+  @ViewChild(GuaranteeFormComponent)
+  private guaranteeForm!: GuaranteeFormComponent;
+
   isVisible = false;
   isLoading = false;
-  isFetching = signal(false);  // spinner while loading entity data
+  isFetching = signal(false);
 
-  /** Snapshot of the loaded data — needed for diffing spouse/gallery on update */
-  private loadedData: CustomerForEdit | null = null;
+  private loadedCustomerData: CustomerForEdit | null = null;
+  private loadedGuaranteeData: GuaranteePersonForEdit | null = null;
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private entitiesService: EntitiesService,
     private storageService: StorageService,
-    private generalService: GeneralService,
-    private authService: AuthService
+    private generalService: GeneralService
   ) { }
 
   ngOnDestroy(): void {
@@ -69,24 +72,36 @@ export class EditEntityDrawerComponent implements OnDestroy {
 
   closeDrawer(): void {
     this.isVisible = false;
-    this.loadedData = null;
+    this.loadedCustomerData = null;
+    this.loadedGuaranteeData = null;
+  }
+
+  getDrawerTitle(): string {
+    return this.entityType === 'C'
+      ? 'Modificación de Cliente'
+      : 'Modificación de Aval';
   }
 
   // ── Data fetching ─────────────────────────────────────────────────────────
 
   private loadEntityData(): void {
-    if (this.entityType !== 'C') return;
+    if (this.entityType === 'C') {
+      this.loadCustomerData();
+    } else {
+      this.loadGuaranteeData();
+    }
+  }
 
+  private loadCustomerData(): void {
     this.isFetching.set(true);
 
     this.entitiesService
-      .getCustomerForEdit(this.customerId)
+      .getCustomerForEdit(this.entityId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async (data) => {
-          this.loadedData = data;
+          this.loadedCustomerData = data;
 
-          // Resolve signed URLs for all gallery images
           const signedUrls = await this.storageService.getSignedUrls(
             SUPABASE_BUCKETS.ENTITIES_GALLERIES,
             data.customer.id,
@@ -96,32 +111,59 @@ export class EditEntityDrawerComponent implements OnDestroy {
 
           this.isFetching.set(false);
 
-          // Give Angular a tick to render the form before patching
           setTimeout(() => {
             this.customerForm?.loadForEdit(data, signedUrls, PROFESSION_LIST);
           }, 0);
         },
         error: (err) => {
-          console.error('loadEntityData error:', err);
-          this.generalService.createMessage('error', 'Error al cargar los datos de la entidad.');
+          console.error('loadCustomerData error:', err);
+          this.generalService.createMessage('error', 'Error al cargar los datos del cliente.');
           this.isFetching.set(false);
           this.closeDrawer();
         }
       });
   }
 
-  // ── Update flow ───────────────────────────────────────────────────────────
+  private loadGuaranteeData(): void {
+    this.isFetching.set(true);
 
-  handleGuarantee() {
-    /* TODO: Add functionality when able to edit a GuaranteePerson */
+    this.entitiesService
+      .getGuaranteePersonForEdit(this.entityId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (data) => {
+          this.loadedGuaranteeData = data;
+
+          const signedUrls = await this.storageService.getSignedUrls(
+            SUPABASE_BUCKETS.ENTITIES_GALLERIES,
+            data.id,
+            data.gallery,
+            3600
+          );
+
+          this.isFetching.set(false);
+
+          setTimeout(() => {
+            this.guaranteeForm?.loadForEdit(data, signedUrls, PROFESSION_LIST);
+          }, 0);
+        },
+        error: (err) => {
+          console.error('loadGuaranteeData error:', err);
+          this.generalService.createMessage('error', 'Error al cargar los datos del aval.');
+          this.isFetching.set(false);
+          this.closeDrawer();
+        }
+      });
   }
 
+  // ── Update flows ──────────────────────────────────────────────────────────
+
   async handleCustomer(output: CustomerFormOutput): Promise<void> {
-    if (this.isLoading || !this.loadedData) return;
+    if (this.isLoading || !this.loadedCustomerData) return;
     this.isLoading = true;
 
     try {
-      const { customer: original, spouse: originalSpouse } = this.loadedData;
+      const { customer: original, spouse: originalSpouse } = this.loadedCustomerData;
       const { formValue, rawFiles } = output;
 
       // ── 1. Spouse handling ───────────────────────────────────────────────
@@ -130,7 +172,6 @@ export class EditEntityDrawerComponent implements OnDestroy {
 
       if (formValue.withSpouse && formValue.spouse) {
         if (originalSpouse) {
-          // Update existing spouse
           const { error: spouseError } = await this.entitiesService.updateSpouse(
             originalSpouse.id,
             {
@@ -151,7 +192,6 @@ export class EditEntityDrawerComponent implements OnDestroy {
           spouseId = originalSpouse.id;
 
         } else {
-          // Insert new spouse
           const { data: newSpouse, error: spouseError } = await this.entitiesService.insertSpouse({
             firstName: formValue.spouse.firstName,
             secondName: formValue.spouse.secondName,
@@ -170,9 +210,8 @@ export class EditEntityDrawerComponent implements OnDestroy {
         }
 
       } else if (!formValue.withSpouse && originalSpouse) {
-        // User toggled spouse off → unlink and delete
         const { error: deleteError } = await this.entitiesService.unlinkAndDeleteSpouse(
-          this.customerId,
+          this.entityId,
           originalSpouse.id
         );
         if (deleteError) {
@@ -187,10 +226,9 @@ export class EditEntityDrawerComponent implements OnDestroy {
       const imagesToDelete = this.customerForm.imagesToDelete;
       const survivingImages = this.customerForm.survivingImageFileNames;
 
-      // Delete removed images from storage
       if (imagesToDelete.length > 0) {
         const { error: deleteError } = await this.storageService.deleteEntityGalleryFiles(
-          this.customerId,
+          this.entityId,
           imagesToDelete
         );
         if (deleteError) {
@@ -198,27 +236,24 @@ export class EditEntityDrawerComponent implements OnDestroy {
             'error',
             'Algunos archivos no se pudieron eliminar del almacenamiento.'
           );
-          // Non-blocking — continue with update
         }
       }
 
-      // Upload new images
       let newFileNames: string[] = [];
       if (rawFiles.length > 0) {
         newFileNames = await this.storageService.uploadEntityGallery(
-          this.customerId,
+          this.entityId,
           rawFiles,
           true
         );
       }
 
-      // Final gallery = surviving originals + newly uploaded
       const finalGallery = [...survivingImages, ...newFileNames];
 
       // ── 3. Update customer ───────────────────────────────────────────────
 
       const { error: updateError } = await this.entitiesService.updateCustomer(
-        this.customerId,
+        this.entityId,
         {
           firstName: formValue.firstName,
           secondName: formValue.secondName,
@@ -243,14 +278,86 @@ export class EditEntityDrawerComponent implements OnDestroy {
         return;
       }
 
-      // ── 4. Success ───────────────────────────────────────────────────────
-
       this.generalService.createMessage('success', 'Cliente actualizado exitosamente.');
-      this.entityUpdated.emit();  // ← triggers table refresh in parent
+      this.entityUpdated.emit();
       this.closeDrawer();
 
     } catch (err) {
       console.error('handleCustomer (edit) error:', err);
+      this.generalService.createMessage('error', 'Ocurrió un error inesperado.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async handleGuarantee(output: GuaranteeFormOutput): Promise<void> {
+    if (this.isLoading || !this.loadedGuaranteeData) return;
+    this.isLoading = true;
+
+    try {
+      const { formValue, rawFiles } = output;
+
+      // ── 1. Gallery handling ──────────────────────────────────────────────
+
+      const imagesToDelete = this.guaranteeForm.imagesToDelete;
+      const survivingImages = this.guaranteeForm.survivingImageFileNames;
+
+      if (imagesToDelete.length > 0) {
+        const { error: deleteError } = await this.storageService.deleteEntityGalleryFiles(
+          this.entityId,
+          imagesToDelete
+        );
+        if (deleteError) {
+          this.generalService.createMessage(
+            'error',
+            'Algunos archivos no se pudieron eliminar del almacenamiento.'
+          );
+        }
+      }
+
+      let newFileNames: string[] = [];
+      if (rawFiles.length > 0) {
+        newFileNames = await this.storageService.uploadEntityGallery(
+          this.entityId,
+          rawFiles,
+          true
+        );
+      }
+
+      const finalGallery = [...survivingImages, ...newFileNames];
+
+      // ── 2. Update guarantee person ───────────────────────────────────────
+
+      const { error: updateError } = await this.entitiesService.updateGuaranteePerson(
+        this.entityId,
+        {
+          firstName: formValue.firstName,
+          secondName: formValue.secondName,
+          lastName: formValue.lastName,
+          dni: formValue.dni,
+          phone: formValue.phone,
+          email: formValue.email,
+          location: formValue.location,
+          profession: formValue.profession,
+          company: formValue.company,
+          income: formValue.income,
+          paymentGrade: formValue.paymentGrade,
+          gallery: finalGallery,
+          notes: formValue.notes,
+        }
+      );
+
+      if (updateError) {
+        this.generalService.createMessage('error', `Error al actualizar el aval: ${updateError}`);
+        return;
+      }
+
+      this.generalService.createMessage('success', 'Aval actualizado exitosamente.');
+      this.entityUpdated.emit();
+      this.closeDrawer();
+
+    } catch (err) {
+      console.error('handleGuarantee (edit) error:', err);
       this.generalService.createMessage('error', 'Ocurrió un error inesperado.');
     } finally {
       this.isLoading = false;

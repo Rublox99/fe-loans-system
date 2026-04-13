@@ -1,18 +1,19 @@
-<!-- Trigger button -->
+<!-- Trigger -->
 <div class="flex items-center justify-center" (click)="openDrawer()">
   <web-icon size="18" name="EDIT" color="var(--success)" class="pseudo__button" />
 </div>
 
 <nz-drawer [nzClosable]="true" nzWidth="600px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
+
   <ng-container *nzDrawerContent>
     <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
 
       <!-- Header -->
       <p class="font-sans text-3xl font-bold text-primary">
-        Modificación de Individuo
+        {{ getDrawerTitle() }}
       </p>
 
-      <!-- Loading spinner while fetching entity data -->
+      <!-- Spinner while fetching -->
       @if (isFetching()) {
       <div class="flex flex-col items-center justify-center flex-1 gap-4">
         <nz-spin nzSimple [nzSize]="'large'" />
@@ -20,19 +21,19 @@
       </div>
       }
 
-      <!-- Customer form — hidden while fetching so ViewChild is always in DOM -->
+      <!-- Forms — kept in DOM so ViewChild resolves, hidden during fetch -->
       <div [class.hidden]="isFetching()">
+
         @if (entityType === 'C') {
-        <app-customer-form [entityId]="customerId" [isLoading]="isLoading" (submitForm)="handleCustomer($event)"
-          (closeDrawer)="closeDrawer()">
-        </app-customer-form>
+        <app-customer-form [entityId]="entityId" [isLoading]="isLoading" (submitForm)="handleCustomer($event)"
+          (closeDrawer)="closeDrawer()" />
         }
 
-        @if (entityType === 'G') {
-        <app-guarantee-form [entityId]="customerId" [isLoading]="isLoading" (submitForm)="handleGuarantee()"
-          (closeDrawer)="closeDrawer()">
-        </app-guarantee-form>
+        @if (entityType === 'A') {
+        <app-guarantee-form [entityId]="entityId" [isLoading]="isLoading" (submitForm)="handleGuarantee($event)"
+          (closeDrawer)="closeDrawer()" />
         }
+
       </div>
 
     </section>

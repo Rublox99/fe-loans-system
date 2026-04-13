@@ -22,8 +22,8 @@
                         <span class="text-help">Cliente</span>
                         <nz-select class="w-full" formControlName="customerId"
                             nzPlaceHolder="Busque un cliente por su nombre" nzShowSearch nzAllowClear nzServerSearch
-                            [nzLoading]="isCustomerSearchLoading()" (nzOnSearch)="onCustomerSearch($event)">
-                            @for (customer of customerSearchResults(); track customer.id) {
+                            [nzLoading]="isEntitySearchLoading()" (nzOnSearch)="onCustomerSearch($event)">
+                            @for (customer of entitiesSearchResults(); track customer.id) {
                             <nz-option [nzValue]="customer.id" [nzLabel]="getCustomerFullName(customer)" />
                             }
                         </nz-select>

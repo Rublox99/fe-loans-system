@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal, computed } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 import { Customer } from '../../../../core/interfaces/customers.interface';
 import { EntitiesService } from '../../../../core/services/pages/entities.service';
 import { StorageService } from '../../../../core/services/storage.service';
-import { GuaranteePerson } from '../../../../core/interfaces/guarantee-person.interface';
 import { Spouse } from '../../../../core/interfaces/spouse.interface';
 import { SUPABASE_BUCKETS } from '../../../../shared/constants';
+import { Entity } from '../../../../core/types/entity.type';
+import { GuaranteePerson } from '../../../../core/interfaces/guarantee-person.interface';
 
 @Component({
   selector: 'app-view-entity',
@@ -24,54 +25,53 @@ import { SUPABASE_BUCKETS } from '../../../../shared/constants';
     .section__wrapper {
       @apply space-y-2.5
     }
-
     .section__header {
       @apply font-sans text-xs font-bold uppercase text-highContrast
     }
-
     .section__line {
       @apply font-sans flex gap-2.5 text-base
     }
-
     .section__line-left {
       @apply flex-1
     }
-
     .section__line-right {
       @apply flex-none
     }
   `
 })
 export class ViewEntityDrawerComponent {
+
+  /** Pre-resolved entity passed directly from the table row */
+  @Input() set entity(value: Entity | null | undefined) {
+    if (value) this._entity.set(value);
+  }
+
+  /**
+   * Fallback: resolve a Customer by id (used from loan-details context).
+   * When supplied, _kind is implicitly 'C'.
+   */
   @Input() customerId?: string;
+
   @Input() isViewableFromLoanDetails: boolean = false;
-
-  private _customer = signal<Customer | undefined>(undefined);
-  @Input() set customer(value: Customer) {
-    this._customer.set(value);
-  }
-
-  get customer(): Customer | undefined {
-    return this._customer();
-  }
 
   isVisible = false;
 
-  // Customer state (only used when resolving from customerId)
-  isLoadingCustomer = signal(false);
-  errorCustomer = signal<string | null>(null);
+  private _entity = signal<Entity | null>(null);
 
-  // Guarantee person state
+  // Derived from _entity for template convenience
+  get resolvedEntity(): Entity | null { return this._entity(); }
+
+  isLoadingEntity = signal(false);
+  errorEntity = signal<string | null>(null);
+
   isLoadingGuaranteePerson = signal(false);
   errorGuaranteePerson = signal<string | null>(null);
   guaranteePerson = signal<GuaranteePerson | null>(null);
 
-  // Spouse state
   isLoadingSpouse = signal(false);
   errorSpouse = signal<string | null>(null);
   spouse = signal<Spouse | null>(null);
 
-  // Gallery state
   isLoadingGallery = signal(false);
   galleryUrls = signal<string[]>([]);
 
@@ -80,39 +80,35 @@ export class ViewEntityDrawerComponent {
     private storageService: StorageService
   ) { }
 
-  openDrawer() {
-    this.isVisible = true;
-
-    const c = this._customer();
-    if (c) {
-      this.resolveGalleryUrls(c);
-      this.resolveRelations(c);
-    } else if (this.customerId) {
-      this.fetchCustomer(this.customerId);
-    }
+  isCustomer(entity: Entity): entity is Customer & { _kind: 'C' } {
+    return entity._kind === 'C';
   }
 
-  closeDrawer() {
-    this.isVisible = false;
+  getEntityTitle(): string {
+    const e = this._entity();
+    if (!e) return 'Visualización de Individuo';
+    return e._kind === 'C' ? 'Visualización de Cliente' : 'Visualización de Aval';
   }
 
-  getPaymentGradeLabel(grade: string): string {
+  getPaymentGradeLabel(grade: string | null | undefined): string {
     const labels: Record<string, string> = {
       '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E'
     };
-    return labels[grade] ?? grade;
+    return grade ? (labels[grade] ?? grade) : '—';
   }
 
-  getFullName(entity: Customer | Spouse): string {
+  getFullName(entity: { first_name: string; second_name: string; last_names: string }): string {
     return [entity.first_name, entity.second_name, entity.last_names]
       .filter(Boolean)
       .join(' ');
   }
 
-  getGuaranteeFullName(gp: GuaranteePerson): string {
-    return [gp.first_name, gp.second_name, gp.last_names]
-      .filter(Boolean)
-      .join(' ');
+  /** Primary phone for display — handles both array and scalar variants */
+  getPrimaryPhone(entity: Entity): string {
+    if (this.isCustomer(entity)) {
+      return entity.phone_numbers?.[0] ?? '—';
+    }
+    return entity.phone_number ?? '—';
   }
 
   formatIncome(income: number): string {
@@ -122,8 +118,37 @@ export class ViewEntityDrawerComponent {
     })}`;
   }
 
-  private async resolveGalleryUrls(customer: Customer) {
-    if (!customer.gallery?.length) {
+  openDrawer() {
+    this.isVisible = true;
+    this.resetRelations();
+
+    const e = this._entity();
+
+    if (e) {
+      this.resolveGalleryUrls(e);
+      if (this.isCustomer(e)) {
+        this.resolveCustomerRelations(e);
+      }
+    } else if (this.customerId) {
+      this.fetchCustomerById(this.customerId);
+    }
+  }
+
+  closeDrawer() {
+    this.isVisible = false;
+  }
+
+  private resetRelations() {
+    this.guaranteePerson.set(null);
+    this.spouse.set(null);
+    this.galleryUrls.set([]);
+    this.errorGuaranteePerson.set(null);
+    this.errorSpouse.set(null);
+    this.errorEntity.set(null);
+  }
+
+  private async resolveGalleryUrls(entity: Entity) {
+    if (!entity.gallery?.length) {
       this.galleryUrls.set([]);
       return;
     }
@@ -131,52 +156,47 @@ export class ViewEntityDrawerComponent {
     this.isLoadingGallery.set(true);
 
     const urls = await Promise.all(
-      customer.gallery.map(async filename => {
-        const path = `${customer.id}/${filename}`;
-
-        const url = await this.storageService.getSignedUrl(
+      entity.gallery.map(filename =>
+        this.storageService.getSignedUrl(
           SUPABASE_BUCKETS.ENTITIES_GALLERIES,
-          `${customer.id}/${filename}`
-        );
-
-        return url;
-      })
+          `${entity.id}/${filename}`
+        )
+      )
     );
 
-    // Filter out any nulls from failed signed URL generations
     this.galleryUrls.set(urls.filter((url): url is string => url !== null));
     this.isLoadingGallery.set(false);
   }
 
-  private fetchCustomer(id: string) {
-    this.isLoadingCustomer.set(true);
-    this.errorCustomer.set(null);
-
-    this.entitiesService.getCustomerById(id).subscribe({
-      next: (data) => {
-        this._customer.set(data);
-        this.isLoadingCustomer.set(false);
-        if (data) {
-          this.resolveGalleryUrls(data);
-          this.resolveRelations(data);
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorCustomer.set('Error cargando información del cliente');
-        this.isLoadingCustomer.set(false);
-      }
-    });
-  }
-
-  private resolveRelations(customer: Customer) {
-    if (customer.guaranteePerson_id) {       // corrected from guarantee_id
+  private resolveCustomerRelations(customer: Customer & { _kind: 'C' }) {
+    if (customer.guaranteePerson_id) {
       this.fetchGuaranteePerson(customer.guaranteePerson_id);
     }
-
     if (customer.spouse_id) {
       this.fetchSpouse(customer.spouse_id);
     }
+  }
+
+  private fetchCustomerById(id: string) {
+    this.isLoadingEntity.set(true);
+    this.errorEntity.set(null);
+
+    this.entitiesService.getCustomerById(id).subscribe({
+      next: (data) => {
+        if (data) {
+          const entity = { ...data, _kind: 'C' as const };
+          this._entity.set(entity);
+          this.resolveGalleryUrls(entity);
+          this.resolveCustomerRelations(entity);
+        }
+        this.isLoadingEntity.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorEntity.set('Error cargando información del cliente');
+        this.isLoadingEntity.set(false);
+      }
+    });
   }
 
   private fetchGuaranteePerson(id: string) {

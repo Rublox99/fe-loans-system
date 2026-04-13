@@ -1,8 +1,8 @@
-@if(!isViewableFromLoanDetails) {
+@if (!isViewableFromLoanDetails) {
 <div class="flex items-center justify-center" (click)="openDrawer()">
-  <web-icon size="20" name="SEE" color="var(--standard-gray)" class="pseudo__button"></web-icon>
+  <web-icon size="20" name="SEE" color="var(--standard-gray)" class="pseudo__button" />
 </div>
-} @else if (isViewableFromLoanDetails) {
+} @else {
 <button class="button bg-lightGray" nz-button nzType="primary" (click)="openDrawer()">
   <web-icon class="mr-2.5" name="SEE" color="var(--primary)" size="16" />
   <span class="font-sans font-extralight text-primary">Información del cliente</span>
@@ -10,45 +10,50 @@
 }
 
 <nz-drawer [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right" (nzOnClose)="closeDrawer()">
-  <ng-container *nzDrawerContent="">
+
+  <ng-container *nzDrawerContent>
     <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
 
-      @if (isLoadingCustomer()) {
-      <!-- Simple spinner while resolving customer from customerId -->
+      @if (isLoadingEntity()) {
       <div class="flex items-center justify-center w-full h-full">
         <nz-spin nzSimple />
       </div>
-      } @else if (errorCustomer()) {
+
+      } @else if (errorEntity()) {
       <div class="flex items-center justify-center w-full h-full">
-        <span class="font-sans text-sm text-standardGray">{{ errorCustomer() }}</span>
+        <span class="font-sans text-sm text-standardGray">{{ errorEntity() }}</span>
       </div>
-      } @else if (customer){
+
+      } @else if (resolvedEntity) {
+
       <!-- Header -->
       <p class="mb-5 font-sans text-3xl font-bold text-primary">
-        Visualización de Individuo
+        {{ getEntityTitle() }}
       </p>
 
       <div class="flex-1 space-y-5">
+
         <!-- 1. Personal Identification -->
         <section class="relative section__wrapper">
           <span class="absolute top-0 right-0 px-2 py-1 text-xs uppercase rounded-sm bg-slate-200 text-slate-800">
-            Grado {{ getPaymentGradeLabel(customer.payment_grade) }}
+            Grado {{ getPaymentGradeLabel(resolvedEntity.payment_grade) }}
           </span>
 
           <p class="section__header">1. Identificación Personal</p>
 
           <div class="section__line text-highContrast">
-            <span class="section__line-left">{{ getFullName(customer) }}</span>
-            <span class="section__line-right">{{ customer.phone_numbers[0] }}</span>
+            <span class="section__line-left">{{ getFullName(resolvedEntity) }}</span>
+            <span class="section__line-right">{{ getPrimaryPhone(resolvedEntity) }}</span>
           </div>
 
           <div class="section__line text-standardGray">
-            <span class="section__line-left">{{ customer.dni }}</span>
-            <span class="section__line-right">{{ customer.email }}</span>
+            <span class="section__line-left">{{ resolvedEntity.dni }}</span>
+            <span class="section__line-right">{{ resolvedEntity.email ? resolvedEntity.email : '—' }}</span>
           </div>
         </section>
 
-        <!-- 2. Spouse Information -->
+        <!-- 2. Spouse Information — Customers only -->
+        @if (isCustomer(resolvedEntity)) {
         <section class="section__wrapper">
           <p class="section__header">2. Información del Cónyuge</p>
 
@@ -75,7 +80,7 @@
           }
         </section>
 
-        <!-- 3. Guarantee Person -->
+        <!-- 3. Guarantee Person — Customers only -->
         <section class="section__wrapper">
           <p class="section__header">3. Información del Aval</p>
 
@@ -89,7 +94,7 @@
           </div>
           } @else if (guaranteePerson()) {
           <div class="section__line text-highContrast">
-            <span class="section__line-left">{{ getGuaranteeFullName(guaranteePerson()!) }}</span>
+            <span class="section__line-left">{{ getFullName(guaranteePerson()!) }}</span>
             <span class="section__line-right">{{ guaranteePerson()!.phone_number }}</span>
           </div>
           <div class="section__line text-standardGray">
@@ -102,25 +107,30 @@
           </div>
           }
         </section>
+        }
 
         <!-- 4. Financial and Demographic -->
         <section class="section__wrapper">
-          <p class="section__header">4. Datos Demográficos y Financieros</p>
+          <p class="section__header">
+            {{ isCustomer(resolvedEntity) ? '4.' : '2.' }} Datos Demográficos y Financieros
+          </p>
 
           <div class="section__line text-highContrast">
-            <span class="section__line-left">{{ customer.profession }}</span>
-            <span class="section__line-right">{{ formatIncome(customer.income) }}</span>
+            <span class="section__line-left">{{ resolvedEntity.profession | titlecase }}</span>
+            <span class="section__line-right">{{ formatIncome(resolvedEntity.income) }}</span>
           </div>
 
           <div class="section__line text-standardGray">
-            <span class="section__line-left">{{ customer.company ?? 'N/A' }}</span>
-            <span class="section__line-right">{{ customer.location }}</span>
+            <span class="section__line-left">{{ resolvedEntity.company ?? 'N/A' }}</span>
+            <span class="section__line-right">{{ resolvedEntity.location }}</span>
           </div>
         </section>
 
         <!-- 5. Multimedia -->
         <section class="section__wrapper">
-          <p class="section__header">5. Multimedia de verificación</p>
+          <p class="section__header">
+            {{ isCustomer(resolvedEntity) ? '5.' : '3.' }} Multimedia de verificación
+          </p>
 
           @if (isLoadingGallery()) {
           <div class="flex items-center justify-center w-full py-4">
@@ -139,6 +149,7 @@
           </div>
           }
         </section>
+
       </div>
 
       <button class="button" style="border: 1px solid var(--high-contrast) !important" nz-button nzType="text"

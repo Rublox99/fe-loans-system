@@ -50,7 +50,7 @@ export class AuthComponent implements OnInit {
     try {
       const { email, password } = this.loginForm.value;
       await this.authService.signIn(email!, password!);
-      this.router.navigateByUrl(this.appRoutes.customers.path);
+      this.router.navigateByUrl(this.appRoutes.entities.path);
     } catch (error: any) {
       this.generalService.createMessage(
         'error',

@@ -20,7 +20,6 @@
       <span class="title__data-card">{{ card.title }}</span>
 
       @if (isStatsLoading()) {
-      <!-- TODO: Swap for a skeleton/spinner -->
       <span class="value__data-card">—</span>
       } @else {
       <span class="value__data-card">{{ card.value }}</span>
@@ -53,7 +52,7 @@
       <nz-spin [nzSpinning]="isLoading()">
         @if (error()) {
         <div class="p-4 text-red-500">{{ error() }}</div>
-        } @else if (customers().length === 0 && !isLoading()) {
+        } @else if (entities().length === 0 && !isLoading()) {
         <div class="p-4 text-center text-standardGray">No se encontraron clientes.</div>
         } @else {
         <table class="w-full text-sm">
@@ -71,28 +70,37 @@
             </tr>
           </thead>
           <tbody>
-            @for (customer of customers(); track customer.id) {
+            @for (entity of entities(); track entity.id) {
             <tr class="border-b">
-              <td class="font-medium cell__table whitespace-nowrap">{{ customer.dni }}</td>
-              <td class="font-medium cell__table whitespace-nowrap">{{ getFullName(customer) }}</td>
-              <td class="font-medium cell__table">Cliente</td>
+              <td class="font-medium cell__table whitespace-nowrap">{{ entity.dni }}</td>
+              <td class="font-medium cell__table whitespace-nowrap">{{ getFullName(entity) }}</td>
+
+              <!-- Tipo -->
+              <td class="font-medium cell__table">{{ getEntityKindLabel(entity) }}</td>
+
+              <!-- Grado de Riesgo -->
               <td class="cell__table">
                 <span class="flex justify-center px-2 py-1 text-xs border rounded-sm border-primary text-primary">
-                  Grado {{ getGradeLabel(customer.payment_grade) }}
+                  Grado {{ getGradeLabel(entity.payment_grade ?? '1') }}
                 </span>
               </td>
+
               <td class="cell__table">L 50,000</td>
-              <td class="cell__table whitespace-nowrap">
-                {{ getSpouseLabel(customer) }}
-              </td>
+
+              <!-- Cónyuge -->
+              <td class="cell__table whitespace-nowrap">{{ getSpouseLabel(entity) }}</td>
+
+              <!-- Estado -->
               <td class="cell__table">
-                <web-icon name="DOT" size="16" [color]="getStateColor(customer.state)" />
+                <web-icon name="DOT" size="16" [color]="getStateColor(entity)" />
               </td>
+
               <td class="cell__table">06/04/2026</td>
+
               <td class="cell__table">
                 <div class="flex items-center gap-2.5">
-                  <app-view-entity aria-label="Ver cliente" [customer]="customer" />
-                  <app-edit-entity aria-label="Editar cliente" [customerId]="customer.id" [entityType]="'C'"
+                  <app-view-entity aria-label="Ver entidad" [entity]="entity" />
+                  <app-edit-entity aria-label="Editar entidad" [entityId]="entity.id" [entityType]="entity._kind"
                     (entityUpdated)="onEntityChanged()" />
                 </div>
               </td>

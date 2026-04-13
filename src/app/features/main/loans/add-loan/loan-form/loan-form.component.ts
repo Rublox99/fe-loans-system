@@ -9,6 +9,7 @@ import { Customer } from '../../../../../core/interfaces/customers.interface';
 import { GeneralService } from '../../../../../core/services/general.service';
 import { interestRangeValidator, positiveNumberValidator } from '../../loans.component';
 import { EntitiesService } from '../../../../../core/services/pages/entities.service';
+import { Entity } from '../../../../../core/types/entity.type';
 
 @Component({
   selector: 'app-loan-form',
@@ -60,9 +61,9 @@ export class LoanFormComponent implements OnInit {
   total = computed(() => this.capital() + this.interestAmount());
   feeValue = computed(() => this.fees() > 0 ? this.total() / this.fees() : 0);
 
-  customerSearchResults = signal<Customer[]>([]);
-  isCustomerSearchLoading = signal(false);
-  private onCustomerSearchDebounced!: (term: string) => void;
+  entitySearchResults = signal<Entity[]>([]);
+  isEntitySearchLoading = signal(false);
+  private onEntitySearchDebounced!: (term: string) => void;
 
   isSubmitting = signal(false);
 
@@ -86,33 +87,33 @@ export class LoanFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(v => this.interest.set(Number(v) || 0));
 
-    // Debounced customer search
-    this.onCustomerSearchDebounced = this.generalService.debounce((term: string) => {
+    // Debounced entity search
+    this.onEntitySearchDebounced = this.generalService.debounce((term: string) => {
       if (!term?.trim()) {
-        this.customerSearchResults.set([]);
-        this.isCustomerSearchLoading.set(false);
+        this.entitySearchResults.set([]);
+        this.isEntitySearchLoading.set(false);
         return;
       }
-      this.isCustomerSearchLoading.set(true);
-      this.entitiesService.getCustomers(term, 1, 10)
+      this.isEntitySearchLoading.set(true);
+      this.entitiesService.getEntities(term, 1, 10)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: ({ data }) => {
-            this.customerSearchResults.set(data);
-            this.isCustomerSearchLoading.set(false);
+            this.entitySearchResults.set(data);
+            this.isEntitySearchLoading.set(false);
           },
-          error: () => this.isCustomerSearchLoading.set(false)
+          error: () => this.isEntitySearchLoading.set(false)
         });
     }, 350);
   }
 
-  onCustomerSearch(term: string): void {
-    this.isCustomerSearchLoading.set(true); // optimistic — debounce will resolve
-    this.onCustomerSearchDebounced(term);
+  onEntitySearch(term: string): void {
+    this.isEntitySearchLoading.set(true); // optimistic — debounce will resolve
+    this.onEntitySearchDebounced(term);
   }
 
-  getCustomerFullName(customer: Customer): string {
-    return [customer.first_name, customer.second_name, customer.last_names]
+  getEntityFullName(entity: Entity): string {
+    return [entity.first_name, entity.second_name, entity.last_names]
       .filter(Boolean)
       .join(' ');
   }

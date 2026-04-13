@@ -12,6 +12,7 @@ import { ReportsService } from '../../../core/services/pages/reports.service';
 import { PaymentGrade } from '../../../core/types/payment-grade.type';
 import { ExcelService } from '../../../core/services/pages/excel.service';
 import { EntitiesService } from '../../../core/services/pages/entities.service';
+import { Entity } from '../../../core/types/entity.type';
 
 export interface ReportFilters {
   search?: string;
@@ -57,8 +58,8 @@ export class ReportsComponent implements OnInit {
   });
 
   // Customer search signals
-  customerSearchResults = signal<Customer[]>([]);
-  isCustomerSearchLoading = signal(false);
+  entitiesSearchResults = signal<Entity[]>([]);
+  isEntitySearchLoading = signal(false);
 
   // User search signals
   userSearchResults = signal<LocalUser[]>([]);
@@ -127,7 +128,7 @@ export class ReportsComponent implements OnInit {
     });
 
     this.searchCustomers = this.generalService.debounce((search: string) => {
-      this.fetchCustomerOptions(search);
+      this.fetchEntitiesOptions(search);
     }, 400);
 
     this.searchUsers = this.generalService.debounce((search: string) => {
@@ -135,26 +136,26 @@ export class ReportsComponent implements OnInit {
     }, 400);
 
     this.fetchCustomers();
-    this.fetchCustomerOptions();
+    this.fetchEntitiesOptions();
     this.fetchUserOptions();
   }
 
   onCustomerSearch(search: string): void {
-    this.isCustomerSearchLoading.set(true);
+    this.isEntitySearchLoading.set(true);
     this.searchCustomers(search);
   }
 
-  private fetchCustomerOptions(search: string = ''): void {
-    this.isCustomerSearchLoading.set(true);
+  private fetchEntitiesOptions(search: string = ''): void {
+    this.isEntitySearchLoading.set(true);
 
-    this.entitiesService.getCustomers(search, 1, 20).subscribe({
+    this.entitiesService.getEntities(search, 1, 20).subscribe({
       next: ({ data }) => {
-        this.customerSearchResults.set(data);
-        this.isCustomerSearchLoading.set(false);
+        this.entitiesSearchResults.set(data);
+        this.isEntitySearchLoading.set(false);
       },
       error: (err) => {
         console.error(err);
-        this.isCustomerSearchLoading.set(false);
+        this.isEntitySearchLoading.set(false);
       }
     });
   }
@@ -179,8 +180,8 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  getCustomerFullName(customer: Customer): string {
-    return [customer.first_name, customer.last_names]
+  getCustomerFullName(entity: Entity): string {
+    return [entity.first_name, entity.last_names]
       .filter(Boolean)
       .join(' ');
   }

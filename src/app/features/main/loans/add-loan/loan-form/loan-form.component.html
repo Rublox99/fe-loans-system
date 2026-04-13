@@ -4,11 +4,12 @@
   <section class="section__line text-highContrast">
     <div class="w-full space-y-2.5">
       <p class="text-help">Cliente</p>
-      <nz-select class="w-full" style="height: 45px !important;" formControlName="customerId" nzPlaceHolder="Busque un cliente por su nombre o DNI"
-        nzShowSearch nzAllowClear nzServerSearch [nzStatus]="isInvalid('customerId') ? 'error' : ''"
-        [nzLoading]="isCustomerSearchLoading()" (nzOnSearch)="onCustomerSearch($event)">
-        @for (customer of customerSearchResults(); track customer.id) {
-        <nz-option [nzValue]="customer.id" [nzLabel]="getCustomerFullName(customer)" />
+      <nz-select class="w-full" style="height: 45px !important;" formControlName="customerId"
+        nzPlaceHolder="Busque un cliente por su nombre o DNI" nzShowSearch nzAllowClear nzServerSearch
+        [nzStatus]="isInvalid('customerId') ? 'error' : ''" [nzLoading]="isEntitySearchLoading()"
+        (nzOnSearch)="onEntitySearch($event)">
+        @for (entity of entitySearchResults(); track entity.id) {
+        <nz-option [nzValue]="entity.id" [nzLabel]="getEntityFullName(entity  )" />
         }
       </nz-select>
       @if (isInvalid('customerId')) {

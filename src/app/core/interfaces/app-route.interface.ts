@@ -5,7 +5,7 @@ export interface AppRoute {
 
 export interface AppRoutesCollection {
     login: AppRoute
-    customers: AppRoute
+    entities: AppRoute
     loans: AppRoute
     reports: AppRoute
 }

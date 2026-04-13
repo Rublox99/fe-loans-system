@@ -15,6 +15,7 @@ import { GeneralService } from '../../../core/services/general.service';
 import { ViewEntityDrawerComponent } from './view-entity/view-entity.component';
 import { AddEntityDrawerComponent } from './add-entity/add-entity.component';
 import { EditEntityDrawerComponent } from './edit-entity/edit-entity.component';
+import { Entity, EntityKind } from '../../../core/types/entity.type';
 
 export interface CardDef {
   title: string;
@@ -25,8 +26,8 @@ export interface CardDef {
 
 @Component({
   selector: 'app-main',
-  templateUrl: './customers.component.html',
-  styleUrls: ['../main.styles.css', './customers.styles.css'],
+  templateUrl: './entities.component.html',
+  styleUrls: ['../main.styles.css', './entities.styles.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex-1 min-h-0 overflow-hidden' },
   imports: [
@@ -38,14 +39,14 @@ export interface CardDef {
     NgZorroModule
   ]
 })
-export class CustomersComponent implements OnInit {
+export class EntitiessComponent implements OnInit {
   private generalService = inject(GeneralService);
   private entitiesService = inject(EntitiesService);
 
   searchText = '';
   isLoading = signal(false);
   isStatsLoading = signal(false);
-  customers = signal<Customer[]>([]);
+  entities = signal<Entity[]>([]);
   error = signal<string | null>(null);
   currentPage = signal(1);
   readonly pageSize = 10;
@@ -104,26 +105,34 @@ export class CustomersComponent implements OnInit {
   ngOnInit() {
     this.getCustomers = this.generalService.debounce(() => {
       this.currentPage.set(1);
-      this.fetchCustomers();
+      this.fetchEntities();
     });
 
-    this.fetchCustomers();
+    this.fetchEntities();
     this.fetchStats();
   }
 
   onEntityChanged(): void {
-    this.fetchCustomers();
+    this.fetchEntities();
     this.fetchStats();
   }
 
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages()) return;
     this.currentPage.set(page);
-    this.fetchCustomers();
+    this.fetchEntities();
   }
 
-  getFullName(customer: Customer): string {
-    return [customer.first_name, customer.second_name, customer.last_names]
+  isCustomer(entity: Entity): entity is Customer & { _kind: 'C' } {
+    return entity._kind === 'C';
+  }
+
+  getEntityKindLabel(entity: Entity): string {
+    return entity._kind === 'C' ? 'Cliente' : 'Aval';
+  }
+
+  getFullName(entity: Entity): string {
+    return [entity.first_name, entity.second_name, entity.last_names]
       .filter(Boolean)
       .join(' ');
   }
@@ -133,8 +142,9 @@ export class CustomersComponent implements OnInit {
     return labels[grade] ?? grade;
   }
 
-  getStateColor(state: string): string {
-    switch (state) {
+  getStateColor(entity: Entity): string {
+    if (!this.isCustomer(entity)) return 'gray'; // Guarantee persons have no state field
+    switch (entity.state) {
       case 'Active': return 'var(--success)';
       case 'Inactive': return 'var(--warning)';
       case 'Blocked': return 'var(--error)';
@@ -142,35 +152,30 @@ export class CustomersComponent implements OnInit {
     }
   }
 
-  getSpouseLabel(customer: Customer): string {
-    if (!customer.spouse) return 'N/A';
-
-    const name = [
-      customer.spouse.first_name,
-      customer.spouse.second_name,
-      customer.spouse.last_names
-    ].filter(Boolean).join(' ');
-
-    return `${name} (${customer.spouse.dni})`;
+  getSpouseLabel(entity: Entity): string {
+    if (!this.isCustomer(entity)) return 'N/A';
+    const c = entity;
+    if (!c.spouse) return 'N/A';
+    const name = [c.spouse.first_name, c.spouse.second_name, c.spouse.last_names]
+      .filter(Boolean).join(' ');
+    return `${name} (${c.spouse.dni})`;
   }
 
-  fetchCustomers() {
+  fetchEntities() {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.entitiesService.getCustomers(this.searchText, this.currentPage(), this.pageSize)
+    this.entitiesService
+      .getEntities(this.searchText, this.currentPage(), this.pageSize, true)
       .subscribe({
         next: ({ data, total }) => {
-          this.customers.set(data);
+          this.entities.set(data);
           this.totalItems.set(total);
           this.isLoading.set(false);
-
-          console.log(this.customers());
-
         },
         error: (err) => {
           console.error(err);
-          this.error.set('Error cargando clientes');
+          this.error.set('Error cargando entidades');
           this.isLoading.set(false);
         }
       });

@@ -3,8 +3,8 @@ import {
   OnInit, OnDestroy, Output, signal
 } from '@angular/core';
 import {
-  AbstractControl, FormControl, FormGroup,
-  ReactiveFormsModule, ValidationErrors, Validators
+  FormControl, FormGroup,
+  ReactiveFormsModule, Validators
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
@@ -15,18 +15,19 @@ import { PaymentGrade } from '../../../../core/types/payment-grade.type';
 import { ProfessionOption } from '../../../../core/interfaces/profession-option.interface';
 import { PROFESSION_LIST } from '../../../../shared/constants';
 import { dniValidator, incomeValidator, phoneValidator } from '../add-entity/add-entity.component';
+import { GuaranteePerson } from '../../../../core/interfaces/guarantee-person.interface';
 
 export interface GuaranteeFormOutput {
   formValue: {
     firstName: string;
     secondName: string;
     lastName: string;
-    dni: string;   // formatted: xxxx-xxxx-xxxxx
-    phone: string;   // formatted: xxxx-xxxx
+    dni: string;
+    phone: string;
     email: string;
     paymentGrade: PaymentGrade;
     location: string;
-    profession: string;   // value from list OR custom text
+    profession: string;
     company: string;
     income: number;
     notes: string;
@@ -36,6 +37,11 @@ export interface GuaranteeFormOutput {
 
 const GRADE_MAP: Record<string, PaymentGrade> = {
   A: '1', B: '2', C: '3', D: '4', E: '5',
+};
+
+// Inverse map for loading existing grade into the radio group
+const GRADE_LABEL_MAP: Record<string, string> = {
+  '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E',
 };
 
 @Component({
@@ -82,8 +88,29 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
   mediaFiles = signal<NzUploadFile[]>([]);
   private rawFiles: File[] = [];
 
+  // ── Edit-mode gallery tracking ────────────────────────────────────────────
+
+  /**
+   * File names (not signed URLs) of images that existed when the drawer
+   * opened and have NOT been removed by the user.
+   */
+  survivingImageFileNames: string[] = [];
+
+  /**
+   * File names of images the user removed from the list during this edit
+   * session — these will be deleted from storage.
+   */
+  imagesToDelete: string[] = [];
+
+  /**
+   * Parallel array to mediaFiles: for pre-existing images this holds the
+   * original storage filename; for newly added files it is null.
+   */
+  private mediaFileNames: (string | null)[] = [];
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
+
   ngOnInit(): void {
-    // Show/hide custom profession input reactively
     this.form.get('professionSelect')!
       .valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -100,24 +127,6 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
         }
         customCtrl.updateValueAndValidity();
       });
-
-    if (this.entityId) {
-      // TODO: load from Supabase
-      this.form.patchValue({
-        firstName: 'John',
-        secondName: 'Doe',
-        lastName: 'Smith',
-        dni: '0801-1990-12345',
-        phone: '9999-8888',
-        email: 'prueba@gmail.com',
-        radioEntityGrade: 'A',
-        location: 'Tegucigalpa, Francisco Morazán',
-        professionSelect: 'ingeniero',
-        company: 'Tech Co.',
-        income: 5000,
-        notes: 'This is a note about the guarantee.'
-      });
-    }
   }
 
   ngOnDestroy(): void {
@@ -125,75 +134,64 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * DNI: formats to xxxx-xxxx-xxxxx as user types
-   * Only allows numeric input, strips everything else
-   */
-  onDniInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    // Strip non-digits
-    const digits = input.value.replace(/\D/g, '').slice(0, 13);
-
-    let formatted = digits;
-    if (digits.length > 8) {
-      formatted = `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8)}`;
-    } else if (digits.length > 4) {
-      formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
-    }
-
-    // Patch without re-triggering this listener
-    this.form.get('dni')!.setValue(formatted, { emitEvent: false });
-    input.value = formatted;
-  }
-
-  onDniKeydown(event: KeyboardEvent): void {
-    this.preventNonNumeric(event);
-  }
+  // ── Edit-mode loader (called by parent after fetch completes) ─────────────
 
   /**
-   * Phone: formats to xxxx-xxxx as user types
+   * Patches the form with existing data and populates the gallery preview
+   * with signed URLs while tracking original filenames for diffing on save.
+   *
+   * @param data        The flat GuaranteePerson record from the DB
+   * @param signedUrls  Pre-signed URLs for each filename in data.gallery
+   * @param profList    The profession list used to detect 'otro' vs known value
    */
-  onPhoneInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 8);
+  loadForEdit(
+    data: GuaranteePerson,
+    signedUrls: Record<string, string>,
+    profList: ProfessionOption[]
+  ): void {
+    // Resolve profession select vs custom
+    const knownProfession = profList.find(p => p.value === data.profession);
+    const professionSelect = knownProfession ? data.profession : 'otro';
+    const professionCustom = knownProfession ? '' : data.profession;
 
-    const formatted = digits.length > 4
-      ? `${digits.slice(0, 4)}-${digits.slice(4)}`
-      : digits;
+    this.form.patchValue({
+      firstName: data.first_name,
+      secondName: data.second_name,
+      lastName: data.last_names,
+      dni: data.dni.trim(),
+      phone: data.phone_number,
+      email: data.email,
+      radioEntityGrade: GRADE_LABEL_MAP[data.payment_grade ?? '1'] ?? 'A',
+      location: data.location,
+      professionSelect,
+      professionCustom,
+      company: data.company ?? '',
+      income: data.income,
+      notes: data.comment ?? '',
+    });
 
-    this.form.get('phone')!.setValue(formatted, { emitEvent: false });
-    input.value = formatted;
-  }
+    // Initialise gallery tracking
+    this.survivingImageFileNames = [...data.gallery];
+    this.imagesToDelete = [];
+    this.mediaFileNames = [...data.gallery]; // one entry per image
 
-  onPhoneKeydown(event: KeyboardEvent): void {
-    this.preventNonNumeric(event);
-  }
+    // Build NzUploadFile list from signed URLs
+    const previewFiles: NzUploadFile[] = data.gallery.map((filename, i) => ({
+      uid: `-existing-${i}`,
+      name: filename,
+      status: 'done',
+      url: signedUrls[i] ?? '',
+      thumbUrl: signedUrls[i] ?? '',
+    }));
 
-  /** Allows only digits, backspace, delete, arrows and tab */
-  private preventNonNumeric(event: KeyboardEvent): void {
-    const allowed = [
-      'Backspace', 'Delete', 'Tab',
-      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-      'Home', 'End'
-    ];
-    if (allowed.includes(event.key)) return;
-    if (!/^\d$/.test(event.key)) event.preventDefault();
-  }
-
-  /** Returns true if a control is invalid AND has been touched */
-  isInvalid(controlName: string): boolean {
-    const ctrl = this.form.get(controlName);
-    return !!ctrl && ctrl.invalid && ctrl.touched;
-  }
-
-  /** Touches all controls to trigger validation display on submit attempt */
-  private markAllTouched(): void {
-    Object.values(this.form.controls).forEach(ctrl => ctrl.markAsTouched());
+    this.mediaFiles.set(previewFiles);
+    this.rawFiles = []; // no new raw files yet
   }
 
   beforeUpload = (file: NzUploadFile): boolean => {
     const rawFile = (file.originFileObj ?? file) as unknown as File;
     this.rawFiles.push(rawFile);
+    this.mediaFileNames.push(null); // new file — no existing filename
 
     const reader = new FileReader();
     reader.onload = e => {
@@ -209,14 +207,49 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
 
   handleMediaChange(info: NzUploadChangeParam): void {
     const remainingUids = new Set(info.fileList.map(f => f.uid));
-    this.rawFiles = this.rawFiles.filter((_, i) => {
-      const uid = this.mediaFiles()[i]?.uid;
-      return uid ? remainingUids.has(uid) : false;
+    const currentFiles = this.mediaFiles();
+
+    currentFiles.forEach((f, i) => {
+      if (!remainingUids.has(f.uid)) {
+        const filename = this.mediaFileNames[i];
+
+        if (filename) {
+          // Pre-existing image was removed — mark for deletion
+          this.imagesToDelete.push(filename);
+          this.survivingImageFileNames = this.survivingImageFileNames
+            .filter(n => n !== filename);
+        } else {
+          // Newly added file was removed before saving — drop from rawFiles
+          // Find the raw file index by matching uid order among null-named entries
+          const newFileIndex = currentFiles
+            .slice(0, i)
+            .filter((_, j) => this.mediaFileNames[j] === null)
+            .length;
+          this.rawFiles.splice(newFileIndex, 1);
+        }
+      }
     });
+
+    // Rebuild parallel arrays to match the new fileList order
+    const newMediaFileNames: (string | null)[] = [];
+    info.fileList.forEach(f => {
+      const idx = currentFiles.findIndex(c => c.uid === f.uid);
+      newMediaFileNames.push(idx !== -1 ? this.mediaFileNames[idx] : null);
+    });
+
+    this.mediaFileNames = newMediaFileNames;
     this.mediaFiles.set(info.fileList);
   }
 
-  /* Called by the parent after a successful submission */
+  isInvalid(controlName: string): boolean {
+    const ctrl = this.form.get(controlName);
+    return !!ctrl && ctrl.invalid && ctrl.touched;
+  }
+
+  private markAllTouched(): void {
+    Object.values(this.form.controls).forEach(ctrl => ctrl.markAsTouched());
+  }
+
   resetForm(): void {
     this.form.reset({
       firstName: '',
@@ -234,16 +267,59 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
       notes: ''
     });
 
-    // Reset upload state
     this.mediaFiles.set([]);
     this.rawFiles = [];
-
-    // Reset profession custom input visibility
+    this.survivingImageFileNames = [];
+    this.imagesToDelete = [];
+    this.mediaFileNames = [];
     this.isCustomProfession.set(false);
-
-    // Clear touched/dirty state so no error messages show
     this.form.markAsPristine();
     this.form.markAsUntouched();
+  }
+
+  onDniInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 13);
+
+    let formatted = digits;
+    if (digits.length > 8) {
+      formatted = `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8)}`;
+    } else if (digits.length > 4) {
+      formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+    }
+
+    this.form.get('dni')!.setValue(formatted, { emitEvent: false });
+    input.value = formatted;
+  }
+
+  onDniKeydown(event: KeyboardEvent): void {
+    this.preventNonNumeric(event);
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 8);
+
+    const formatted = digits.length > 4
+      ? `${digits.slice(0, 4)}-${digits.slice(4)}`
+      : digits;
+
+    this.form.get('phone')!.setValue(formatted, { emitEvent: false });
+    input.value = formatted;
+  }
+
+  onPhoneKeydown(event: KeyboardEvent): void {
+    this.preventNonNumeric(event);
+  }
+
+  private preventNonNumeric(event: KeyboardEvent): void {
+    const allowed = [
+      'Backspace', 'Delete', 'Tab',
+      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Home', 'End'
+    ];
+    if (allowed.includes(event.key)) return;
+    if (!/^\d$/.test(event.key)) event.preventDefault();
   }
 
   closeDrawerFn(): void {
@@ -256,7 +332,6 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
 
     const raw = this.form.value;
 
-    // Resolve profession: use custom text if 'otro' was selected
     const profession = raw.professionSelect === 'otro'
       ? raw.professionCustom
       : raw.professionSelect;
