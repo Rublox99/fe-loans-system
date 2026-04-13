@@ -43,9 +43,17 @@ import { SUPABASE_BUCKETS } from '../../../../shared/constants';
   `
 })
 export class ViewEntityDrawerComponent {
-  @Input() customer!: Customer;
   @Input() customerId?: string;
   @Input() isViewableFromLoanDetails: boolean = false;
+
+  private _customer = signal<Customer | undefined>(undefined);
+  @Input() set customer(value: Customer) {
+    this._customer.set(value);
+  }
+
+  get customer(): Customer | undefined {
+    return this._customer();
+  }
 
   isVisible = false;
 
@@ -75,9 +83,10 @@ export class ViewEntityDrawerComponent {
   openDrawer() {
     this.isVisible = true;
 
-    if (this.customer) {
-      this.resolveGalleryUrls(this.customer);
-      this.resolveRelations(this.customer);
+    const c = this._customer();
+    if (c) {
+      this.resolveGalleryUrls(c);
+      this.resolveRelations(c);
     } else if (this.customerId) {
       this.fetchCustomer(this.customerId);
     }
@@ -129,7 +138,7 @@ export class ViewEntityDrawerComponent {
           SUPABASE_BUCKETS.ENTITIES_GALLERIES,
           `${customer.id}/${filename}`
         );
-        
+
         return url;
       })
     );
@@ -145,10 +154,12 @@ export class ViewEntityDrawerComponent {
 
     this.entitiesService.getCustomerById(id).subscribe({
       next: (data) => {
-        this.customer = data!;
+        this._customer.set(data);
         this.isLoadingCustomer.set(false);
-        this.resolveGalleryUrls(data!);
-        this.resolveRelations(data!);
+        if (data) {
+          this.resolveGalleryUrls(data);
+          this.resolveRelations(data);
+        }
       },
       error: (err) => {
         console.error(err);

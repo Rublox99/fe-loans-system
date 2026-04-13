@@ -24,9 +24,9 @@
             </div>
             <span class="title__data-card">Capital en fluctuación</span>
             <span class="value__data-card">
-                @if (areStatsLoading()) {
-                <nz-spin nzSimple nzSize="small" />
-                } @else {
+                @if (areStatsLoading())
+                { - }
+                @else {
                 {{ stats().fluctuatingCapital | currency:'L':'symbol':'1.2-2' }}
                 }
             </span>
@@ -36,9 +36,9 @@
         <div class="flex-1 highlight__data-card bg-primary text-staticWhite">
             <span class="title__data-card">Líquidez del portafolio</span>
             <span class="value__data-card">
-                @if (areStatsLoading()) {
-                <nz-spin nzSimple nzSize="small" />
-                } @else {
+                @if (areStatsLoading())
+                { - }
+                @else {
                 {{ stats().portfolioLiquidity | number:'1.0-1' }}% retornado
                 }
             </span>
@@ -54,9 +54,9 @@
         <div class="highlight__data-card bg-[#E8F2FF] flex-none text-staticBlack">
             <span class="title__data-card">Préstamos activos</span>
             <span class="value__data-card">
-                @if (areStatsLoading()) {
-                <nz-spin nzSimple nzSize="small" />
-                } @else {
+                @if (areStatsLoading()) 
+                { - }
+                @else {
                 {{ stats().activeLoans }}
                 }
             </span>

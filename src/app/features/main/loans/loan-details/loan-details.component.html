@@ -10,11 +10,12 @@
         <p class="title__header h-ellipsed-text" style="font-weight: bold !important;">{{loanId}}</p>
 
         <!-- Loan State Selector -->
+        @if (selectedLoanState() === 'Under Review') {
+        <!-- Editable selector — only when Under Review -->
         <nz-select class="loan-state-select" [ngModel]="selectedLoanState()" [nzLoading]="isUpdatingState()"
           [nzDisabled]="isLoadingLoan() || isUpdatingState()" [class]="selectedStateColorClass()"
           (ngModelChange)="onLoanStateChange($event)" nzBorderless aria-label="Estado del préstamo">
-
-          @for (option of loanStateOptions; track option.value) {
+          @for (option of availableLoanStateOptions(); track option.value) {
           <nz-option [nzValue]="option.value" [nzLabel]="option.label" [nzCustomContent]="true">
             <span [class]="option.colorClass + ' option-pill'">
               {{ option.label }}
@@ -22,56 +23,76 @@
           </nz-option>
           }
         </nz-select>
+        } @else {
+        <!-- Read-only pill — once Accepted, Denied or Paid -->
+        <span class="px-3 py-1 text-xs border rounded-sm font-roboto" [ngClass]="selectedStateColorClass()">
+          {{ loanStateOptions.find(o => o.value === selectedLoanState())?.label }}
+        </span>
+        }
       </div>
     </div>
 
     <!-- Right -->
     <div class="flex-none flex items-center gap-2.5">
-      <app-view-entity aria-label="Ver entidad" [isViewableFromLoanDetails]="true" [customerId]="loan!.customer_id" />
-      <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee" [loan]="loan" />
+      @if (loan()) {
+      <app-view-entity aria-label="Ver entidad" [isViewableFromLoanDetails]="true" [customerId]="loan()!.customer_id" />
+      <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee()" [loan]="loan()"
+        (feeUpdated)="onFeeUpdated()" />
+      } @else {
+      <!-- Placeholder to preserve layout while loading -->
+      <div class="flex gap-2.5">
+        <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>
+        <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>
+      </div>
+      }
     </div>
   </section>
 
   <!-- Cards -->
   <section class="flex flex-none gap-5 py-2 overflow-x-auto hide-scrollbar">
-    <!-- #1 -->
+
+    <!-- #1 Total pagado -->
     <div class="flex-1 relative highlight__data-card bg-[#E4FFF3] text-highContrast" style="--card-accent: #0A7040;">
       <span class="title__data-card">Total pagado</span>
-      <span class="value__data-card">L {{isLoadingLoan() ? 0 : loan!.fee_value * loan!.paid_fees }}</span>
-
-      <!-- Absolute -->
-      <span class="absolute text-xs uppercase text-standardGray bottom-1.5 left-5">
-        45% retornado
+      <span class="value__data-card">
+        @if (isLoadingLoan()) { — }
+        @else { {{ totalPaid() | currency:'L ':'symbol':'1.2-2' }} }
       </span>
-
+      <span class="absolute text-xs uppercase text-standardGray bottom-1.5 left-5">
+        @if (!isLoadingLoan() && loan()) {
+        {{ ((totalPaid() / (loan()!.fee_value * loan()!.fees)) * 100) | number:'1.0-0' }}% retornado
+        }
+      </span>
       <web-icon class="absolute top-5 right-5" name="BILL" color="#0A7040" size="20" />
     </div>
 
-    <!-- #2 -->
+    <!-- #2 Saldo restante -->
     <div class="flex-1 relative highlight__data-card bg-[#FFF6E7] text-highContrast" style="--card-accent: #FFA719;">
       <span class="title__data-card">Saldo restante</span>
-      <span class="value__data-card">L {{isLoadingLoan() ?
-        0
-        :
-        loan!.capital_balance + loan!.capital_balance*loan!.interest}}</span>
-
-      <!-- Absolute -->
+      <span class="value__data-card">
+        @if (isLoadingLoan()) { — }
+        @else { {{ remainingBalance() | currency:'L ':'symbol':'1.2-2' }} }
+      </span>
       <web-icon class="absolute top-5 right-5" name="BANK" color="#FFA719" size="20" />
     </div>
 
-    <!-- #3 -->
+    <!-- #3 Siguiente fecha de pago -->
     <div class="relative flex-1 highlight__data-card bg-primary text-staticWhite">
-      <!-- Texture layer -->
       <div class="absolute inset-0 
-                bg-[url(/assets/images/geometric-texture.webp)] 
-                bg-cover opacity-10 pointer-events-none">
+            bg-[url(/assets/images/geometric-texture.webp)] 
+            bg-cover opacity-10 pointer-events-none">
       </div>
-
       <span class="title__data-card">Siguiente fecha de pago</span>
       <span class="value__data-card">
-        {{ loan!.next_expected_payment | date:"d 'de' MMMM 'de' yyyy" : '' : 'es' }}
+        @if (isLoadingLoan()) { — }
+        @else if (loan()?.next_expected_payment) {
+        {{ loan()!.next_expected_payment | date:"d 'de' MMMM 'de' yyyy" : '' : 'es' }}
+        } @else {
+        N/A
+        }
       </span>
     </div>
+
   </section>
 
   <!-- Table -->
@@ -116,9 +137,9 @@
                 {{ fee.expiration_date | date:"d-MM-yyyy" }}
               </td>
               <td class="cell__table whitespace-nowrap">
-                {{ fee.payment_date | date:"d-MM-yyyy" }}
+                {{ fee.payment_date ? (fee.payment_date | date:"d-MM-yyyy") : 'N/A' }}
               </td>
-              <td class="cell__table whitespace-nowrap">{{ fee.paid_amount }}</td>
+              <td class="cell__table whitespace-nowrap">{{ fee.paid_amount ? fee.paid_amount : 'N/A'}}</td>
               <td class="cell__table">
                 <span class="flex justify-center w-[100px] px-2 py-1 text-xs border rounded-sm font-roboto"
                   [ngClass]="getFeeStateClasses(fee.fee_state)">

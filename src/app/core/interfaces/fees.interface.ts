@@ -12,3 +12,9 @@ export interface Fee {
     last_modified: string;
     created_at: string;
 }
+
+export interface UpdateFeePayload {
+    fee_state?: FeeState;
+    payment_date?: string | null;
+    paid_amount?: number | null;
+}

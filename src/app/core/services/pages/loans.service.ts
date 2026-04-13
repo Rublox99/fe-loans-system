@@ -72,9 +72,11 @@ export class LoansService {
                 const customerNames = new Map<string, string>(
                     loans.map(l => [
                         l.customer_id,
-                        [l.customer.first_name, l.customer.second_name, l.customer.last_names]
-                            .filter(Boolean)
-                            .join(' ')
+                        l.customer
+                            ? [l.customer.first_name, l.customer.second_name, l.customer.last_names]
+                                .filter(Boolean)
+                                .join(' ')
+                            : 'Unknown'
                     ])
                 );
 
@@ -88,7 +90,18 @@ export class LoansService {
     }
 
     getLoanById(id: string): Observable<Loan | undefined> {
-        return of(LOANS_MOCK.find(l => l.id === id));
+        return from(
+            this.supabase
+                .from('loans')
+                .select('*')
+                .eq('id', id)
+                .single()
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+                return data as Loan;
+            })
+        );
     }
 
     getLoansByCustomerId(customerId: string): Observable<Loan[]> {
@@ -148,6 +161,20 @@ export class LoansService {
 
         return from(
             this.supabase.from('loans').insert(insert)
+        ).pipe(
+            map(({ error }) => {
+                if (error) throw error;
+            })
+        );
+    }
+
+    // ─── UPDATE ────────────────────────────────────────────────────────────────
+    updateLoanState(loanId: string, newState: LoanState): Observable<void> {
+        return from(
+            this.supabase
+                .from('loans')
+                .update({ state: newState })
+                .eq('id', loanId)
         ).pipe(
             map(({ error }) => {
                 if (error) throw error;
