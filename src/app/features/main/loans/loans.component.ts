@@ -155,6 +155,8 @@ export class LoansComponent implements OnInit {
           this.totalItems.set(total);
           this.customerNames.set(customerNames);
           this.isLoading.set(false);
+
+          console.log(this.loans())
         },
         error: (err) => {
           console.error(err);

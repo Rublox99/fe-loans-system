@@ -40,14 +40,14 @@ export class LoansService {
         let query = this.supabase
             .from('loans')
             .select(`
-            *,
-            customer:customers!customer_id (
-                first_name,
-                second_name,
-                last_names,
-                dni
-            )
-        `, { count: 'exact' })
+                *,
+                customer:customers!inner(          
+                    first_name,
+                    second_name,
+                    last_names,
+                    dni
+                )
+            `, { count: 'exact' })
             .range(start, end);
 
         if (search) {
@@ -113,7 +113,7 @@ export class LoansService {
         return of(LOANS_MOCK.filter(l => l.state === state));
     }
     */
-    
+
     getLoansStats(): Observable<LoansStats> {
         const stats$ = from(
             this.supabase
