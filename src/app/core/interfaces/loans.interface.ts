@@ -21,6 +21,10 @@ export interface Loan {
   updated_at: string;
 }
 
+export interface LoanSummary {
+  totalBalance: number;
+  lastPaymentDate: string | null;
+}
 export interface LoanWithCustomer extends Loan {
   customer: {
     first_name: string;

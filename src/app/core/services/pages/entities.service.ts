@@ -276,6 +276,65 @@ export class EntitiesService {
         );
     }
 
+    // In EntitiesService
+
+    getLoanSummariesForCustomers(
+        customerIds: string[]
+    ): Observable<Map<string, { totalBalance: number; lastPaymentDate: string | null }>> {
+
+        if (customerIds.length === 0) {
+            return of(new Map());
+        }
+
+        // Query 1: sum of capital_balance per customer for active loans
+        const balances$ = from(
+            this.supabase
+                .from('loans')
+                .select('customer_id, capital_balance')
+                .in('customer_id', customerIds)
+                .eq('state', 'Accepted')
+        );
+
+        // Query 2: most recent payment_date per customer via fees → loans join
+        const lastPayments$ = from(
+            this.supabase
+                .from('fees')
+                .select('payment_date, loans!inner(customer_id)')
+                .in('loans.customer_id', customerIds)
+                .not('payment_date', 'is', null)
+                .order('payment_date', { ascending: false })
+        );
+
+        return forkJoin([balances$, lastPayments$]).pipe(
+            map(([balancesRes, paymentsRes]) => {
+                if (balancesRes.error) throw balancesRes.error;
+                if (paymentsRes.error) throw paymentsRes.error;
+
+                const result = new Map<string, { totalBalance: number; lastPaymentDate: string | null }>();
+
+                // Initialise all requested IDs with zero/null defaults
+                customerIds.forEach(id => result.set(id, { totalBalance: 0, lastPaymentDate: null }));
+
+                // Accumulate balances
+                for (const row of balancesRes.data ?? []) {
+                    const entry = result.get(row.customer_id)!;
+                    entry.totalBalance += Number(row.capital_balance);
+                }
+
+                // Last payment — rows already ordered DESC so first hit per customer wins
+                for (const row of paymentsRes.data ?? []) {
+                    const customerId = (row.loans as any).customer_id as string;
+                    const entry = result.get(customerId);
+                    if (entry && entry.lastPaymentDate === null) {
+                        entry.lastPaymentDate = row.payment_date;
+                    }
+                }
+
+                return result;
+            })
+        );
+    }
+
     getGuaranteePersonForEdit(id: string): Observable<GuaranteePerson> {
         return from(
             this.supabase

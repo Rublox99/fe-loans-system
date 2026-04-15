@@ -70,8 +70,13 @@ import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 import { NzGraphModule } from 'ng-zorro-antd/graph';
 import { NzCronExpressionModule } from 'ng-zorro-antd/cron-expression';
 import { NzQRCodeModule } from 'ng-zorro-antd/qr-code';
+import { EyeOutline, DeleteOutline, DownloadOutline } from '@ant-design/icons-angular/icons';
 
 @NgModule({
+  imports: [
+    // ... your existing ng-zorro imports
+    NzIconModule.forRoot([EyeOutline, DeleteOutline, DownloadOutline])
+  ],
   exports: [
     NzAffixModule,
     NzAlertModule,

@@ -35,7 +35,6 @@
   </section>
 
   <!-- Table -->
-  <!-- TODO: Fix dynamic missing values -->
   <section class="flex flex-col flex-1 min-h-0 gap-2.5">
     <!-- Header -->
     <div class="flex flex-none items-center gap-2.5">
@@ -85,7 +84,10 @@
                 </span>
               </td>
 
-              <td class="cell__table">L 50,000</td>
+              <!-- Capital total   -->
+              <td class="cell__table whitespace-nowrap">
+                {{ formatTotalBalance(entity) }}
+              </td>
 
               <!-- Cónyuge -->
               <td class="cell__table whitespace-nowrap">{{ getSpouseLabel(entity) }}</td>
@@ -95,7 +97,10 @@
                 <web-icon name="DOT" size="16" [color]="getStateColor(entity)" />
               </td>
 
-              <td class="cell__table">06/04/2026</td>
+              <!-- Último pago -->
+              <td class="cell__table whitespace-nowrap">
+                {{ formatLastPayment(entity) }}
+              </td>
 
               <td class="cell__table">
                 <div class="flex items-center gap-2.5">

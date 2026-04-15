@@ -208,7 +208,7 @@ export class CustomerFormComponent implements OnInit, OnDestroy {
       });
 
     if (this.entityId) {
-      // TODO: load from Supabase
+      // TODO: load from Supabase (Aint' sure what's this for)
     }
   }
 

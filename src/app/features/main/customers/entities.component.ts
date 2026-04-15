@@ -16,6 +16,7 @@ import { ViewEntityDrawerComponent } from './view-entity/view-entity.component';
 import { AddEntityDrawerComponent } from './add-entity/add-entity.component';
 import { EditEntityDrawerComponent } from './edit-entity/edit-entity.component';
 import { Entity, EntityKind } from '../../../core/types/entity.type';
+import { LoanSummary } from '../../../core/interfaces/loans.interface';
 
 export interface CardDef {
   title: string;
@@ -47,6 +48,8 @@ export class EntitiessComponent implements OnInit {
   isLoading = signal(false);
   isStatsLoading = signal(false);
   entities = signal<Entity[]>([]);
+  loanSummaries = signal<Map<string, LoanSummary>>(new Map());
+  isLoanSummaryLoading = signal(false);
   error = signal<string | null>(null);
   currentPage = signal(1);
   readonly pageSize = 10;
@@ -161,6 +164,34 @@ export class EntitiessComponent implements OnInit {
     return `${name} (${c.spouse.dni})`;
   }
 
+  getLoanSummary(entity: Entity): LoanSummary | null {
+    if (!this.isCustomer(entity)) return null;
+    return this.loanSummaries().get(entity.id) ?? null;
+  }
+
+  formatTotalBalance(entity: Entity): string {
+    if (!this.isCustomer(entity)) return 'N/A';
+    if (this.isLoanSummaryLoading()) return '—';
+    const summary = this.loanSummaries().get(entity.id);
+    if (!summary || summary.totalBalance === 0) return 'L 0.00';
+    return `L ${summary.totalBalance.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
+
+  formatLastPayment(entity: Entity): string {
+    if (!this.isCustomer(entity)) return 'N/A';
+    if (this.isLoanSummaryLoading()) return '—';
+    const summary = this.loanSummaries().get(entity.id);
+    if (!summary?.lastPaymentDate) return 'Sin pagos';
+    return new Date(summary.lastPaymentDate).toLocaleDateString('es-HN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
   fetchEntities() {
     this.isLoading.set(true);
     this.error.set(null);
@@ -172,6 +203,13 @@ export class EntitiessComponent implements OnInit {
           this.entities.set(data);
           this.totalItems.set(total);
           this.isLoading.set(false);
+
+          // Fetch loan summaries only for customer rows on this page
+          const customerIds = data
+            .filter(e => e._kind === 'C')
+            .map(e => e.id);
+
+          this.fetchLoanSummaries(customerIds);
         },
         error: (err) => {
           console.error(err);
@@ -180,6 +218,30 @@ export class EntitiessComponent implements OnInit {
         }
       });
   }
+
+  private fetchLoanSummaries(customerIds: string[]): void {
+    // Clear stale data immediately so previous page values don't linger
+    this.loanSummaries.set(new Map());
+
+    if (customerIds.length === 0) return;
+
+    this.isLoanSummaryLoading.set(true);
+
+    this.entitiesService
+      .getLoanSummariesForCustomers(customerIds)
+      .subscribe({
+        next: (summaries) => {
+          this.loanSummaries.set(summaries);
+          this.isLoanSummaryLoading.set(false);
+        },
+        error: (err) => {
+          console.error('fetchLoanSummaries error:', err);
+          this.isLoanSummaryLoading.set(false);
+          // Non-blocking — table still renders, columns just show '—'
+        }
+      });
+  }
+
 
   fetchStats() {
     this.isStatsLoading.set(true);
