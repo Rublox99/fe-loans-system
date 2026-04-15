@@ -1,30 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { WebIconComponent } from '../../../shared/components/web-icon.component';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { WebIconComponent } from '../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../shared/modules/ng-zorro.module';
 import { GeneralService } from '../../../core/services/general.service';
 import { ReportCustomer } from '../../../core/interfaces/report-customers.interface';
 import { LoanStateAcronym } from '../../../core/types/loan-state.type';
-import { Customer } from '../../../core/interfaces/customers.interface';
 import { LocalUser } from '../../../core/interfaces/users.interface';
 import { ReportsService } from '../../../core/services/pages/reports.service';
 import { PaymentGrade } from '../../../core/types/payment-grade.type';
 import { ExcelService } from '../../../core/services/pages/excel.service';
 import { EntitiesService } from '../../../core/services/pages/entities.service';
 import { Entity } from '../../../core/types/entity.type';
-
-export interface ReportFilters {
-  search?: string;
-  customerId?: string;
-  customersGrade?: string[];
-  userId?: string;
-  loanState?: string;
-  feeState?: string;
-  dateRange?: [Date, Date] | null;
-  page?: number;
-  pageSize?: number;
-}
+import { ReportFilters } from '../../../core/interfaces/report-filters.interface';
 
 @Component({
   selector: 'app-reports',
@@ -47,49 +42,78 @@ export class ReportsComponent implements OnInit {
 
   readonly grades: PaymentGrade[] = ['1', '2', '3', '4', '5'];
 
-  filtersForm: FormGroup = new FormGroup({
+  filtersForm = new FormGroup({
     customerId: new FormControl(''),
     customersGrade: new FormControl<string[]>([]),
     userId: new FormControl(''),
-    capital: new FormControl('C'),
+    capital: new FormControl(''),
     loanState: new FormControl(''),
     feeState: new FormControl(''),
-    dateRange: new FormControl<[Date, Date] | Date | null>(null)
+    dateRange: new FormControl<[Date, Date] | null>(null),
+    dateRangeTarget: new FormControl<'next_payment' | 'fee_date'>('next_payment')
   });
 
-  // Customer search signals
+  // Search signals
   entitiesSearchResults = signal<Entity[]>([]);
   isEntitySearchLoading = signal(false);
-
-  // User search signals
   userSearchResults = signal<LocalUser[]>([]);
   isUserSearchLoading = signal(false);
 
+  // Table signals
   isLoading = signal(false);
   reportCustomers = signal<ReportCustomer[]>([]);
   error = signal<string | null>(null);
   currentPage = signal(1);
-  readonly pageSize = 10;
   totalItems = signal(0);
   totalCapital = signal(0);
+
+  readonly pageSize = 10;
+
+  // Computed
+  totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalItems() / this.pageSize))
+  );
+  pageNumbers = computed(() =>
+    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
+  );
+  rangeStart = computed(() =>
+    this.totalItems() === 0
+      ? 0
+      : (this.currentPage() - 1) * this.pageSize + 1
+  );
+  rangeEnd = computed(() =>
+    Math.min(this.currentPage() * this.pageSize, this.totalItems())
+  );
+
   selectedDateRange = signal<[Date, Date] | null>(null);
 
-  totalPages = computed(() => Math.max(1, Math.ceil(this.totalItems() / this.pageSize)));
-  pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
-  rangeStart = computed(() => this.totalItems() === 0 ? 0 : (this.currentPage() - 1) * this.pageSize + 1);
-  rangeEnd = computed(() => Math.min(this.currentPage() * this.pageSize, this.totalItems()));
   formattedDateRange = computed(() => {
-    const dateRange = this.selectedDateRange();
+    const dr = this.selectedDateRange();
+    if (!dr?.[0] || !dr?.[1]) return 'Sin período seleccionado';
 
-    if (!dateRange?.[0] || !dateRange?.[1]) return 'Sin período seleccionado';
+    const fmt = (d: Date) =>
+      d.toLocaleDateString('es-HN', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
 
-    const format = (date: Date) => date.toLocaleDateString('es-HN', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
+    return `${fmt(dr[0])} - ${fmt(dr[1])}`;
+  });
 
-    return `${format(dateRange[0])} - ${format(dateRange[1])}`;
+  hasActiveFilters = computed(() => {
+    const {
+      customerId, customersGrade, userId,
+      capital, loanState, feeState, dateRange
+    } = this.filtersForm.value;
+
+    return !!(
+      customerId ||
+      customersGrade?.length ||
+      userId ||
+      capital ||
+      loanState ||
+      feeState ||
+      dateRange
+    );
   });
 
   datePresets: Record<string, [Date, Date]> = {
@@ -111,15 +135,16 @@ export class ReportsComponent implements OnInit {
     ]
   };
 
+  // Debounced functions
   getCustomers!: () => void;
   searchCustomers!: (search: string) => void;
   searchUsers!: (search: string) => void;
 
-  constructor() { }
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.filtersForm.get('dateRange')?.valueChanges.subscribe(value => {
-      this.selectedDateRange.set(value ?? null);
+      this.selectedDateRange.set(
+        Array.isArray(value) ? value as [Date, Date] : null
+      );
     });
 
     this.getCustomers = this.generalService.debounce(() => {
@@ -127,27 +152,35 @@ export class ReportsComponent implements OnInit {
       this.fetchCustomers();
     });
 
-    this.searchCustomers = this.generalService.debounce((search: string) => {
-      this.fetchEntitiesOptions(search);
-    }, 400);
+    this.searchCustomers = this.generalService.debounce(
+      (search: string) => this.fetchEntitiesOptions(search),
+      400
+    );
 
-    this.searchUsers = this.generalService.debounce((search: string) => {
-      this.fetchUserOptions(search);
-    }, 400);
+    this.searchUsers = this.generalService.debounce(
+      (search: string) => this.fetchUserOptions(search),
+      400
+    );
 
     this.fetchCustomers();
     this.fetchEntitiesOptions();
     this.fetchUserOptions();
   }
 
+  // ── Search handlers ──────────────────────────────────────────────────────
+
   onCustomerSearch(search: string): void {
     this.isEntitySearchLoading.set(true);
     this.searchCustomers(search);
   }
 
-  private fetchEntitiesOptions(search: string = ''): void {
-    this.isEntitySearchLoading.set(true);
+  onUserSearch(search: string): void {
+    this.isUserSearchLoading.set(true);
+    this.searchUsers(search);
+  }
 
+  private fetchEntitiesOptions(search = ''): void {
+    this.isEntitySearchLoading.set(true);
     this.entitiesService.getEntities(search, 1, 20).subscribe({
       next: ({ data }) => {
         this.entitiesSearchResults.set(data);
@@ -160,14 +193,8 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  onUserSearch(search: string): void {
+  private fetchUserOptions(search = ''): void {
     this.isUserSearchLoading.set(true);
-    this.searchUsers(search);
-  }
-
-  private fetchUserOptions(search: string = ''): void {
-    this.isUserSearchLoading.set(true);
-
     this.reportsService.getUsers(search, 1, 20).subscribe({
       next: ({ data }) => {
         this.userSearchResults.set(data);
@@ -180,20 +207,126 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  getCustomerFullName(entity: Entity): string {
-    return [entity.first_name, entity.last_names]
-      .filter(Boolean)
-      .join(' ');
+  // ── Filters ──────────────────────────────────────────────────────────────
+
+  private buildFilters(): ReportFilters {
+    const {
+      customerId, customersGrade, userId,
+      capital, loanState, feeState,
+      dateRange, dateRangeTarget
+    } = this.filtersForm.value;
+
+    return {
+      customerId: customerId || undefined,
+      customersGrade: customersGrade?.length ? customersGrade : undefined,
+      userId: userId || undefined,
+      capitalRange: (capital as 'A' | 'B' | 'C') || undefined,
+      loanState: loanState || undefined,
+      feeState: feeState || undefined,
+      dateRange: dateRange || undefined,
+      dateRangeTarget: dateRangeTarget || 'next_payment'
+    };
   }
 
-  goToPage(page: number) {
+  resetFilters(): void {
+    this.filtersForm.reset({
+      customerId: '',
+      customersGrade: [],
+      userId: '',
+      capital: '',
+      loanState: '',
+      feeState: '',
+      dateRange: null,
+      dateRangeTarget: 'next_payment'
+    });
+    this.selectedDateRange.set(null);
+    this.currentPage.set(1);
+    this.fetchCustomers();
+  }
+
+  onGradeChange(grade: PaymentGrade): void {
+    const current = this.filtersForm.get('customersGrade')?.value as PaymentGrade[];
+    const updated = current.includes(grade)
+      ? current.filter(g => g !== grade)
+      : [...current, grade];
+    this.filtersForm.get('customersGrade')?.setValue(updated);
+  }
+
+  isGradeSelected(grade: PaymentGrade): boolean {
+    return (
+      this.filtersForm.get('customersGrade')?.value as PaymentGrade[]
+    ).includes(grade);
+  }
+
+  // ── Data fetching ────────────────────────────────────────────────────────
+
+  private fetchCustomers(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.reportsService
+      .getReportCustomers({
+        ...this.buildFilters(),
+        page: this.currentPage(),
+        pageSize: this.pageSize
+      })
+      .subscribe({
+        next: ({ data, total, totalCapital }) => {
+          this.reportCustomers.set(data);
+          this.totalItems.set(total);
+          this.totalCapital.set(totalCapital);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.error.set('Error cargando clientes');
+          this.isLoading.set(false);
+        }
+      });
+  }
+
+  generateReport(): void {
+    this.isLoading.set(true);
+
+    this.reportsService
+      .getReportCustomers({
+        ...this.buildFilters(),
+        page: 1,
+        pageSize: 99999
+      })
+      .subscribe({
+        next: ({ data, totalCapital }) => {
+          this.excelService.generateReportExcel(
+            data,
+            totalCapital,
+            this.formattedDateRange()
+          );
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.error.set('Error generando reporte');
+          this.isLoading.set(false);
+        }
+      });
+  }
+
+  goToPage(page: number): void {
     if (page < 1 || page > this.totalPages()) return;
     this.currentPage.set(page);
     this.fetchCustomers();
   }
 
+  // ── Display helpers ──────────────────────────────────────────────────────
+
   getFullName(customer: ReportCustomer): string {
     return [customer.first_name, customer.second_name, customer.last_names]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  getCustomerFullName(entity: Entity): string {
+    return [entity.first_name, entity.last_names]
       .filter(Boolean)
       .join(' ');
   }
@@ -205,110 +338,32 @@ export class ReportsComponent implements OnInit {
     return labels[grade];
   }
 
-  getLoanStateLabel(state: string): string {
-    switch (state) {
-      case 'A': return 'Aprobado';
-      case 'IP': return 'En Proceso';
-      case 'R': return 'Rechazado';
-      case 'C': return 'Cerrado';
-      default: return state;
-    }
+  getLoanStateLabel(state: LoanStateAcronym): string {
+    const labels: Record<LoanStateAcronym, string> = {
+      'A': 'Aprobado',
+      'IP': 'En Proceso',
+      'R': 'Rechazado',
+      'C': 'Cerrado'
+    };
+    return labels[state] ?? state;
   }
 
   getLoanStateClasses(state: LoanStateAcronym): string {
-    switch (state) {
-      case 'A': return 'border-green-500 text-green-700 bg-green-100';
-      case 'IP': return 'border-orange-400 text-orange-700 bg-orange-100';
-      case 'R': return 'border-red-500 text-red-700 bg-red-100';
-      case 'C': return 'border-purple-500 text-purple-700 bg-purple-100';
-      default: return 'border-gray-300 text-gray-600 bg-gray-100';
-    }
-  }
-
-  onGradeChange(grade: PaymentGrade): void {
-    const currentGrades = this.filtersForm.get('customersGrade')?.value as PaymentGrade[];
-    const updatedGrades = currentGrades.includes(grade)
-      ? currentGrades.filter(g => g !== grade)
-      : [...currentGrades, grade];
-
-    this.filtersForm.get('customersGrade')?.setValue(updatedGrades);
-  }
-
-  isGradeSelected(grade: PaymentGrade): boolean {
-    const currentGrades = this.filtersForm.get('customersGrade')?.value as PaymentGrade[];
-    return currentGrades.includes(grade);
-  }
-
-  private fetchCustomers() {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    const { customerId, customersGrade, userId, loanState, feeState, dateRange } = this.filtersForm.value;
-
-    /* TODO: Fix filtering by states, capital range and date */
-    console.log(this.filtersForm.value);
-
-    this.reportsService.getReportCustomers({
-      customerId: customerId || undefined,
-      customersGrade: customersGrade?.length ? customersGrade : undefined,
-      userId: userId || undefined,
-      loanState: loanState || undefined,
-      feeState: feeState || undefined,
-      dateRange: dateRange || undefined,
-      page: this.currentPage(),
-      pageSize: this.pageSize
-    }).subscribe({
-      next: ({ data, total, totalCapital }) => {
-        this.reportCustomers.set(data);
-        this.totalItems.set(total);
-        this.totalCapital.set(totalCapital);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.error.set('Error cargando clientes');
-        this.isLoading.set(false);
-      }
-    });
+    const classes: Record<LoanStateAcronym, string> = {
+      'A': 'border-green-500  text-green-700  bg-green-100',
+      'IP': 'border-orange-400 text-orange-700 bg-orange-100',
+      'R': 'border-red-500    text-red-700    bg-red-100',
+      'C': 'border-purple-500 text-purple-700 bg-purple-100'
+    };
+    return classes[state] ?? 'border-gray-300 text-gray-600 bg-gray-100';
   }
 
   getStateColor(state: string): string {
-    switch (state) {
-      case 'Active': return 'var(--success)';
-      case 'Inactive': return 'var(--warning)';
-      case 'Blocked': return 'var(--error)';
-      default: return 'gray';
-    }
-  }
-
-  generateReport(): void {
-    this.isLoading.set(true);
-
-    const { customerId, customersGrade, userId, loanState, feeState, dateRange } = this.filtersForm.value;
-
-    this.reportsService.getReportCustomers({
-      customerId: customerId || undefined,
-      customersGrade: customersGrade?.length ? customersGrade : undefined,
-      userId: userId || undefined,
-      loanState: loanState || undefined,
-      feeState: feeState || undefined,
-      dateRange: dateRange || undefined,
-      page: 1,
-      pageSize: 99999 // Fetch all records for the export
-    }).subscribe({
-      next: ({ data, totalCapital }) => {
-        this.excelService.generateReportExcel(
-          data,
-          totalCapital,
-          this.formattedDateRange()
-        );
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.error.set('Error generando reporte');
-        this.isLoading.set(false);
-      }
-    });
+    const colors: Record<string, string> = {
+      'Active': 'var(--success)',
+      'Inactive': 'var(--warning)',
+      'Blocked': 'var(--error)'
+    };
+    return colors[state] ?? 'gray';
   }
 }

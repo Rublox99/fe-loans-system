@@ -28,63 +28,60 @@ export class ExcelService {
         dateRange: string
     ): Promise<void> {
         const workbook = new ExcelJS.Workbook();
-
-        // 👇 Workbook metadata
         workbook.creator = 'Sistema de Reportes';
         workbook.created = new Date();
 
         const worksheet = workbook.addWorksheet('Reporte de Clientes', {
-            pageSetup: {
-                paperSize: 9, // A4
-                orientation: 'landscape',
-                fitToPage: true
-            }
+            pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true }
         });
 
-        // ---- Column definitions ----
         worksheet.columns = [
-            { key: 'index', header: '#', width: 5 },
-            { key: 'full_name', header: 'Cliente', width: 30 },
-            { key: 'dni', header: 'DNI', width: 16 },
+            { key: 'index', header: '#', width: 26 },
+            { key: 'dni', header: 'DNI', width: 22 },
+            { key: 'full_name', header: 'Cliente', width: 32 },
+            { key: 'phone', header: 'Teléfono', width: 16 },
+            { key: 'location', header: 'Ubicación', width: 24 },
             { key: 'payment_grade', header: 'Grado', width: 8 },
             { key: 'capital', header: 'Capital (L)', width: 16 },
+            { key: 'capital_balance', header: 'Saldo Pendiente (L)', width: 20 },
+            { key: 'fee_value', header: 'Valor Cuota (L)', width: 18 },
+            { key: 'progress', header: 'Avance', width: 10 },
             { key: 'paid_amount', header: 'Monto Pagado (L)', width: 18 },
-            { key: 'loan_state', header: 'Estado de Préstamo', width: 20 },
-            { key: 'date_of_approval', header: 'Fecha de Aprobación', width: 22 },
-            { key: 'next_fee_due_date', header: 'Próximo Pago', width: 22 },
+            { key: 'loan_state', header: 'Estado Préstamo', width: 18 },
+            { key: 'loan_date', header: 'Fecha Préstamo', width: 18 },
+            { key: 'next_fee_expiration', header: 'Próxima Cuota', width: 18 },
+            { key: 'delay_days', header: 'Días de Mora', width: 14 },
         ];
 
-        // ---- Header styles ----
         this.styleHeaderRow(worksheet);
-
-        // ---- Summary rows above the table ----
         this.addSummarySection(worksheet, data.length, totalCapital, dateRange);
 
-        // ---- Data rows ----
         data.forEach((customer, index) => {
             const row = worksheet.addRow({
                 index: index + 1,
+                dni: customer.dni,
                 full_name: [customer.first_name, customer.second_name, customer.last_names]
                     .filter(Boolean).join(' '),
-                dni: customer.dni,
+                phone: customer.phone_numbers[0] ?? '—',
+                location: customer.location,
                 payment_grade: GRADE_LABEL[customer.payment_grade],
                 capital: customer.capital,
+                capital_balance: customer.capital_balance,
+                fee_value: customer.fee_value,
+                progress: `${customer.paid_fees}/${customer.total_fees}`,
                 paid_amount: customer.paid_amount,
                 loan_state: LOAN_STATE_LABEL[customer.loan_state],
-                date_of_approval: customer.date_of_approval
-                    ? this.formatDate(customer.date_of_approval)
-                    : '—',
-                next_fee_due_date: customer.next_fee_due_date
-                    ? this.formatDate(customer.next_fee_due_date)
-                    : '—',
+                loan_date: customer.loan_date
+                    ? this.formatDate(customer.loan_date) : '—',
+                next_fee_expiration: customer.next_fee_expiration_date
+                    ? this.formatDate(customer.next_fee_expiration_date) : '—',
+                delay_days: customer.next_fee_delay_days ?? 0,
             });
 
-            // 👇 Alternate row background for readability
             const isEven = index % 2 === 0;
             row.eachCell(cell => {
                 cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
+                    type: 'pattern', pattern: 'solid',
                     fgColor: { argb: isEven ? 'FFFFFFFF' : 'FFF5F5F5' }
                 };
                 cell.border = this.thinBorder();
@@ -92,29 +89,38 @@ export class ExcelService {
                 cell.font = { name: 'Calibri', size: 11 };
             });
 
-            // 👇 Color-code the loan state cell
+            // Currency formatting
+            row.getCell('capital').numFmt = '"L "#,##0.00';
+            row.getCell('capital_balance').numFmt = '"L "#,##0.00';
+            row.getCell('fee_value').numFmt = '"L "#,##0.00';
+            row.getCell('paid_amount').numFmt = '"L "#,##0.00';
+
+            // Loan state color
             const stateCell = row.getCell('loan_state');
             stateCell.font = {
-                name: 'Calibri',
-                size: 11,
-                bold: true,
+                name: 'Calibri', size: 11, bold: true,
                 color: { argb: this.getLoanStateColor(customer.loan_state) }
             };
 
-            // 👇 Format capital and paid_amount as currency
-            row.getCell('capital').numFmt = '"L "#,##0.00';
-            row.getCell('paid_amount').numFmt = '"L "#,##0.00';
+            // Highlight overdue rows
+            const delayCell = row.getCell('delay_days');
+            if ((customer.next_fee_delay_days ?? 0) > 0) {
+                delayCell.font = {
+                    name: 'Calibri', size: 11, bold: true,
+                    color: { argb: 'FFB91C1C' }  // red
+                };
+            }
         });
 
-        // ---- Totals row ----
         this.addTotalsRow(worksheet, data, totalCapital);
 
-        // ---- Download ----
         const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
-        saveAs(blob, `reporte_clientes_${this.getTimestamp()}.xlsx`);
+        saveAs(
+            new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }),
+            `reporte_clientes_${this.getTimestamp()}.xlsx`
+        );
     }
 
     // ---- Private helpers ----
@@ -152,7 +158,8 @@ export class ExcelService {
     }
 
     private styleHeaderRow(worksheet: ExcelJS.Worksheet): void {
-        const headerRow = worksheet.getRow(7); // After 6 summary rows
+        const headerRow = worksheet.getRow(0); // After 6 summary rows
+
         headerRow.height = 20;
         headerRow.eachCell(cell => {
             cell.fill = {
@@ -166,7 +173,7 @@ export class ExcelService {
                 bold: true,
                 color: { argb: 'FFFFFFFF' }
             };
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.alignment = { vertical: 'middle', horizontal: 'left' };
             cell.border = this.thinBorder();
         });
     }
@@ -178,27 +185,33 @@ export class ExcelService {
     ): void {
         const totalsRow = worksheet.addRow({
             index: '',
-            full_name: 'TOTALES',
             dni: '',
+            full_name: 'TOTALES',
+            phone: '',
+            location: '',
             payment_grade: '',
             capital: totalCapital,
-            paid_amount: data.reduce((sum, c) => sum + c.paid_amount, 0),
+            capital_balance: data.reduce((s, c) => s + c.capital_balance, 0),
+            fee_value: '',
+            progress: '',
+            paid_amount: data.reduce((s, c) => s + c.paid_amount, 0),
             loan_state: '',
-            date_of_approval: '',
-            next_fee_due_date: ''
+            loan_date: '',
+            next_fee_expiration: '',
+            delay_days: ''
         });
 
         totalsRow.eachCell(cell => {
             cell.font = { name: 'Calibri', size: 11, bold: true };
             cell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
+                type: 'pattern', pattern: 'solid',
                 fgColor: { argb: 'FFE8F0FE' }
             };
             cell.border = this.thinBorder();
         });
 
         totalsRow.getCell('capital').numFmt = '"L "#,##0.00';
+        totalsRow.getCell('capital_balance').numFmt = '"L "#,##0.00';
         totalsRow.getCell('paid_amount').numFmt = '"L "#,##0.00';
     }
 

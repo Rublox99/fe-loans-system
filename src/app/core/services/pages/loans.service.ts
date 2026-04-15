@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { forkJoin, from, map, Observable, of } from 'rxjs';
-import { LOANS_MOCK } from '../../../shared/mocks/loans.mock';
 import { LoanState } from '../../types/loan-state.type';
 import { CreateLoanPayload, Loan, LoansStats, LoanWithCustomer } from '../../interfaces/loans.interface';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -104,6 +103,8 @@ export class LoansService {
         );
     }
 
+    /* TODO: Possibly required in a future */
+    /* 
     getLoansByCustomerId(customerId: string): Observable<Loan[]> {
         return of(LOANS_MOCK.filter(l => l.customer_id === customerId));
     }
@@ -111,7 +112,8 @@ export class LoansService {
     getLoansByState(state: LoanState): Observable<Loan[]> {
         return of(LOANS_MOCK.filter(l => l.state === state));
     }
-
+    */
+    
     getLoansStats(): Observable<LoansStats> {
         const stats$ = from(
             this.supabase

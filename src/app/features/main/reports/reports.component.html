@@ -1,118 +1,137 @@
 <main class="px-[50px] py-[25px] flex flex-col w-full h-full gap-[20px]">
+
     <!-- Header -->
     <section class="items-end flex-none gap-5 space-y-2">
         <p class="title__header">Generación de Reportes</p>
-        <span class="label__header">Seleccione los parámetros deseados para generar reportes de forma dinámica</span>
+        <span class="label__header">
+            Seleccione los parámetros deseados para generar reportes de forma dinámica
+        </span>
     </section>
 
     <!-- Filters & Controls -->
     <section class="flex flex-none gap-5">
-        <!-- Fields -->
+
+        <!-- Filter card -->
         <div [formGroup]="filtersForm" class="border-lightGray bg-[#f4f9ff] container__filters-card w-2/3">
+
             <!-- Title -->
             <div class="flex gap-5">
                 <web-icon name="TABLE" color="var(--primary)" />
                 <p class="title__filters-card text-primary">Parámetros de reporte</p>
             </div>
 
-            <!-- Customer & Grade -->
+            <!-- Row 1: Customer & Grade -->
             <div class="line__filters-card">
-                <div class="line__filters-card">
-                    <div class="w-full space-y-2.5">
-                        <span class="text-help">Cliente</span>
-                        <nz-select class="w-full" formControlName="customerId"
-                            nzPlaceHolder="Busque un cliente por su nombre" nzShowSearch nzAllowClear nzServerSearch
-                            [nzLoading]="isEntitySearchLoading()" (nzOnSearch)="onCustomerSearch($event)">
-                            @for (customer of entitiesSearchResults(); track customer.id) {
-                            <nz-option [nzValue]="customer.id" [nzLabel]="getCustomerFullName(customer)" />
-                            }
-                        </nz-select>
-                    </div>
-                    <div class="w-full space-y-2.5">
-                        <span class="text-help">Grado de cliente</span>
-                        <div class="w-full flex gap-5 h-[35px]">
-                            @for (grade of grades; track grade) {
-                            <button style="width: 100% !important;" nz-button
-                                [ngClass]="isGradeSelected(grade) ? 'confirm__button' : 'default'"
-                                [nzType]="isGradeSelected(grade) ? 'primary' : 'default'" nzSize="small"
-                                class="h-full px-4 -ml-px first:ml-0 first:rounded-l last:rounded-r !rounded-none"
-                                (click)="onGradeChange(grade)">
-                                {{ getGradeLabel(grade) }}
-                            </button>
-                            }
-                        </div>
+                <!-- Customer -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Cliente</span>
+                    <nz-select class="w-full" formControlName="customerId"
+                        nzPlaceHolder="Busque un cliente por su nombre" nzShowSearch nzAllowClear nzServerSearch
+                        [nzLoading]="isEntitySearchLoading()" (nzOnSearch)="onCustomerSearch($event)">
+                        @for (customer of entitiesSearchResults(); track customer.id) {
+                        <nz-option [nzValue]="customer.id" [nzLabel]="getCustomerFullName(customer)" />
+                        }
+                    </nz-select>
+                </div>
+
+                <!-- Grade -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Grado de cliente</span>
+                    <div class="w-full flex gap-5 h-[35px]">
+                        @for (grade of grades; track grade) {
+                        <button style="width: 100% !important;" nz-button
+                            [ngClass]="isGradeSelected(grade) ? 'confirm__button' : 'default'"
+                            [nzType]="isGradeSelected(grade) ? 'primary' : 'default'" nzSize="small" class="h-full px-4 -ml-px first:ml-0 first:rounded-l
+                                       last:rounded-r !rounded-none" (click)="onGradeChange(grade)">
+                            {{ getGradeLabel(grade) }}
+                        </button>
+                        }
                     </div>
                 </div>
             </div>
 
-            <!-- User & Capital -->
-            <div class="line_filters-card">
-                <div class="line__filters-card">
-                    <div class="w-full space-y-2.5">
-                        <span class="text-help">Colaborador</span>
-                        <nz-select class="w-full" formControlName="userId"
-                            nzPlaceHolder="Busque un colaborador por su nombre" nzShowSearch nzAllowClear nzServerSearch
-                            [nzLoading]="isUserSearchLoading()" (nzOnSearch)="onUserSearch($event)">
-                            @for (user of userSearchResults(); track user.id) {
-                            <nz-option [nzValue]="user.id" [nzLabel]="user.username" />
-                            }
-                        </nz-select>
-                    </div>
+            <!-- Row 2: User & Capital range -->
+            <div class="line__filters-card">
+                <!-- User -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Colaborador</span>
+                    <nz-select class="w-full" formControlName="userId"
+                        nzPlaceHolder="Busque un colaborador por su nombre" nzShowSearch nzAllowClear nzServerSearch
+                        [nzLoading]="isUserSearchLoading()" (nzOnSearch)="onUserSearch($event)">
+                        @for (user of userSearchResults(); track user.id) {
+                        <nz-option [nzValue]="user.id" [nzLabel]="user.username" />
+                        }
+                    </nz-select>
+                </div>
 
-                    <div class="w-full space-y-2.5">
-                        <span class="text-help ">Rango de capital</span>
-                        <nz-select class="w-full" formControlName="capital"
-                            nzPlaceHolder="Seleccione un rango de capital">
-                            <nz-option nzValue="A" nzLabel="< 100,000.00" />
-                            <nz-option nzValue="B" nzLabel="100,000.00 - 500,000.00" />
-                            <nz-option nzValue="C" nzLabel="> 500,000.00" />
-                        </nz-select>
-                    </div>
+                <!-- Capital range -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Rango de capital</span>
+                    <nz-select class="w-full" formControlName="capital" nzPlaceHolder="Todos los rangos" nzAllowClear>
+                        <nz-option nzValue="A" nzLabel="< 100,000.00" />
+                        <nz-option nzValue="B" nzLabel="100,000.00 - 500,000.00" />
+                        <nz-option nzValue="C" nzLabel="> 500,000.00" />
+                    </nz-select>
                 </div>
             </div>
 
-            <!-- Loan State, Fee State & Daterange -->
-            <div class="line_filters-card">
+            <!-- Row 3: Loan state, Fee state & Date range -->
+            <div class="line__filters-card">
+                <!-- Loan state -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Estado de préstamo</span>
+                    <nz-select class="w-full" formControlName="loanState" nzPlaceHolder="Todos los estados"
+                        nzAllowClear>
+                        <nz-option nzValue="Accepted" nzLabel="Aprobado" />
+                        <nz-option nzValue="Under Review" nzLabel="En proceso" />
+                        <nz-option nzValue="Denied" nzLabel="Rechazado" />
+                        <nz-option nzValue="Paid" nzLabel="Cerrado" />
+                    </nz-select>
+                </div>
+
+                <!-- Fee state -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Estado de cuota</span>
+                    <nz-select class="w-full" formControlName="feeState" nzPlaceHolder="Todos los estados" nzAllowClear>
+                        <nz-option nzValue="1" nzLabel="Pendiente" />
+                        <nz-option nzValue="2" nzLabel="Pagado" />
+                        <nz-option nzValue="3" nzLabel="En mora" />
+                    </nz-select>
+                </div>
+
+                <!-- Date range target -->
                 <div class="line__filters-card">
                     <div class="w-full space-y-2.5">
-                        <span class="text-help ">Estado de préstamo</span>
-                        <nz-select class="w-full" formControlName="loanState" nzPlaceHolder="Seleccione un estado">
-                            <nz-option nzValue="Accepted" nzLabel="Aprobado" />
-                            <nz-option nzValue="Under Review" nzLabel="En proceso" />
-                            <nz-option nzValue="Denied" nzLabel="Rechazado" />
-                            <nz-option nzValue="Paid" nzLabel="Cerrado" />
+                        <span class="text-help">Filtrar período por</span>
+                        <nz-select class="w-full" formControlName="dateRangeTarget">
+                            <nz-option nzValue="next_payment" nzLabel="Próxima fecha de pago" />
+                            <nz-option nzValue="fee_date" nzLabel="Fecha de cuota (cualquiera)" />
                         </nz-select>
-                    </div>
-
-                    <div class="w-full space-y-2.5">
-                        <span class="text-help ">Estado de cuota (actual)</span>
-                        <nz-select class="w-full" formControlName="feeState" nzPlaceHolder="Seleccione un estado">
-                            <nz-option nzValue="1" nzLabel="Pendiente" />
-                            <nz-option nzValue="2" nzLabel="Pagado" />
-                            <nz-option nzValue="3" nzLabel="En mora" />
-                        </nz-select>
-                    </div>
-
-                    <div class="w-full space-y-2.5">
-                        <span class="text-help">Período de consulta</span>
-                        <nz-range-picker class="w-full" formControlName="dateRange" [nzAllowClear]="true"
-                            [nzShowTime]="false" nzFormat="dd/MM/yyyy" [nzPlaceHolder]="['Fecha inicio', 'Fecha fin']"
-                            [nzRanges]="datePresets">
-                        </nz-range-picker>
                     </div>
                 </div>
+
+                <!-- Date range -->
+                <div class="w-full space-y-2.5">
+                    <span class="text-help">Período de consulta</span>
+                    <nz-range-picker class="w-full" formControlName="dateRange" [nzAllowClear]="true"
+                        [nzShowTime]="false" nzFormat="dd/MM/yyyy" [nzPlaceHolder]="['Fecha inicio', 'Fecha fin']"
+                        [nzRanges]="datePresets">
+                    </nz-range-picker>
+                </div>
             </div>
+
         </div>
 
         <!-- Output card -->
         <div class="w-1/3 bg-primary text-staticWhite container__filters-card">
+
             <!-- Title -->
             <div class="flex flex-none gap-5">
                 <web-icon name="VERIFIED" color="var(--static-white)" />
                 <p class="title__filters-card text-staticWhite">Salida parametrizada</p>
             </div>
 
-            <!-- Summary text -->
+            <!-- Count -->
             <p class="flex-none text-xs font-light text-lightGray font-roboto">
                 Se han encontrado
                 <span class="font-medium text-staticWhite">
@@ -121,136 +140,208 @@
                 dentro del período seleccionado.
             </p>
 
-            <!-- Divisor -->
+            <!-- Divider -->
             <div class="w-full h-[1px] bg-help"></div>
 
-            <!-- Summary details & Button -->
+            <!-- Summary -->
             <div class="flex flex-1 flex-col gap-2.5">
                 <div class="flex-1 space-y-2.5">
                     <p class="text-xs font-light font-roboto text-staticWhite">
                         Capital calculado:
                         <span class="font-medium">
-                            L {{ totalCapital() | number: '1.2-2' }}
+                            L {{ totalCapital() | number:'1.2-2' }}
                         </span>
                     </p>
                     <p class="text-xs font-light font-roboto text-staticWhite">
                         Período:
-                        <span class="font-medium">
-                            {{ formattedDateRange() }}
-                        </span>
+                        <span class="font-medium">{{ formattedDateRange() }}</span>
                     </p>
                 </div>
             </div>
 
+            <!-- Actions -->
             <div class="flex gap-2.5">
+
+                <!-- Reset (only shown when filters are active) -->
+                @if (hasActiveFilters()) {
+                <button class="flex-none button" style="border: 1px solid rgba(255,255,255,0.3);" nz-button
+                    nzType="text" nz-tooltip nzTooltipTitle="Limpiar filtros" nzTooltipPlacement="top"
+                    (click)="resetFilters()">
+                    <web-icon name="CLOSE" color="var(--static-white)" size="18" />
+                </button>
+                }
+
+                <!-- Search -->
                 <button class="flex-none button cto__button" nz-button nzType="text" (click)="getCustomers()">
                     <web-icon name="SEARCH" color="var(--static-white)" size="18" />
                 </button>
 
+                <!-- Export -->
                 <button class="flex-1 button confirm__button" style="background-color: var(--static-white) !important;"
                     nz-button nzType="text" (click)="generateReport()">
-                    <span class="font-sans font-extralight text-staticBlack">Generar reporte</span>
+                    <span class="font-sans font-extralight text-staticBlack">
+                        Generar reporte
+                    </span>
                 </button>
+
             </div>
         </div>
     </section>
 
-    <!-- Output Table -->
+    <!-- Preview table -->
     <section class="flex flex-col flex-1 min-h-0 gap-1 space-y-2">
+
         <!-- Header -->
         <div class="items-end flex-none gap-5 space-y-2">
             <p class="flex-none title__header" style="font-size: 20px !important;">
                 Pre-visualización de datos
             </p>
             <span class="label__header">
-                Vista previa de los resultados obtenidos según los parámetros
-                consultados.
+                Vista previa de los resultados obtenidos según los parámetros consultados.
             </span>
         </div>
 
-        <!-- Content -->
+        <!-- Table -->
         <div class="flex-1 min-h-0 overflow-auto border rounded-md">
             <nz-spin [nzSpinning]="isLoading()">
+
                 @if (error()) {
                 <div class="p-4 text-red-500">{{ error() }}</div>
-                }@else if (reportCustomers().length === 0 && !isLoading()) {
-                <div class="p-4 text-center text-standardGray">No se encontraron clientes.</div>
+
+                } @else if (reportCustomers().length === 0 && !isLoading()) {
+                <div class="p-4 text-center text-standardGray">
+                    No se encontraron resultados.
+                </div>
+
                 } @else {
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b">
                             <th class="header__table">DNI</th>
                             <th class="header__table">Nombre</th>
-                            <th class="header__table">Grado de Riesgo</th>
+                            <th class="header__table">Teléfono</th>
+                            <th class="header__table">Ubicación</th>
+                            <th class="header__table">Grado</th>
                             <th class="header__table">Capital</th>
-                            <th class="header__table">Saldo Abonado</th>
-                            <th class="header__table">Estado de Préstamo</th>
-                            <th class="header__table">Fecha de Préstamo</th>
+                            <th class="header__table">Saldo Pendiente</th>
+                            <th class="header__table">Cuota</th>
+                            <th class="header__table">Avance</th>
+                            <th class="header__table">Estado Préstamo</th>
                             <th class="header__table">Próxima Cuota</th>
+                            <th class="header__table">Días de Mora</th>
                         </tr>
                     </thead>
                     <tbody>
                         @for (customer of reportCustomers(); track customer.id) {
-                        <tr class="border-b">
-                            <td class="font-medium cell__table whitespace-nowrap">{{ customer.dni }}</td>
-                            <td class="font-medium cell__table whitespace-nowrap">{{ getFullName(customer) }}</td>
+                        <tr class="transition-colors border-b hover:bg-gray-50">
+
+                            <td class="font-medium cell__table whitespace-nowrap">
+                                {{ customer.dni }}
+                            </td>
+
+                            <td class="font-medium cell__table whitespace-nowrap">
+                                {{ getFullName(customer) }}
+                            </td>
+
+                            <td class="cell__table whitespace-nowrap">
+                                {{ customer.phone_numbers[0] ?? '—' }}
+                            </td>
+
+                            <td class="cell__table">
+                                {{ customer.location }}
+                            </td>
+
                             <td class="cell__table">
                                 <span
                                     class="flex justify-center px-2 py-1 text-xs border rounded-sm border-primary text-primary">
-                                    Grado {{ getGradeLabel(customer.payment_grade) }}
+                                    {{ getGradeLabel(customer.payment_grade) }}
                                 </span>
                             </td>
-                            <td class="cell__table">L {{customer.capital}}</td>
-                            <td class="cell__table">L {{customer.paid_amount}}</td>
+
+                            <td class="cell__table whitespace-nowrap">
+                                L {{ customer.capital | number:'1.2-2' }}
+                            </td>
+
+                            <td class="cell__table whitespace-nowrap">
+                                L {{ customer.capital_balance | number:'1.2-2' }}
+                            </td>
+
+                            <td class="cell__table whitespace-nowrap">
+                                L {{ customer.fee_value | number:'1.2-2' }}
+                            </td>
+
+                            <td class="text-center cell__table whitespace-nowrap">
+                                {{ customer.paid_fees }}/{{ customer.total_fees }}
+                            </td>
+
                             <td class="cell__table">
                                 <span class="flex justify-center px-2 py-1 text-xs border rounded-sm font-roboto"
                                     [ngClass]="getLoanStateClasses(customer.loan_state)">
                                     {{ getLoanStateLabel(customer.loan_state) }}
                                 </span>
                             </td>
-                            <td class="cell__table">{{customer.date_of_approval === undefined ? 'N/A' :
-                                customer.date_of_approval | date:'dd/MM/yyyy'}}</td>
-                            <td class="cell__table">{{customer.next_fee_due_date === undefined ? 'N/A' :
-                                customer.next_fee_due_date | date:'dd/MM/yyyy'}}</td>
+
+                            <td class="cell__table whitespace-nowrap">
+                                {{ customer.next_fee_expiration_date
+                                ? (customer.next_fee_expiration_date | date:'dd/MM/yyyy')
+                                : '—' }}
+                            </td>
+
+                            <td class="cell__table whitespace-nowrap">
+                                @if ((customer.next_fee_delay_days ?? 0) > 0) {
+                                <span class="font-semibold text-red-600">
+                                    {{ customer.next_fee_delay_days }} días
+                                </span>
+                                } @else {
+                                <span class="text-green-600">Al día</span>
+                                }
+                            </td>
+
                         </tr>
                         }
                     </tbody>
                 </table>
                 }
+
             </nz-spin>
         </div>
 
         <!-- Paginator -->
         <div class="flex flex-none items-center gap-2.5">
-            <!-- Left -->
+
+            <!-- Range label -->
             <div class="flex-1 space-x-1 text-xs font-medium uppercase font-roboto">
                 <span class="text-help">Mostrando</span>
-                <span class="text-primary">{{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}</span>
+                <span class="text-primary">
+                    {{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}
+                </span>
                 <span class="text-help">entidades registradas</span>
             </div>
 
-            <!-- Right -->
+            <!-- Prev / Next -->
             <div class="flex items-center flex-none gap-1">
-                <!-- Previous -->
-                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
-                    [class.border-lightGray]="currentPage() === 1" [class.cursor-not-allowed]="currentPage() === 1"
-                    [class.border-standardGray]="currentPage() > 1" [disabled]="currentPage() === 1"
-                    (click)="goToPage(currentPage() - 1)" aria-label="Página anterior">
-                    <web-icon [color]="currentPage() === 1 ? 'var(--light-gray)' : 'var(--standard-gray)'"
-                        name="LEFT_ROUNDED_ARROW" size="20" />
+                <button class="size-[30px] rounded-sm border flex items-center
+                           justify-center transition-colors" [class.border-lightGray]="currentPage() === 1"
+                    [class.cursor-not-allowed]="currentPage() === 1" [class.border-standardGray]="currentPage() > 1"
+                    [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" aria-label="Página anterior">
+                    <web-icon [color]="currentPage() === 1
+                            ? 'var(--light-gray)'
+                            : 'var(--standard-gray)'" name="LEFT_ROUNDED_ARROW" size="20" />
                 </button>
 
-                <!-- Next -->
-                <button class="size-[30px] rounded-sm border flex items-center justify-center transition-colors"
-                    [class.border-lightGray]="currentPage() === totalPages()"
+                <button class="size-[30px] rounded-sm border flex items-center
+                           justify-center transition-colors" [class.border-lightGray]="currentPage() === totalPages()"
                     [class.cursor-not-allowed]="currentPage() === totalPages()"
                     [class.border-standardGray]="currentPage() < totalPages()"
                     [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)"
                     aria-label="Página siguiente">
-                    <web-icon [color]="currentPage() === totalPages() ? 'var(--light-gray)' : 'var(--standard-gray)'"
-                        name="RIGHT_ROUNDED_ARROW" size="20" />
+                    <web-icon [color]="currentPage() === totalPages()
+                            ? 'var(--light-gray)'
+                            : 'var(--standard-gray)'" name="RIGHT_ROUNDED_ARROW" size="20" />
                 </button>
             </div>
+
         </div>
     </section>
+
 </main>
