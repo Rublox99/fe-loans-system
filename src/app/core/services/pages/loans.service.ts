@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { forkJoin, from, map, Observable, of } from 'rxjs';
 import { LoanState } from '../../types/loan-state.type';
-import { CreateLoanPayload, Loan, LoansStats, LoanWithCustomer } from '../../interfaces/loans.interface';
+import { CreateLoanPayload, Loan, LoansStats, LoanWithCustomer, UpdateLoanPayload } from '../../interfaces/loans.interface';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from './auth.service';
@@ -185,4 +185,17 @@ export class LoansService {
             })
         );
     }
+
+    updateLoan(loanId: string, payload: UpdateLoanPayload): Observable<void> {
+    return from(
+        this.supabase
+            .from('loans')
+            .update(payload)
+            .eq('id', loanId)
+    ).pipe(
+        map(({ error }) => {
+            if (error) throw error;
+        })
+    );
+}
 }

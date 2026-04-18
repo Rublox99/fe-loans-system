@@ -13,6 +13,7 @@ import { LoansService } from '../../../../core/services/pages/loans.service';
 import { FeeState } from '../../../../core/types/fee-state';
 import { LoanState } from '../../../../core/types/loan-state.type';
 import { GeneralService } from '../../../../core/services/general.service';
+import { EditLoanDrawerComponent } from '../edit-loan/edit-loan.component';
 
 export interface LoanStateOption {
   value: LoanState;
@@ -31,7 +32,8 @@ export interface LoanStateOption {
     FormsModule,
     NgZorroModule,
     ViewEntityDrawerComponent,
-    HandleFeeDrawerComponent
+    HandleFeeDrawerComponent,
+    EditLoanDrawerComponent
   ],
   styleUrls: ['./loan-details.component.css', '../../main.styles.css']
 })
@@ -145,6 +147,11 @@ export class LoanDetailsComponent implements OnInit {
         this.isUpdatingState.set(false);
       }
     });
+  }
+
+  onLoanUpdated(): void {
+    this.fetchLoanDetails();
+    this.fetchFeeDetails();
   }
 
   getFeeStateLabel(state: FeeState): string {

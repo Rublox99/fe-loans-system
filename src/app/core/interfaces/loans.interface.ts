@@ -48,3 +48,12 @@ export interface CreateLoanPayload {
   feeValue: number;
   modality: 'S' | 'Q' | 'M';
 }
+
+export interface UpdateLoanPayload {
+  capital?: number;
+  capital_balance?: number;
+  interest?: number;
+  fees?: number;
+  fee_value?: number;
+  modality?: 'S' | 'Q' | 'M';
+}

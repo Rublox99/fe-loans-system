@@ -72,28 +72,45 @@
       <span class="font-medium text-primary">Resumen</span>
     </div>
 
-    <div class="mb-10 space-y-5">
+    <div class="space-y-5">
+      <!-- Capital -->
       <div class="flex gap-2.5">
         <span class="flex-1 text-standardGray">Capital a prestar</span>
         <span class="flex-none text-highContrast">
           {{ capital() | currency:'L ':'symbol':'1.2-2' }}
         </span>
       </div>
+
+      <!-- Total interest -->
       <div class="flex gap-2.5">
-        <span class="flex-1 text-standardGray">Interés calculado</span>
+        <span class="flex-1 text-standardGray">Interés total</span>
         <span class="flex-none text-highContrast">
           {{ interestAmount() | currency:'L ':'symbol':'1.2-2' }}
         </span>
       </div>
-      <div class="w-full h-[1px] bg-lightGray"></div>
+
+      <!-- Interest per fee -->
       <div class="flex gap-2.5">
-        <span class="flex-1 text-standardGray">Total</span>
+        <span class="flex-1 text-standardGray">
+          Interés por cuota (÷{{ frequency() }})
+        </span>
+        <span class="flex-none text-highContrast">
+          {{ interestPerFee() | currency:'L ':'symbol':'1.2-2' }}
+        </span>
+      </div>
+
+      <div class="w-full h-[1px] bg-lightGray"></div>
+
+      <!-- Total -->
+      <div class="flex gap-2.5">
+        <span class="flex-1 text-standardGray">Total a pagar</span>
         <span class="flex-none text-highContrast">
           {{ total() | currency:'L ':'symbol':'1.2-2' }}
         </span>
       </div>
     </div>
 
+    <!-- Fee value -->
     <div class="flex gap-2.5 text-accent">
       <span class="flex-1">Valor de la cuota ({{ fees() }} cuotas)</span>
       <span class="flex-none">{{ feeValue() | currency:'L ':'symbol':'1.2-2' }}</span>

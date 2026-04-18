@@ -11,20 +11,9 @@
 
         <!-- Loan State Selector -->
         @if (selectedLoanState() === 'Under Review') {
-        <!-- Editable selector — only when Under Review -->
-        <nz-select class="loan-state-select" [ngModel]="selectedLoanState()" [nzLoading]="isUpdatingState()"
-          [nzDisabled]="isLoadingLoan() || isUpdatingState()" [class]="selectedStateColorClass()"
-          (ngModelChange)="onLoanStateChange($event)" nzBorderless aria-label="Estado del préstamo">
-          @for (option of availableLoanStateOptions(); track option.value) {
-          <nz-option [nzValue]="option.value" [nzLabel]="option.label" [nzCustomContent]="true">
-            <span [class]="option.colorClass + ' option-pill'">
-              {{ option.label }}
-            </span>
-          </nz-option>
-          }
-        </nz-select>
+        <app-edit-loan [loan]="loan()!" (loanUpdated)="onLoanUpdated()" />
         } @else {
-        <!-- Read-only pill — once Accepted, Denied or Paid -->
+        <!-- Read-only pill when not Under Review -->
         <span class="px-3 py-1 text-xs border rounded-sm font-roboto" [ngClass]="selectedStateColorClass()">
           {{ loanStateOptions.find(o => o.value === selectedLoanState())?.label }}
         </span>
@@ -39,7 +28,6 @@
       <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee()" [loan]="loan()"
         (feeUpdated)="onFeeUpdated()" />
       } @else {
-      <!-- Placeholder to preserve layout while loading -->
       <div class="flex gap-2.5">
         <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>
         <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>

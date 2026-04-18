@@ -5,7 +5,6 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { NgZorroModule } from '../../../../../shared/modules/ng-zorro.module';
 import { WebIconComponent } from '../../../../../shared/components/web-icon.component';
 import { LoansService } from '../../../../../core/services/pages/loans.service';
-import { Customer } from '../../../../../core/interfaces/customers.interface';
 import { GeneralService } from '../../../../../core/services/general.service';
 import { interestRangeValidator, positiveNumberValidator } from '../../loans.component';
 import { EntitiesService } from '../../../../../core/services/pages/entities.service';
@@ -53,13 +52,40 @@ export class LoanFormComponent implements OnInit {
     modality: new FormControl<'S' | 'Q' | 'M'>('S', Validators.required),
   });
 
+  // ── Frequency map ─────────────────────────────────────────────────────
+  private readonly frequencyMap: Record<'S' | 'Q' | 'M', number> = {
+    'S': 4,
+    'Q': 2,
+    'M': 1
+  };
+
+  // ── Summary signals ───────────────────────────────────────────────────
   fees = signal(0);
   capital = signal(0);
   interest = signal(0);
+  modality = signal<'S' | 'Q' | 'M'>('S'); // 👈 new
 
-  interestAmount = computed(() => this.capital() * (this.interest() / 100));
-  total = computed(() => this.capital() + this.interestAmount());
-  feeValue = computed(() => this.fees() > 0 ? this.total() / this.fees() : 0);
+  frequency = computed(() => this.frequencyMap[this.modality()] ?? 1);
+
+  interestAmount = computed(() =>
+    this.capital() * (this.interest() / 100)
+  );
+
+  interestPerFee = computed(() =>
+    this.interestAmount() / this.frequency()
+  );
+
+  capitalPerFee = computed(() =>
+    this.fees() > 0 ? this.capital() / this.fees() : 0
+  );
+
+  feeValue = computed(() =>
+    this.capitalPerFee() + this.interestPerFee()
+  );
+
+  total = computed(() =>
+    this.feeValue() * this.fees()
+  );
 
   entitySearchResults = signal<Entity[]>([]);
   isEntitySearchLoading = signal(false);
@@ -86,6 +112,10 @@ export class LoanFormComponent implements OnInit {
     this.form.get('interest')!.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(v => this.interest.set(Number(v) || 0));
+
+    this.form.get('modality')!.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(v => this.modality.set((v as 'S' | 'Q' | 'M') ?? 'S'));
 
     // Debounced entity search
     this.onEntitySearchDebounced = this.generalService.debounce((term: string) => {
@@ -158,11 +188,12 @@ export class LoanFormComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.form.reset({ modality: 'S' });   // keep modality default
+        this.form.reset({ modality: 'S' });
         this.fees.set(0);
         this.capital.set(0);
         this.interest.set(0);
-        this.submitForm.emit();                // → parent closes drawer + refreshes
+        this.modality.set('S');
+        this.submitForm.emit();
       },
       error: (err) => {
         console.error('Error creating loan:', err);
