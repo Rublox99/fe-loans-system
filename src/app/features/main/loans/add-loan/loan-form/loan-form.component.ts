@@ -172,7 +172,6 @@ export class LoanFormComponent implements OnInit {
   }
 
   submit(): void {
-    // Touch all fields to trigger validation display
     this.form.markAllAsTouched();
     if (this.form.invalid || this.isSubmitting()) return;
 
@@ -180,7 +179,9 @@ export class LoanFormComponent implements OnInit {
 
     this.loansService.createLoan({
       customerId: this.form.value.customerId,
-      capital: Number(this.form.value.lendingCapital),
+      raw_capital: Number(this.form.value.lendingCapital), // user input
+      capital: this.total(), // total with interest
+      capital_balance: this.total(),
       interest: Number(this.form.value.interest),
       fees: Number(this.form.value.feesAmount),
       feeValue: this.feeValue(),
@@ -197,7 +198,7 @@ export class LoanFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error creating loan:', err);
-        this.isSubmitting.set(false);          // allow retry
+        this.isSubmitting.set(false);
       }
     });
   }

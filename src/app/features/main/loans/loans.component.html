@@ -127,7 +127,7 @@
                             </td>
                             <td class="cell__table">
                                 {{ loan.capital | currency:'L':'symbol' }}
-                                ({{ loan.capital / (1 + loan.interest / 100) | currency:'L':'symbol' }})
+                                ({{ loan.raw_capital | currency:'L':'symbol' }})
                             </td>
                             <td class="cell__table">{{ loan.capital_balance | currency:'L':'symbol' }}</td>
                             <td class="cell__table">{{ loan.interest }}%</td>

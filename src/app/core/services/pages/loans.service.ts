@@ -150,12 +150,11 @@ export class LoansService {
         const user = this.authService.currentUser;
         if (!user) throw new Error('No authenticated user');
 
-        const calculatedCapital = payload.capital * (1 + payload.interest / 100) // Full amount owed from day one
-
         const insert = {
             customer_id: payload.customerId,
-            capital: calculatedCapital,
-            capital_balance: calculatedCapital,
+            raw_capital: payload.raw_capital,
+            capital: payload.capital,
+            capital_balance: payload.capital_balance,
             interest: payload.interest,
             fees: payload.fees,
             fee_value: payload.feeValue,
@@ -187,15 +186,15 @@ export class LoansService {
     }
 
     updateLoan(loanId: string, payload: UpdateLoanPayload): Observable<void> {
-    return from(
-        this.supabase
-            .from('loans')
-            .update(payload)
-            .eq('id', loanId)
-    ).pipe(
-        map(({ error }) => {
-            if (error) throw error;
-        })
-    );
-}
+        return from(
+            this.supabase
+                .from('loans')
+                .update(payload)
+                .eq('id', loanId)
+        ).pipe(
+            map(({ error }) => {
+                if (error) throw error;
+            })
+        );
+    }
 }

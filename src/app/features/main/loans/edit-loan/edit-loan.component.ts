@@ -118,14 +118,14 @@ export class EditLoanDrawerComponent implements OnChanges {
 
   private patchForm(): void {
     this.form.patchValue({
-      capital: this.loan.capital,
+      capital: this.loan.raw_capital,
       interest: this.loan.interest,
       fees: this.loan.fees,
       modality: this.loan.modality as 'S' | 'Q' | 'M',
       state: this.loan.state as LoanState,
     });
 
-    this.capital.set(this.loan.capital);
+    this.capital.set(this.loan.raw_capital);
     this.interest.set(this.loan.interest);
     this.fees.set(this.loan.fees);
     this.modality.set(this.loan.modality as 'S' | 'Q' | 'M');
@@ -187,9 +187,10 @@ export class EditLoanDrawerComponent implements OnChanges {
     const payload: UpdateLoanPayload = {};
     let hasChanges = false;
 
-    if (Number(v.capital) !== this.loan.capital) {
-      payload.capital = Number(v.capital);
-      payload.capital_balance = Number(v.capital); // reset balance to new capital
+    if (Number(v.capital) !== this.loan.raw_capital) {  // 👈 compare against raw_capital
+      payload.raw_capital = Number(v.capital);
+      payload.capital = this.total();
+      payload.capital_balance = this.total();
       hasChanges = true;
     }
     if (Number(v.interest) !== this.loan.interest) {
@@ -205,8 +206,8 @@ export class EditLoanDrawerComponent implements OnChanges {
       hasChanges = true;
     }
 
-    // Always recalculate fee_value if any relevant field changed
-    if (hasChanges || this.feeValue() !== this.loan.fee_value) {
+    // Recalculate fee_value whenever any relevant field changed
+    if (hasChanges) {
       payload.fee_value = this.feeValue();
     }
 

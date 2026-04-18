@@ -9,6 +9,7 @@ export interface Loan {
   date: string;
   capital: number;
   capital_balance: number;
+  raw_capital: number; // Added for display purposes
   interest: number;
   fee_value: number;
   fees: number;
@@ -42,7 +43,9 @@ export interface LoansStats {
 
 export interface CreateLoanPayload {
   customerId: string;
+  raw_capital: number;
   capital: number;
+  capital_balance: number;
   interest: number;
   fees: number;
   feeValue: number;
@@ -50,6 +53,7 @@ export interface CreateLoanPayload {
 }
 
 export interface UpdateLoanPayload {
+  raw_capital?: number;
   capital?: number;
   capital_balance?: number;
   interest?: number;
