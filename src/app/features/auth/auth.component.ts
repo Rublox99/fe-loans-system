@@ -58,8 +58,6 @@ export class AuthComponent implements OnInit {
       );
     } finally {
       this.isLoadingResponse = false;
-
-      console.log(this.authService.currentUser);
     }
   }
 }

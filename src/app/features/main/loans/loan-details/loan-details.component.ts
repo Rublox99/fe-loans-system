@@ -81,7 +81,7 @@ export class LoanDetailsComponent implements OnInit {
   totalPaid = computed(() => {
     const l = this.loan();
     if (!l) return 0;
-    return l.fee_value * l.paid_fees;
+    return l.capital - l.capital_balance;
   });
 
   remainingBalance = computed(() => this.loan()?.capital_balance ?? 0);

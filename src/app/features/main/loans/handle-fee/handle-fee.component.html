@@ -34,9 +34,8 @@
           <span class="text-xs uppercase text-standardGray">
             Identificador de cuota
           </span>
-
           <p class="font-medium uppercase text-highContrast">
-            {{ fee!.id }}
+            {{ fee.id }}
           </p>
         </div>
 
@@ -45,9 +44,8 @@
           <span class="text-xs uppercase text-standardGray">
             Préstamo asociado
           </span>
-
           <p class="font-medium uppercase text-highContrast">
-            {{ loan!.id }}
+            {{ loan.id }}
           </p>
         </div>
       </section>
@@ -56,33 +54,85 @@
       <section class="section__wrapper">
         <p class="section__header">Resumen</p>
         <div class="section__line text-standardGray">
+
           <div class="flex-1 space-y-1">
             <span class="text-xs uppercase text-standardGray">Cantidad a pagar</span>
             <p class="text-2xl font-bold text-accent">
               {{ loan.fee_value | currency:'L ':'symbol':'1.2-2' }}
             </p>
           </div>
+
           <div class="flex-1 space-y-1">
             <span class="text-xs uppercase text-standardGray">Días de mora</span>
             <p class="text-2xl font-bold text-success">
               {{ fee.delay_days ? fee.delay_days : 0 }} Día(s)
             </p>
           </div>
+
         </div>
+
+        <!-- Partial payment progress — only shown when there is an existing paid amount -->
+        @if (alreadyPaid > 0) {
+        <div class="space-y-1.5">
+          <div class="flex justify-between text-xs text-standardGray">
+            <span>Pagado hasta ahora</span>
+            <span>
+              {{ alreadyPaid | currency:'L ':'symbol':'1.2-2' }}
+              /
+              {{ loan.fee_value | currency:'L ':'symbol':'1.2-2' }}
+            </span>
+          </div>
+          <nz-progress [nzPercent]="+(alreadyPaid / loan.fee_value * 100).toFixed(0)" nzSize="small"
+            [nzStatus]="alreadyPaid >= loan.fee_value ? 'success' : 'active'" />
+        </div>
+        }
+
       </section>
 
       <!-- Administration -->
       <section class="flex-1 section__wrapper">
         <p class="section__header">Administración de cuota</p>
 
-        <!-- State -->
+        <!-- Payment Amount -->
         <div class="w-full space-y-2.5">
-          <span class="text-help">Estado de pago</span>
-          <nz-select class="w-full" formControlName="paymentState" nzPlaceHolder="Seleccione un estado">
-            <nz-option nzValue="1" nzLabel="1 - Pendiente" />
-            <nz-option nzValue="3" nzLabel="3 - Pagado" />
-            <nz-option nzValue="2" nzLabel="2 - Mora" nzDisabled />
-          </nz-select>
+          <div class="flex items-center justify-between">
+            <span class="text-help">Monto a abonar</span>
+            <span class="text-xs text-standardGray">
+              Restante: {{ remainingAmount | currency:'L ':'symbol':'1.2-2' }}
+            </span>
+          </div>
+
+          <nz-input-number class="w-full" formControlName="paymentAmount" [nzMin]="1" [nzMax]="remainingAmount"
+            [nzStep]="1" [nzPrecision]="2" nzPlaceHolder="Ingrese el monto" [nzFormatter]="amountFormatter"
+            [nzParser]="amountParser" />
+
+          <!-- Validation messages -->
+          @if (form.get('paymentAmount')!.invalid && form.get('paymentAmount')!.touched) {
+          @if (form.get('paymentAmount')!.hasError('required')) {
+          <p class="text-xs text-danger">El monto es requerido.</p>
+          } @else if (form.get('paymentAmount')!.hasError('min')) {
+          <p class="text-xs text-danger">El monto mínimo es L 1.00.</p>
+          } @else if (form.get('paymentAmount')!.hasError('max')) {
+          <p class="text-xs text-danger">
+            El monto no puede exceder el saldo restante
+            ({{ remainingAmount | currency:'L ':'symbol':'1.2-2' }}).
+          </p>
+          }
+          }
+
+          <!-- Settlement preview -->
+          @if (form.get('paymentAmount')!.valid) {
+          <div class="rounded-md p-2.5 text-xs" [ngClass]="willBeFullyPaid
+              ? 'bg-success/10 text-success'
+              : 'bg-accent/10 text-accent'">
+            @if (willBeFullyPaid) {
+            ✓ Este pago saldará la cuota por completo.
+            } @else {
+            Este es un pago parcial. Saldo pendiente tras el abono:
+            {{ (remainingAmount - (form.get('paymentAmount')!.value ?? 0)) | currency:'L ':'symbol':'1.2-2' }}
+            }
+          </div>
+          }
         </div>
 
         <!-- Payment Date -->
@@ -112,12 +162,13 @@
           <span class="text-help">Fecha de vencimiento (Solo lectura)</span>
           <input class="w-full border-help" nz-input [value]="formatDateForDisplay(fee.expiration_date)" disabled />
         </div>
+
       </section>
 
       <!-- Buttons -->
       <div class="space-y-2.5">
         <button class="w-full button confirm__button" nz-button nzType="text" [nzLoading]="isSubmitting()"
-          [disabled]="isSubmitting()" (click)="submit()">
+          [disabled]="isSubmitting() || form.invalid" (click)="submit()">
           <span class="font-sans font-extralight text-staticWhite">Actualizar cuota</span>
         </button>
 

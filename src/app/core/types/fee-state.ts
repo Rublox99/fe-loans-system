@@ -1,1 +1,1 @@
-export type FeeState = '1' | '2' | '3'; // '1' = Pending | '2' = Paid | '3' = Overdue
+export type FeeState = '1' | '2' | '3'; // '1' = Pending | '2' = Overdue | '3' = Paid
