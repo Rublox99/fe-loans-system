@@ -15,7 +15,8 @@
     "test": "ng test",
     "electron:compile": "tsc -p electron/tsconfig.electron.json",
     "electron:dev": "concurrently \"ng serve\" \"wait-on http://localhost:4200 && npm run electron:compile && electron .\"",
-    "electron:build": "ng build && npm run electron:compile && electron-builder build --win"
+    "electron:kill": "taskkill /f /im \"Loans System.exe\" & exit 0",
+    "electron:build": "npm run electron:kill && ng build --base-href ./ && npm run electron:compile && electron-builder build --win"
   },
   "build": {
     "appId": "com.robust.loans-system",

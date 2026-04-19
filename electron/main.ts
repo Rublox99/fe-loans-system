@@ -35,15 +35,8 @@ function createWindow(): void {
         mainWindow.webContents.openDevTools();
     } else {
         // In production we load from the built files
-        mainWindow.loadURL(
-            url.format({
-                pathname: path.join(
-                    __dirname,
-                    '../dist/loans-system/browser/index.html'  // ← Angular 21 outputs to /browser subfolder
-                ),
-                protocol: 'file:',
-                slashes: true,
-            })
+        mainWindow.loadFile(
+            path.join(__dirname, '../dist/loans-system/browser/index.html')
         );
     }
 

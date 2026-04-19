@@ -204,8 +204,6 @@ export class LoanDetailsComponent implements OnInit {
         this.fees.set(data);
         this.totalItems.set(total);
 
-        console.log(this.fees())
-
         // Picks first pending fee for the handle-fee drawer
         this.currentPendingFee.set(
           data.find(f => f.fee_state === '1') ?? null

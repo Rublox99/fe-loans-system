@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
-const url = __importStar(require("url"));
 // Keep a global reference to prevent garbage collection
 let mainWindow = null;
 const isDev = !electron_1.app.isPackaged;
@@ -65,12 +64,7 @@ function createWindow() {
     }
     else {
         // In production we load from the built files
-        mainWindow.loadURL(url.format({
-            pathname: path.join(__dirname, '../dist/loans-system/browser/index.html' // ← Angular 21 outputs to /browser subfolder
-            ),
-            protocol: 'file:',
-            slashes: true,
-        }));
+        mainWindow.loadFile(path.join(__dirname, '../dist/loans-system/browser/index.html'));
     }
     // ── Window Events ─────────────────────────────────────
     // Show window only when fully loaded (avoids white flash)
