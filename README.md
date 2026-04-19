@@ -36,3 +36,7 @@ ng generate component features/home/pages/home --module=features/home/home.modul
 ## ----- Clonación de boilerplate ----- ##
 git clone
 npx degit tu-usuario/loans-system nuevo-proyecto
+
+## ----- Electron Distribution ----- ##
+npm run electron:dev
+npm run electron:build
