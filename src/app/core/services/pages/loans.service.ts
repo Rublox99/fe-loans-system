@@ -197,4 +197,17 @@ export class LoansService {
             })
         );
     }
+
+    payLoanEarly(loanId: string): Observable<void> {
+        return from(
+            this.supabase.rpc('fn_pay_loan_early', {
+                p_loan_id: loanId,
+                p_payment_date: new Date().toISOString()
+            })
+        ).pipe(
+            map(({ error }) => {
+                if (error) throw error;
+            })
+        );
+    }
 }

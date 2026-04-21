@@ -1,0 +1,51 @@
+<!-- Trigger button -->
+<div class="relative">
+  <button class="flex items-center gap-1.5 px-3 h-[40px] rounded-md border border-standardGray
+           text-sm font-medium font-roboto text-highContrast
+           hover:bg-gray-50 transition-colors" (click)="isDropdownOpen.set(!isDropdownOpen())"
+    aria-label="Acciones del préstamo">
+    <span>Acciones</span>
+    <web-icon name="LEFT_ROUNDED_ARROW" size="16" color="var(--high-contrast)" class="transition-transform duration-200"
+      [style.transform]="isDropdownOpen() ? 'rotate(180deg)' : 'rotate(0)'" />
+  </button>
+
+  <!-- Backdrop -->
+  @if (isDropdownOpen()) {
+  <div class="fixed inset-0 z-10" (click)="isDropdownOpen.set(false)"></div>
+
+  <!-- Dropdown menu -->
+  <div class="absolute right-0 z-20 mt-1 w-[180px] rounded-md border border-lightGray
+             bg-white shadow-md overflow-hidden">
+    <button class="w-full px-4 py-2.5 text-left text-sm font-roboto text-highContrast
+                 hover:bg-gray-100 transition-colors" (click)="selectAction(actions[0].value)">
+      {{ actions[0].label }}
+    </button>
+    <app-finance-loan [action]="actions[1]" [loan]="loan" />
+  </div>
+  }
+</div>
+
+<!-- Confirmation Modal Template -->
+<ng-template #confirmModalTpl>
+  <section class="p-5">
+    <p class="text-sm text-highContrast font-roboto">
+      ¿Está seguro de que desea
+      <strong class="uppercase text-primary">{{ pendingActionLabel }}</strong>
+      el préstamo
+      <strong>{{ loan.id }}</strong>?
+    </p>
+    @if (pendingAction() === 'pay_full') {
+    <ul class="space-y-2.5 mt-5">
+      <li class="text-xs text-standardGray font-roboto">
+        - Esta acción no se puede deshacer.
+      </li>
+      <li class="text-xs text-standardGray font-roboto">
+        - Se considerará el saldo pendiente como pagado.
+      </li>
+      <li class="text-xs text-standardGray font-roboto">
+        - Las cuotas pendientes serán finalizadas sin interés a excepción de las cuotas del mes actual.
+      </li>
+    </ul>
+    }
+  </section>
+</ng-template>

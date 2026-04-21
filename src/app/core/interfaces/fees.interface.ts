@@ -8,6 +8,7 @@ export interface Fee {
     payment_date: string | null;
     paid_amount: number | null;
     fee_state: FeeState;
+    is_early_payment?: boolean;
     delay_days: number;
     last_modified: string;
     created_at: string;

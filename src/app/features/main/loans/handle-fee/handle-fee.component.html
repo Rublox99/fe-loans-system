@@ -8,7 +8,7 @@
 <nz-drawer class="font-sans" [nzClosable]="true" nzWidth="500px" [nzVisible]="isVisible" nzPlacement="right"
   (nzOnClose)="closeDrawer()">
   <ng-container *nzDrawerContent>
-    <section [formGroup]="form" class="flex flex-col gap-[25px] h-full p-[15px] bg-lowContrast">
+    <section [formGroup]="form" class="flex flex-col gap-[25px] h-auto min-h-full p-[15px] bg-lowContrast">
 
       @if (!fee || !loan) {
       <!-- Guard: nothing to manage -->
@@ -89,6 +89,58 @@
 
       </section>
 
+      <!-- Pago Anticipado — solo visible si la cuota vence en un mes futuro -->
+      @if (isFutureFee) {
+      <section class="section__wrapper">
+        <p class="section__header">Pago Anticipado</p>
+
+        <!-- Info card -->
+        <div class="rounded-md border border-primary/30 bg-primary/5 p-3.5 space-y-3">
+
+          <!-- Amounts row -->
+          <div class="flex gap-2.5">
+            <div class="flex-1 space-y-0.5">
+              <span class="text-xs uppercase text-standardGray">Monto con interés</span>
+              <p class="text-lg font-bold line-through text-highContrast decoration-danger/60">
+                {{ loan!.fee_value | currency:'L ':'symbol':'1.2-2' }}
+              </p>
+            </div>
+            <div class="flex-1 space-y-0.5">
+              <span class="text-xs uppercase text-standardGray">Monto anticipado</span>
+              <p class="text-lg font-bold text-primary">
+                {{ earlyPaymentAmount | currency:'L ':'symbol':'1.2-2' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Savings badge -->
+          <div class="flex items-center gap-1.5 text-xs text-success font-medium">
+            <span>✓ Ahorro de</span>
+            <span class="font-bold">
+              {{ interestSaved | currency:'L ':'symbol':'1.2-2' }}
+            </span>
+            <span>en intereses</span>
+          </div>
+
+          <!-- Disclaimer -->
+          <p class="text-xs leading-relaxed text-standardGray">
+            Al pagar anticipadamente, esta cuota se liquida únicamente por su
+            valor de capital, sin aplicar intereses.
+          </p>
+        </div>
+
+        <!-- Early pay button -->
+        <button class="w-full button" style="background-color: var(--primary) !important" nz-button nzType="primary"
+          [nzLoading]="isPayingEarly()" [disabled]="isPayingEarly() || isSubmitting()" (click)="payEarly()">
+          <span class="font-sans font-extralight text-staticWhite">
+            Liquidar cuota anticipadamente
+            ({{ earlyPaymentAmount | currency:'L ':'symbol':'1.2-2' }})
+          </span>
+        </button>
+
+      </section>
+      }
+
       <!-- Administration -->
       <section class="flex-1 section__wrapper">
         <p class="section__header">Administración de cuota</p>
@@ -167,8 +219,8 @@
 
       <!-- Buttons -->
       <div class="space-y-2.5">
-        <button class="w-full button confirm__button" nz-button nzType="text" [nzLoading]="isSubmitting()"
-          [disabled]="isSubmitting() || form.invalid" (click)="submit()">
+        <button [ngClass]="{'disabled': isFutureFee}" class="w-full button confirm__button" nz-button nzType="text"
+          [nzLoading]="isSubmitting()" [disabled]="isSubmitting() || form.invalid" (click)="submit()">
           <span class="font-sans font-extralight text-staticWhite">Actualizar cuota</span>
         </button>
 

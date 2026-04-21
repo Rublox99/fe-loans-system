@@ -1,0 +1,1 @@
+export type LoanAction = 'pay_full' | 'refinance';

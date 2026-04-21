@@ -14,6 +14,7 @@ import { FeeState } from '../../../../core/types/fee-state';
 import { LoanState } from '../../../../core/types/loan-state.type';
 import { GeneralService } from '../../../../core/services/general.service';
 import { EditLoanDrawerComponent } from '../edit-loan/edit-loan.component';
+import { LoanTotalActionsComponent } from './loan-total-actions/loan-total-actions.component';
 
 export interface LoanStateOption {
   value: LoanState;
@@ -33,7 +34,8 @@ export interface LoanStateOption {
     NgZorroModule,
     ViewEntityDrawerComponent,
     HandleFeeDrawerComponent,
-    EditLoanDrawerComponent
+    EditLoanDrawerComponent,
+    LoanTotalActionsComponent
   ],
   styleUrls: ['./loan-details.component.css', '../../main.styles.css']
 })
@@ -154,6 +156,11 @@ export class LoanDetailsComponent implements OnInit {
     this.fetchFeeDetails();
   }
 
+  onLoanPaid(): void {
+    this.fetchLoanDetails();
+    this.fetchFeeDetails();
+  }
+
   getFeeStateLabel(state: FeeState): string {
     switch (state) {
       case '1': return 'Pendiente';
@@ -181,6 +188,8 @@ export class LoanDetailsComponent implements OnInit {
         this.loan.set(loan ?? null);
         this.selectedLoanState.set(loan?.state ?? null);
         this.isLoadingLoan.set(false);
+
+        console.log(this.loan());
       },
       error: (err) => {
         console.error(err);
@@ -209,6 +218,7 @@ export class LoanDetailsComponent implements OnInit {
           data.find(f => f.fee_state === '1') ?? null
         );
 
+        console.log(this.fees());
         this.isLoadingTable.set(false);
       },
       error: (err) => {

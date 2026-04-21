@@ -132,4 +132,17 @@ export class FeesService {
             })
         );
     }
+
+    payFeeEarly(feeId: string, paymentDate?: string): Observable<void> {
+        return from(
+            this.supabase.rpc('fn_pay_fee_early', {
+                p_fee_id: feeId,
+                p_payment_date: paymentDate ?? new Date().toISOString()
+            })
+        ).pipe(
+            map(({ error }) => {
+                if (error) throw error;
+            })
+        );
+    }
 }

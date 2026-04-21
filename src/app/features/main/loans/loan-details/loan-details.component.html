@@ -27,8 +27,12 @@
       <app-view-entity aria-label="Ver entidad" [isViewableFromLoanDetails]="true" [customerId]="loan()!.customer_id" />
       <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee()" [loan]="loan()"
         (feeUpdated)="onFeeUpdated()" />
+      @if (loan()!.state === 'Accepted') {
+      <app-loan-total-actions [loan]="loan()!" (loanPaid)="onLoanPaid()" />
+      }
       } @else {
       <div class="flex gap-2.5">
+        <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>
         <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>
         <div class="w-[120px] h-[36px] rounded-md bg-lightGray animate-pulse"></div>
       </div>
@@ -46,6 +50,8 @@
         @if (isLoadingLoan()) { — }
         @else { {{ totalPaid() | currency:'L ':'symbol':'1.2-2' }} }
       </span>
+
+      <!-- Absolute -->
       <span class="absolute text-xs uppercase text-standardGray bottom-1.5 left-5">
         @if (!isLoadingLoan() && loan()) {
         {{ ((totalPaid() / (loan()!.fee_value * loan()!.fees)) * 100) | number:'1.0-0' }}% retornado
@@ -60,6 +66,13 @@
       <span class="value__data-card">
         @if (isLoadingLoan()) { — }
         @else { {{ remainingBalance() | currency:'L ':'symbol':'1.2-2' }} }
+      </span>
+
+      <!-- Absolute -->
+      <span class="absolute text-xs uppercase text-standardGray bottom-1.5 left-5">
+        @if (!isLoadingLoan() && loan()) {
+        Capital base: {{ loan()?.raw_capital | currency:'L ':'symbol':'1.2-2' }}
+        }
       </span>
       <web-icon class="absolute top-5 right-5" name="BANK" color="#FFA719" size="20" />
     </div>
@@ -149,7 +162,7 @@
       <div class="flex-1 space-x-1 text-xs font-medium uppercase font-roboto">
         <span class="text-help">Mostrando</span>
         <span class="text-primary">{{ rangeStart() }}-{{ rangeEnd() }} de {{ totalItems() }}</span>
-        <span class="text-help">entidades registradas</span>
+        <span class="text-help">cuotas generadas</span>
       </div>
 
       <!-- Right -->
