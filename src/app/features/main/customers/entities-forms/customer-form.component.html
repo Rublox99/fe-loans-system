@@ -90,7 +90,7 @@
 
             <!-- Guarantee person search -->
             <div class="w-full space-y-2.5">
-                <span class="text-help">Aval <span class="text-red-500">*</span></span>
+                <span class="text-help">Aval</span>
                 <div class="relative">
                     <nz-input-wrapper class="h-[45px]">
                         <input nz-input placeholder="Buscar aval por nombre" formControlName="guaranteeSearch"
@@ -273,7 +273,7 @@
                 <!-- Spouse location -->
                 <div class="section__line">
                     <div class="w-full space-y-2.5">
-                        <span class="text-help">Dirección</span>
+                        <span class="text-help">Dirección <span class="text-red-500">*</span></span>
                         <input nz-input placeholder="Ciudad, Departamento" formControlName="location"
                             [nzStatus]="isInvalid('spouse.location') ? 'error' : ''" />
                         @if (isInvalid('spouse.location')) {

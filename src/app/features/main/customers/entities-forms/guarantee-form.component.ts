@@ -75,7 +75,7 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
     lastName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
     dni: new FormControl('', [Validators.required, dniValidator]),
     phone: new FormControl('', [Validators.required, phoneValidator]),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    email: new FormControl('', [Validators.required]),
     radioEntityGrade: new FormControl<string>('A', Validators.required),
     location: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     professionSelect: new FormControl<string | null>(null, Validators.required),
@@ -331,6 +331,7 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
     if (this.form.invalid) return;
 
     const raw = this.form.value;
+    this.isLoading = true;
 
     const profession = raw.professionSelect === 'otro'
       ? raw.professionCustom
@@ -353,5 +354,7 @@ export class GuaranteeFormComponent implements OnInit, OnDestroy {
       },
       rawFiles: [...this.rawFiles],
     });
+
+    this.isLoading = false;
   }
 }

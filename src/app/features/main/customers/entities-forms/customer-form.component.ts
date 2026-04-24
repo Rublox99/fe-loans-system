@@ -106,7 +106,7 @@ export class CustomerFormComponent implements OnInit, OnDestroy {
     dni: new FormControl('', [Validators.required, dniValidator]),
     phone: new FormControl('', [Validators.required, phoneValidator]),
     email: new FormControl('', [Validators.email]),
-    guaranteePersonId: new FormControl<string | null>(null, Validators.required),
+    guaranteePersonId: new FormControl<string | null>(null),
     guaranteeSearch: new FormControl(''),   // display-only search input
     isWithSpouse: new FormControl(false),
     radioEntityGrade: new FormControl<string>('A', Validators.required),
@@ -126,7 +126,7 @@ export class CustomerFormComponent implements OnInit, OnDestroy {
       professionSelect: new FormControl<string | null>(null),
       professionCustom: new FormControl(''),
       income: new FormControl<number | null>(null),
-      location: new FormControl('')
+      location: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     })
   });
 
@@ -144,6 +144,9 @@ export class CustomerFormComponent implements OnInit, OnDestroy {
   constructor(private entitiesService: EntitiesService) { }
 
   ngOnInit(): void {
+    // Initialize form with default values and validators
+    this.toggleSpouseValidators(false);
+
     // Profession select → custom input
     this.form.get('professionSelect')!
       .valueChanges
@@ -474,6 +477,7 @@ export class CustomerFormComponent implements OnInit, OnDestroy {
     this.markAllTouched();
     if (this.form.invalid) return;
 
+    this.isLoading = true;
     const raw = this.form.value;
 
     const profession = raw.professionSelect === 'otro'
@@ -513,5 +517,7 @@ export class CustomerFormComponent implements OnInit, OnDestroy {
       },
       rawFiles: [...this.rawFiles]
     });
+
+    this.isLoading = false;
   }
 }
