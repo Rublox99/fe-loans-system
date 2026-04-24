@@ -20,7 +20,8 @@
                  hover:bg-gray-100 transition-colors" (click)="selectAction(actions[0].value)">
       {{ actions[0].label }}
     </button>
-    <app-finance-loan [action]="actions[1]" [loan]="loan" />
+
+    <app-refinance-loan [action]="actions[1]" [loan]="loan" (loanRefinanced)="loanRefinanced.emit()" />
   </div>
   }
 </div>

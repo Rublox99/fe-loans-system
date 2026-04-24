@@ -28,7 +28,7 @@
       <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee()" [loan]="loan()"
         (feeUpdated)="onFeeUpdated()" />
       @if (loan()!.state === 'Accepted') {
-      <app-loan-total-actions [loan]="loan()!" (loanPaid)="onLoanPaid()" />
+      <app-loan-total-actions [loan]="loan()!" (loanPaid)="onLoanPaid()" (loanRefinanced)="onLoanRefinanced()" />
       }
       } @else {
       <div class="flex gap-2.5">
@@ -144,7 +144,7 @@
               <td class="cell__table">
                 <span class="flex justify-center w-[100px] px-2 py-1 text-xs border rounded-sm font-roboto"
                   [ngClass]="getFeeStateClasses(fee.fee_state)">
-                  {{ getFeeStateLabel(fee.fee_state) }}
+                  {{ fee.is_early_payment ? 'Anticipado' : getFeeStateLabel(fee.fee_state) }}
                 </span>
               </td>
               <td class="cell__table whitespace-nowrap">{{ fee.delay_days }}</td>

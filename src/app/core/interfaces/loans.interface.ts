@@ -10,6 +10,8 @@ export interface Loan {
   capital: number;
   capital_balance: number;
   raw_capital: number; // Added for display purposes
+  is_refinanced: boolean;
+  refinanced_from_loan_id: string | null;
   interest: number;
   fee_value: number;
   fees: number;

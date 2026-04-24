@@ -10,7 +10,7 @@ import { NgZorroModule } from '../../../../../shared/modules/ng-zorro.module';
 import { FormsModule } from '@angular/forms';
 import { WebIconComponent } from '../../../../../shared/components/web-icon.component';
 import { LoanAction } from '../../../../../core/types/loan-action';
-import { FinanceLoanDrawerComponent } from '../refinance-loan/finance-loan.component';
+import { RefinanceLoanDrawerComponent } from '../refinance-loan/refinance-loan.component';
 import { LoansService } from '../../../../../core/services/pages/loans.service';
 
 @Component({
@@ -21,12 +21,13 @@ import { LoansService } from '../../../../../core/services/pages/loans.service';
     NgZorroModule,
     FormsModule,
     WebIconComponent,
-    FinanceLoanDrawerComponent
+    RefinanceLoanDrawerComponent
   ],
 })
 export class LoanTotalActionsComponent {
   @Input() loan!: Loan;
   @Output() loanPaid = new EventEmitter<void>();
+  @Output() loanRefinanced = new EventEmitter<void>();
 
   @ViewChild('confirmModalTpl') confirmModalTpl!: TemplateRef<any>;
 

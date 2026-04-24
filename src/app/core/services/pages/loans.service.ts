@@ -210,4 +210,29 @@ export class LoansService {
             })
         );
     }
+
+    refinanceLoan(params: {
+        sourceLoanId: string;
+        newRawCapital: number;
+        interest: number;
+        fees: number;
+        modality: 'S' | 'Q' | 'M';
+        firstExpDate?: string;
+    }): Observable<{ newLoanId: string }> {
+        return from(
+            this.supabase.rpc('fn_refinance_loan', {
+                p_source_loan_id: params.sourceLoanId,
+                p_new_raw_capital: params.newRawCapital,
+                p_interest: params.interest,
+                p_fees: params.fees,
+                p_modality: params.modality,
+                p_first_exp_date: params.firstExpDate ?? null
+            })
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+                return { newLoanId: data as string };
+            })
+        );
+    }
 }

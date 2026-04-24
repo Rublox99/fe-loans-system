@@ -1,0 +1,33 @@
+<!-- finance-loan.component.html -->
+
+<!-- Trigger button — disabled when below 70% -->
+<button class="w-full px-4 py-2.5 text-left text-sm font-roboto transition-colors" [ngClass]="canRefinance()
+    ? 'text-highContrast hover:bg-gray-100'
+    : 'text-standardGray cursor-not-allowed'" [disabled]="!canRefinance()" (click)="openDrawer()">
+  {{ action.label }}
+  @if (!canRefinance()) {
+  <p class="text-standardGray">
+    ({{ (loan.paid_fees / loan.fees * 100) | number:'1.0-0' }}% / 70%)
+  </p>
+  }
+</button>
+
+<nz-drawer [nzClosable]="true" nzWidth="520px" [nzVisible]="isVisible()" nzPlacement="right" (nzOnClose)="closeDrawer()">
+  <ng-container *nzDrawerContent>
+    <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
+
+      <!-- Header -->
+      <div class="space-y-1.5">
+        <p class="font-sans text-3xl font-bold text-primary">
+          Refinanciación de Préstamo
+        </p>
+        <p class="font-sans text-sm text-standardGray">
+          Complete los datos del nuevo préstamo. El saldo pendiente del
+          préstamo actual será descontado automáticamente del saldo inicial.
+        </p>
+      </div>
+
+      <app-refinance-loan-form [sourceLoan]="loan" (submitForm)="onFormSubmitted()" (closeDrawer)="closeDrawer()" />
+    </section>
+  </ng-container>
+</nz-drawer>

@@ -121,6 +121,8 @@ export class FeesService {
     // ─── UPDATE ────────────────────────────────────────────────────────────────
 
     updateFee(id: string, payload: UpdateFeePayload): Observable<void> {
+        console.log('Updating fee with payload:', { id, ...payload });
+
         return from(
             this.supabase
                 .from('fees')
