@@ -200,6 +200,7 @@ export class LoanDetailsComponent implements OnInit {
         this.loan.set(loan ?? null);
         this.selectedLoanState.set(loan?.state ?? null);
         this.isLoadingLoan.set(false);
+        console.log(this.loan());
       },
       error: (err) => {
         console.error(err);
@@ -227,6 +228,8 @@ export class LoanDetailsComponent implements OnInit {
         this.currentPendingFee.set(
           data.find(f => f.fee_state === '1') ?? null
         );
+
+        console.log(this.fees());
         this.isLoadingTable.set(false);
       },
       error: (err) => {

@@ -78,11 +78,9 @@ export class HandleFeeDrawerComponent implements OnChanges {
    * Same critery as fn_pay_fee_early in DB.
    */
   get isFutureFee(): boolean {
-    if (!this.fee) return false;
-    const cutoff = new Date();
-    // último instante del mes actual
-    cutoff.setMonth(cutoff.getMonth() + 1, 1);
-    cutoff.setHours(0, 0, 0, -1);
+    if (!this.fee || !this.loan?.first_expiration_date) return false;
+    const cutoff = new Date(this.loan.first_expiration_date);
+    cutoff.setDate(cutoff.getDate() + 30); // add 30 days as calendar days instead of current month
     return new Date(this.fee.expiration_date) > cutoff;
   }
 

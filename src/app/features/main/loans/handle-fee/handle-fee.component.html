@@ -219,8 +219,8 @@
 
       <!-- Buttons -->
       <div class="space-y-2.5">
-        <button [ngClass]="{'disabled': isFutureFee}" class="w-full button confirm__button" nz-button nzType="text"
-          [nzLoading]="isSubmitting()" [disabled]="isSubmitting() || form.invalid" (click)="submit()">
+        <button class="w-full button confirm__button" nz-button nzType="text" [nzLoading]="isSubmitting()"
+          [disabled]="isSubmitting() || form.invalid" (click)="submit()">
           <span class="font-sans font-extralight text-staticWhite">Actualizar cuota</span>
         </button>
 
