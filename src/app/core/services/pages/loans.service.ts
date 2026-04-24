@@ -145,6 +145,22 @@ export class LoansService {
         return stats$;
     }
 
+    /**
+ * Previews the total amount due for an early full payment.
+ * Future fees (beyond 30 days) are charged capital only, no interest.
+ */
+    previewEarlyPayment(loanId: string): Observable<number> {
+        return from(
+            this.supabase
+                .rpc('fn_preview_early_payment', { p_loan_id: loanId })
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+                return data as number;
+            })
+        );
+    }
+
     // ─── INSERT ────────────────────────────────────────────────────────────────
     createLoan(payload: CreateLoanPayload): Observable<void> {
         const user = this.authService.currentUser;

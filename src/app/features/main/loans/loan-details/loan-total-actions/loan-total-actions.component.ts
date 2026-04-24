@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter,
-  signal, TemplateRef, ViewChild
+  signal, TemplateRef, ViewChild, OnInit   // ← add OnInit
 } from '@angular/core';
 import { Loan } from '../../../../../core/interfaces/loans.interface';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -24,7 +24,7 @@ import { LoansService } from '../../../../../core/services/pages/loans.service';
     RefinanceLoanDrawerComponent
   ],
 })
-export class LoanTotalActionsComponent {
+export class LoanTotalActionsComponent implements OnInit {
   @Input() loan!: Loan;
   @Output() loanPaid = new EventEmitter<void>();
   @Output() loanRefinanced = new EventEmitter<void>();
@@ -34,6 +34,11 @@ export class LoanTotalActionsComponent {
   isDropdownOpen = signal(false);
   pendingAction = signal<LoanAction | null>(null);
   isLoading = signal(false);
+
+  // ── Early payment preview ─────────────────────────────────────────────────
+  earlyPaymentPreview = signal<number | null>(null);
+  isLoadingPreview = signal(false);
+  previewError = signal(false);
 
   readonly actions: { value: LoanAction; label: string }[] = [
     { value: 'pay_full', label: 'Pagar por completo' },
@@ -49,6 +54,32 @@ export class LoanTotalActionsComponent {
     private message: NzMessageService,
     private loansService: LoansService
   ) { }
+
+  ngOnInit(): void {
+    this.fetchEarlyPaymentPreview();
+  }
+
+  fetchEarlyPaymentPreview(): void {
+    this.isLoadingPreview.set(true);
+    this.previewError.set(false);
+
+    this.loansService.previewEarlyPayment(this.loan.id).subscribe({
+      next: (amount) => {
+        this.earlyPaymentPreview.set(amount);
+        this.isLoadingPreview.set(false);
+      },
+      error: (err) => {
+        console.error('Error fetching early payment preview:', err);
+        this.previewError.set(true);
+        this.isLoadingPreview.set(false);
+      }
+    });
+  }
+
+  /** Call this from the parent whenever loan data changes */
+  refresh(): void {
+    this.fetchEarlyPaymentPreview();
+  }
 
   selectAction(action: LoanAction): void {
     this.pendingAction.set(action);
@@ -73,7 +104,7 @@ export class LoanTotalActionsComponent {
           label: 'Confirmar',
           type: 'primary',
           loading: () => this.isLoading(),
-          disabled: () => this.isLoading(),
+          disabled: () => this.isLoading() || this.isLoadingPreview(),
           onClick: () => this.confirmAction(modalRef)
         }
       ],

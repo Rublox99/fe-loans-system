@@ -35,6 +35,33 @@
       el préstamo
       <strong>{{ loan.id }}</strong>?
     </p>
+
+    <!-- Early payment total -->
+    @if (pendingAction() === 'pay_full') {
+    <div class="mt-2">
+
+      @if (isLoadingPreview()) {
+      <p class="font-sans text-sm text-standardGray animate-pulse">
+        Calculando total a liquidar...
+      </p>
+      } @else if (previewError()) {
+      <p class="font-sans text-sm text-red-500">
+        No se pudo calcular el total.
+        <button class="underline text-primary" (click)="fetchEarlyPaymentPreview()">
+          Reintentar
+        </button>
+      </p>
+      } @else if (earlyPaymentPreview() !== null) {
+      <p class="font-sans text-md text-primary">
+        El total por liquidar sería de
+        <strong>
+          {{ earlyPaymentPreview()! | currency:'L':'symbol':'1.2-2' }}
+        </strong>.
+      </p>
+      }
+
+    </div>
+    }
     @if (pendingAction() === 'pay_full') {
     <ul class="space-y-2.5 mt-5">
       <li class="text-xs text-standardGray font-roboto">

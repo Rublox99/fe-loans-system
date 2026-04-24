@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, OnInit, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
@@ -40,6 +40,10 @@ export interface LoanStateOption {
   styleUrls: ['./loan-details.component.css', '../../main.styles.css']
 })
 export class LoanDetailsComponent implements OnInit {
+  // ── Reference to child ────────────────────────────────────────────────
+  @ViewChild(LoanTotalActionsComponent)
+  loanTotalActions?: LoanTotalActionsComponent;
+
   loanId!: string;
   loan = signal<Loan | null>(null);
   currentPendingFee = signal<Fee | null>(null);
@@ -124,6 +128,7 @@ export class LoanDetailsComponent implements OnInit {
   onFeeUpdated(): void {
     this.fetchLoanDetails(); // refreshes cards (capital_balance, next_expected_payment etc.)
     this.fetchFeeDetails();  // refreshes the fees table
+    this.loanTotalActions?.refresh();
   }
 
   onLoanStateChange(newState: LoanState) {
@@ -154,6 +159,7 @@ export class LoanDetailsComponent implements OnInit {
   onLoanUpdated(): void {
     this.fetchLoanDetails();
     this.fetchFeeDetails();
+    this.loanTotalActions?.refresh();
   }
 
   onLoanPaid(): void {
@@ -164,6 +170,7 @@ export class LoanDetailsComponent implements OnInit {
   onLoanRefinanced(): void {
     this.fetchLoanDetails();
     this.fetchFeeDetails();
+    this.loanTotalActions?.refresh();
   }
 
   getFeeStateLabel(state: FeeState): string {
