@@ -8,6 +8,7 @@ import {
   ReactiveFormsModule, Validators
 } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';           // ← ADD
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 import { Fee } from '../../../../core/interfaces/fees.interface';
@@ -55,7 +56,8 @@ export class HandleFeeDrawerComponent implements OnChanges {
 
   constructor(
     private feesService: FeesService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private modal: NzModalService    // ← ADD
   ) { }
 
   // ─── Computed helpers ────────────────────────────────────────────────────────
@@ -64,23 +66,34 @@ export class HandleFeeDrawerComponent implements OnChanges {
     return this.fee?.paid_amount ?? 0;
   }
 
+  /**
+   * When isFutureFee, the max payable amount through normal payment
+   * is capped to the remaining capital portion (no interest).
+   * Beyond the cutoff, full fee_value applies.
+   */
   get remainingAmount(): number {
-    return Math.max(0, (this.loan?.fee_value ?? 0) - this.alreadyPaid);
+    const base = this.isFutureFee
+      ? this.earlyPaymentAmount          // ← cap to capital only
+      : (this.loan?.fee_value ?? 0);
+    return Math.max(0, base - this.alreadyPaid);
   }
 
   get willBeFullyPaid(): boolean {
     const newPayment = this.form.get('paymentAmount')!.value ?? 0;
-    return this.alreadyPaid + newPayment >= (this.loan?.fee_value ?? 0);
+    const base = this.isFutureFee
+      ? this.earlyPaymentAmount
+      : (this.loan?.fee_value ?? 0);
+    return this.alreadyPaid + newPayment >= base;
   }
 
   /**
-   * True when the fee expires in a future calendar month
-   * Same critery as fn_pay_fee_early in DB.
+   * True when the fee's expiration date is beyond
+   * first_expiration_date + 30 calendar days.
    */
   get isFutureFee(): boolean {
     if (!this.fee || !this.loan?.first_expiration_date) return false;
     const cutoff = new Date(this.loan.first_expiration_date);
-    cutoff.setDate(cutoff.getDate() + 30); // add 30 days as calendar days instead of current month
+    cutoff.setDate(cutoff.getDate() + 30);
     return new Date(this.fee.expiration_date) > cutoff;
   }
 
@@ -120,7 +133,11 @@ export class HandleFeeDrawerComponent implements OnChanges {
 
   private updateAmountValidators(): void {
     const ctrl = this.form.get('paymentAmount')!;
-    ctrl.setValidators([Validators.required, Validators.min(1), Validators.max(this.remainingAmount)]);
+    ctrl.setValidators([
+      Validators.required,
+      Validators.min(1),
+      Validators.max(this.remainingAmount)  // ← already capped via remainingAmount
+    ]);
     ctrl.updateValueAndValidity();
   }
 
@@ -166,7 +183,7 @@ export class HandleFeeDrawerComponent implements OnChanges {
     this.isPayingEarly.set(false);
   }
 
-  // ─── Pago normal ─────────────────────────────────────────────────────────────
+  // ─── Submit with optional warning modal ──────────────────────────────────────
 
   submit(): void {
     if (!this.fee || !this.loan || this.isSubmitting()) return;
@@ -175,8 +192,85 @@ export class HandleFeeDrawerComponent implements OnChanges {
     if (this.form.invalid) return;
 
     const newPayment = this.form.get('paymentAmount')!.value as number;
+
+    if (this.isFutureFee && this.willBeFullyPaid) {
+      this.payEarly();
+      return;
+    }
+
+    /**
+     * Show warning modal only when:
+     * - Fee is beyond the 30-day cutoff (isFutureFee)
+     * - AND payment entered exceeds earlyPaymentAmount
+     * Since remainingAmount is capped to earlyPaymentAmount for future fees,
+     * this case should not normally occur — but acts as a safety guard.
+     */
+    if (this.isFutureFee && newPayment > this.earlyPaymentAmount) {
+      this.openInterestWarningModal();
+      return;
+    }
+
+    this.executeSubmit(newPayment);
+  }
+
+  private openInterestWarningModal(): void {
+    const newPayment = this.form.get('paymentAmount')!.value as number;
+
+    const modalRef = this.modal.create({
+      nzTitle: 'Pago con interés detectado',
+      nzContent: `
+        <div class="space-y-4 font-sans text-sm">
+
+          <p class="text-standardGray">
+            Está a punto de registrar un pago que incluye interés sobre una
+            cuota futura. Considere la siguiente comparación:
+          </p>
+
+          <div class="flex gap-3 mt-2">
+
+            <div class="flex-1 rounded-md border border-danger/30 bg-danger/5 p-3 space-y-1">
+              <p class="text-xs uppercase text-standardGray">Pago actual (con interés)</p>
+              <p class="text-lg font-bold text-danger">
+                L ${newPayment.toFixed(2)}
+              </p>
+              <p class="text-xs text-standardGray">
+                Incluye L ${this.interestSaved.toFixed(2)} de interés
+              </p>
+            </div>
+
+            <div class="flex-1 rounded-md border border-success/30 bg-success/5 p-3 space-y-1">
+              <p class="text-xs uppercase text-standardGray">Pago anticipado (sin interés)</p>
+              <p class="text-lg font-bold text-success">
+                L ${this.earlyPaymentAmount.toFixed(2)}
+              </p>
+              <p class="text-xs text-standardGray">
+                Ahorro de L ${this.interestSaved.toFixed(2)}
+              </p>
+            </div>
+
+          </div>
+
+          <p class="text-xs text-standardGray mt-2">
+            ¿Desea continuar con el pago incluyendo interés, o prefiere
+            liquidar anticipadamente sin interés?
+          </p>
+
+        </div>
+      `,
+      nzOkText: 'Continuar con interés',
+      nzOkDanger: true,
+      nzCancelText: 'Cancelar',
+      nzOnOk: () => this.executeSubmit(newPayment),
+      nzOnCancel: () => { }
+    });
+  }
+
+  private executeSubmit(newPayment: number): void {
     const cumulativePaid = this.alreadyPaid + newPayment;
-    const resolvedState: FeeState = cumulativePaid >= this.loan.fee_value ? '3' : '1';
+    const base = this.isFutureFee
+      ? this.earlyPaymentAmount
+      : (this.loan!.fee_value);
+    const resolvedState: FeeState = cumulativePaid >= base ? '3' : '1';
     const isFullyPaid = resolvedState === '3';
     const rawDate = this.form.getRawValue().paymentDate as string;
     const paymentDate = rawDate
@@ -185,7 +279,7 @@ export class HandleFeeDrawerComponent implements OnChanges {
 
     this.isSubmitting.set(true);
 
-    this.feesService.updateFee(this.fee.id, {
+    this.feesService.updateFee(this.fee!.id, {
       fee_state: resolvedState,
       payment_date: isFullyPaid ? paymentDate : null,
       paid_amount: cumulativePaid,
@@ -214,7 +308,7 @@ export class HandleFeeDrawerComponent implements OnChanges {
         this.isPayingEarly.set(false);
         this.message.success('Cuota liquidada anticipadamente.');
         this.closeDrawer();
-        this.feeUpdated.emit();   // recarga tabla + cards del padre
+        this.feeUpdated.emit();
       },
       error: (err) => {
         console.error('Error en pago anticipado:', err);

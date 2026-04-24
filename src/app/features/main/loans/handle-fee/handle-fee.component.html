@@ -57,9 +57,16 @@
 
           <div class="flex-1 space-y-1">
             <span class="text-xs uppercase text-standardGray">Cantidad a pagar</span>
+            <!-- Shows capped amount for future fees -->
             <p class="text-2xl font-bold text-accent">
-              {{ loan.fee_value | currency:'L ':'symbol':'1.2-2' }}
+              {{ (isFutureFee ? earlyPaymentAmount : loan.fee_value) | currency:'L ':'symbol':'1.2-2' }}
             </p>
+            <!-- Small note when capped -->
+            @if (isFutureFee) {
+            <p class="text-xs text-success font-medium">
+              ✓ Cuota futura — sin interés aplicado
+            </p>
+            }
           </div>
 
           <div class="flex-1 space-y-1">
@@ -71,7 +78,7 @@
 
         </div>
 
-        <!-- Partial payment progress — only shown when there is an existing paid amount -->
+        <!-- Partial payment progress -->
         @if (alreadyPaid > 0) {
         <div class="space-y-1.5">
           <div class="flex justify-between text-xs text-standardGray">
@@ -79,11 +86,14 @@
             <span>
               {{ alreadyPaid | currency:'L ':'symbol':'1.2-2' }}
               /
-              {{ loan.fee_value | currency:'L ':'symbol':'1.2-2' }}
+              <!-- CHANGED: show correct base -->
+              {{ (isFutureFee ? earlyPaymentAmount : loan.fee_value) | currency:'L ':'symbol':'1.2-2' }}
             </span>
           </div>
-          <nz-progress [nzPercent]="+(alreadyPaid / loan.fee_value * 100).toFixed(0)" nzSize="small"
-            [nzStatus]="alreadyPaid >= loan.fee_value ? 'success' : 'active'" />
+          <nz-progress
+            [nzPercent]="+(alreadyPaid / (isFutureFee ? earlyPaymentAmount : loan.fee_value) * 100).toFixed(0)"
+            nzSize="small"
+            [nzStatus]="alreadyPaid >= (isFutureFee ? earlyPaymentAmount : loan.fee_value) ? 'success' : 'active'" />
         </div>
         }
 
