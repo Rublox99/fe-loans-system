@@ -88,11 +88,11 @@ export class HandleFeeDrawerComponent implements OnChanges {
 
   /**
    * True when the fee's expiration date is beyond
-   * first_expiration_date + 30 calendar days.
+   * accepted_at + 30 calendar days.
    */
   get isFutureFee(): boolean {
-    if (!this.fee || !this.loan?.first_expiration_date) return false;
-    const cutoff = new Date(this.loan.first_expiration_date);
+    if (!this.fee || !this.loan?.accepted_at) return false;
+    const cutoff = new Date(this.loan.accepted_at);
     cutoff.setDate(cutoff.getDate() + 30);
     return new Date(this.fee.expiration_date) > cutoff;
   }

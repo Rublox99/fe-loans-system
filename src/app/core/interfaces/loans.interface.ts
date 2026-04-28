@@ -20,6 +20,7 @@ export interface Loan {
   first_expiration_date: string | null;
   last_expected_expiration_date: string | null;
   next_expected_payment: string | null;
+  accepted_at: string | null; 
   created_at: string;
   updated_at: string;
 }
