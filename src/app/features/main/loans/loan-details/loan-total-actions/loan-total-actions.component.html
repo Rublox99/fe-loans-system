@@ -21,7 +21,7 @@
       {{ actions[0].label }}
     </button>
 
-    <app-refinance-loan [action]="actions[1]" [loan]="loan" (loanRefinanced)="loanRefinanced.emit()" />
+    <app-refinance-loan [action]="actions[1]" [loan]="loan" (loanRefinanced)="loanRefinanced.emit($event)" />
   </div>
   }
 </div>

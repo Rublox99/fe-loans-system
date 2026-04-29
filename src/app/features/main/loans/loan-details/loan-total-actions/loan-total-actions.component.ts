@@ -27,7 +27,7 @@ import { LoansService } from '../../../../../core/services/pages/loans.service';
 export class LoanTotalActionsComponent implements OnInit {
   @Input() loan!: Loan;
   @Output() loanPaid = new EventEmitter<void>();
-  @Output() loanRefinanced = new EventEmitter<void>();
+  @Output() loanRefinanced = new EventEmitter<string>();
 
   @ViewChild('confirmModalTpl') confirmModalTpl!: TemplateRef<any>;
 
@@ -134,7 +134,7 @@ export class LoanTotalActionsComponent implements OnInit {
       });
 
     } else if (action === 'refinance') {
-      console.log('TODO: refinance loan ->', this.loan.id);
+      console.log('TODO: Gets done through it drawer component refinance-loan-form ->', this.loan.id);
       this.pendingAction.set(null);
       modalRef.close();
     }

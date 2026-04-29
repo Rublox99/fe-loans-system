@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, OnInit, signal, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, NgZone, OnInit, signal, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgZorroModule } from '../../../../shared/modules/ng-zorro.module';
 import { WebIconComponent } from '../../../../shared/components/web-icon.component';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ import { LoanState } from '../../../../core/types/loan-state.type';
 import { GeneralService } from '../../../../core/services/general.service';
 import { EditLoanDrawerComponent } from '../edit-loan/edit-loan.component';
 import { LoanTotalActionsComponent } from './loan-total-actions/loan-total-actions.component';
+import { RefinanceLoanDrawerComponent } from './refinance-loan/refinance-loan.component';
 
 export interface LoanStateOption {
   value: LoanState;
@@ -43,6 +44,8 @@ export class LoanDetailsComponent implements OnInit {
   // ── Reference to child ────────────────────────────────────────────────
   @ViewChild(LoanTotalActionsComponent)
   loanTotalActions?: LoanTotalActionsComponent;
+  @ViewChild(RefinanceLoanDrawerComponent)
+  refinanceLoanDrawer?: RefinanceLoanDrawerComponent;
 
   loanId!: string;
   loan = signal<Loan | null>(null);
@@ -104,7 +107,9 @@ export class LoanDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private feesService: FeesService,
     private loansService: LoansService,
-    private generalService: GeneralService
+    private generalService: GeneralService,
+    private router: Router,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -167,10 +172,19 @@ export class LoanDetailsComponent implements OnInit {
     this.fetchFeeDetails();
   }
 
-  onLoanRefinanced(): void {
+  // newLoanId is emitted from the refinance form after successful refinancing, so it can navigate to the new loan's details page
+  onLoanRefinanced(newLoanId: string): void {
     this.fetchLoanDetails();
     this.fetchFeeDetails();
     this.loanTotalActions?.refresh();
+    this.refinanceLoanDrawer?.refresh();
+    console.log('Loan refinanced, new loan ID:', newLoanId);
+
+    this.ngZone.run(() => {
+      this.router.navigate(['/v1/main/loans', newLoanId, 'details'], {
+        replaceUrl: true
+      });
+    });
   }
 
   getFeeStateLabel(state: FeeState): string {
@@ -200,7 +214,6 @@ export class LoanDetailsComponent implements OnInit {
         this.loan.set(loan ?? null);
         this.selectedLoanState.set(loan?.state ?? null);
         this.isLoadingLoan.set(false);
-        console.log(this.loan());
       },
       error: (err) => {
         console.error(err);
@@ -229,7 +242,6 @@ export class LoanDetailsComponent implements OnInit {
           data.find(f => f.fee_state === '1') ?? null
         );
 
-        console.log(this.fees());
         this.isLoadingTable.set(false);
       },
       error: (err) => {

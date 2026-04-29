@@ -8,7 +8,7 @@
       <div class="flex-1 space-y-0.5">
         <span class="text-xs text-standardGray">Saldo pendiente</span>
         <p class="text-base font-bold text-highContrast">
-          {{ sourceLoan.capital_balance | currency:'L ':'symbol':'1.2-2' }}
+          {{ earlyPaymentPreview | currency:'L ':'symbol':'1.2-2' }}
         </p>
       </div>
       <div class="flex-1 space-y-0.5">
@@ -112,12 +112,14 @@
       <div class="w-full h-[1px] bg-lightGray"></div>
 
       <!-- Pending balance A (discount) -->
+      <!-- 
       <div class="flex gap-2.5">
         <span class="flex-1 text-standardGray">Saldo pendiente descontado</span>
         <span class="flex-none font-bold text-danger">
           - {{ pendingBalanceA() | currency:'L ':'symbol':'1.2-2' }}
         </span>
       </div>
+      -->
 
       <!-- Balance warning -->
       @if (balanceExceedsCapital()) {
@@ -148,7 +150,7 @@
   <!-- Buttons -->
   <div class="space-y-2.5">
     <button class="w-full button confirm__button" nz-button nzType="text" [nzLoading]="isSubmitting()"
-      [disabled]="isSubmitting() || form.invalid || balanceExceedsCapital()" (click)="submit()">
+      [disabled]="isSubmitting() || form.invalid || balanceExceedsCapital()" (click)="openConfrimationModal()">
       <span class="font-sans font-extralight text-staticWhite">
         Confirmar refinanciación
       </span>

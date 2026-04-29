@@ -28,7 +28,7 @@
       <app-handle-fee aria-label="Gestionar cuota" [fee]="currentPendingFee()" [loan]="loan()"
         (feeUpdated)="onFeeUpdated()" />
       @if (loan()!.state === 'Accepted') {
-      <app-loan-total-actions [loan]="loan()!" (loanPaid)="onLoanPaid()" (loanRefinanced)="onLoanRefinanced()" />
+      <app-loan-total-actions [loan]="loan()!" (loanPaid)="onLoanPaid()" (loanRefinanced)="onLoanRefinanced($event)" />
       }
       } @else {
       <div class="flex gap-2.5">
@@ -101,7 +101,7 @@
     <!-- Header -->
     <div class="flex flex-none items-center gap-2.5">
       <p class="flex-1 title__header" style="font-size: 20px !important;">
-        Préstamos en archivo
+        Préstamos en archivo <span class="font-light font-xs text-primary">({{ loan()?.paid_fees }} / {{totalItems()}})</span>
       </p>
 
       <!-- Buttons -->

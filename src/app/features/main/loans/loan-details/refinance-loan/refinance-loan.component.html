@@ -12,7 +12,8 @@
   }
 </button>
 
-<nz-drawer [nzClosable]="true" nzWidth="520px" [nzVisible]="isVisible()" nzPlacement="right" (nzOnClose)="closeDrawer()">
+<nz-drawer [nzClosable]="true" nzWidth="520px" [nzVisible]="isVisible()" nzPlacement="right"
+  (nzOnClose)="closeDrawer()">
   <ng-container *nzDrawerContent>
     <section class="flex flex-col gap-5 min-h-full h-auto p-[15px] bg-lowContrast">
 
@@ -27,7 +28,8 @@
         </p>
       </div>
 
-      <app-refinance-loan-form [sourceLoan]="loan" (submitForm)="onFormSubmitted()" (closeDrawer)="closeDrawer()" />
+      <app-refinance-loan-form [sourceLoan]="loan" [earlyPaymentPreview]="earlyPaymentPreview()"
+        (submitForm)="onFormSubmitted($event)" (closeDrawer)="closeDrawer()" />
     </section>
   </ng-container>
 </nz-drawer>

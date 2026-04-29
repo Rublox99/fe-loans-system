@@ -13,6 +13,7 @@ import { Loan } from '../../../../../../core/interfaces/loans.interface';
 import { interestRangeValidator, positiveNumberValidator } from '../../../loans.component';
 import { LoansService } from '../../../../../../core/services/pages/loans.service';
 import { Router } from '@angular/router';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'app-refinance-loan-form',
@@ -27,7 +28,8 @@ import { Router } from '@angular/router';
 })
 export class RefinanceLoanFormComponent implements OnInit {
   @Input({ required: true }) sourceLoan!: Loan;
-  @Output() submitForm = new EventEmitter<void>();
+  @Input({ required: true }) earlyPaymentPreview!: number | null;
+  @Output() submitForm = new EventEmitter<string>();
   @Output() closeDrawer = new EventEmitter<void>();
 
   private destroyRef = inject(DestroyRef);
@@ -70,7 +72,7 @@ export class RefinanceLoanFormComponent implements OnInit {
 
   // ── Refinancing-specific computed values ─────────────────────────────────
   /** A's pending balance that will be discounted from B */
-  pendingBalanceA = computed(() => this.sourceLoan?.capital_balance ?? 0);
+  pendingBalanceA = computed(() => this.earlyPaymentPreview ?? 0);
 
   /** B's effective starting balance after discounting A */
   effectiveBalance = computed(() =>
@@ -91,9 +93,8 @@ export class RefinanceLoanFormComponent implements OnInit {
 
   constructor(
     private loansService: LoansService,
-    private message: NzMessageService,
-    private router: Router,
-    private ngZone: NgZone
+    private modal: NzModalService,
+    private message: NzMessageService
   ) { }
 
   ngOnInit(): void {
@@ -130,6 +131,24 @@ export class RefinanceLoanFormComponent implements OnInit {
     return 'Valor inválido.';
   }
 
+  openConfrimationModal(): void {
+    this.modal.confirm({
+      nzTitle: 'Estás seguro de refinanciar este préstamo?',
+      nzContent: `
+        <ul class="space-y-2 text-sm text-gray-600 mt-2">
+          <li>• Esta acción <strong>no se puede deshacer</strong>.</li>
+          <li>• Las cuotas pendientes se cerrarán <strong>sin interés</strong>.</li>
+          <li>• El nuevo préstamo tendrá un capital de <strong class="text-accent font-bold">${this.form.value.lendingCapital?.toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}</strong>.</li>
+          <li>• El total en efectivo a entregar al cliente será de <strong class="text-success font-bold">${((this.form.value.lendingCapital || 0) - this.pendingBalanceA()).toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}</strong>.</li>
+        </ul>
+      `,
+      /*<li>• El monto de <strong>${this.pendingBalanceA().toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}</strong> será descontado del nuevo préstamo.</li> */
+      nzOkText: 'Entendido, continuar',
+      nzCancelText: 'Cancelar',
+      nzOnOk: () => this.submit()
+    });
+  }
+
   submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.isSubmitting()) return;
@@ -153,15 +172,7 @@ export class RefinanceLoanFormComponent implements OnInit {
       next: ({ newLoanId }) => {
         this.isSubmitting.set(false);
         this.message.success('Préstamo refinanciado exitosamente.');
-        this.submitForm.emit();
-
-        // Run inside NgZone so the router actually commits the navigation
-        /* TODO: Fix navigation on successful refinancing */
-        /* 
-        this.ngZone.run(() => {
-          this.router.navigate(['/v1/main/loans', newLoanId, 'details']);
-        });
-        */
+        this.submitForm.emit(newLoanId);
       },
       error: (err) => {
         console.error('Refinancing error:', err);
